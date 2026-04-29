@@ -1,58 +1,71 @@
+<div align="center">
+
+<img src="public/banner.png" alt="Forenlytics Hero Banner" width="100%" />
+
 # 🛡️ Forenlytics
+**The Command Center for Signal Intelligence & Geospatial Forensic Reconstruction**
 
-<br />
+[![License: MIT](https://img.shields.io/badge/License-MIT-f39c12.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2015-000000.svg?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Deep Learning](https://img.shields.io/badge/AI-Neural_Audio-e74c3c.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
 
-### High-Fidelity Forensic Intelligence & Multi-Signal Analysis Platform
+<p align="center">
+  Forenlytics is an elite forensic environment designed for intelligence professionals to ingest raw telecom signaling, geospatial movement logs, and vocal biometric samples—transforming them into high-fidelity investigative intelligence.
+</p>
 
-<br />
+[**Explore Documentation**](#-technical-implementation) • [**Setup Guide**](#-setup--installation) • [**Architecture**](#-system-architecture)
 
----
-
-<br />
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2015-black?logo=next.js)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python)](https://www.python.org/)
-[![Deep Learning](https://img.shields.io/badge/AI-Neural_Audio-red?logo=pytorch)](https://pytorch.org/)
-
-<br />
+</div>
 
 ---
 
-<br />
+## ✨ Core Intelligence Modules
 
-Forenlytics is a professional-grade forensic environment designed for signal intelligence (SIGINT), geospatial movement reconstruction, and neural vocal biometric verification. It provides a unified command center to ingest raw communication logs and geospatial traces, converting them into structured forensic intelligence through advanced graph theory and machine learning.
-
-<br />
+<table width="100%">
+  <tr>
+    <td width="50%" valign="top">
+      <h4>📊 Signal Intelligence (HTS)</h4>
+      <p>Automated graph-based analysis of massive communication matrices. Reconstructs network topologies to identify hubs, bridge-entities, and cluster communities using NetworkX modularity.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h4>📍 Geospatial Reconstruction</h4>
+      <p>Transforms raw coordinate sequences into behavioral movement profiles. Heuristically identifies stationary halts and detects velocity anomalies or path inconsistencies.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h4>🕰️ Unified Timeline Orchestrator</h4>
+      <p>The master correlator integrating heterogeneous data sources. Correlates signal events with physical location to answer exactly where a target was at any given second.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h4>🎙️ Audio Forensic Suite</h4>
+      <p>Neural vocal biometric verification via Microsoft WavLM. Scans for synthetic artifacts, deepfake patterns, and provides high-fidelity similarity scoring.</p>
+    </td>
+  </tr>
+</table>
 
 ---
 
-<br />
+## 🏗️ System Architecture
 
-## 🏗️ System Architecture & Data Flow
-
-<br />
-
-Forenlytics is built on a modern, decoupled architecture designed for high-concurrency data processing and low-latency visualization.
-
-<br />
+Forenlytics is built on a state-of-the-art, decoupled architecture designed for high-concurrency data processing.
 
 ```mermaid
 graph TD
-    subgraph Client_Layer ["Client Layer (Next.js 15)"]
+    subgraph Client ["Client Layer (Next.js 15)"]
         UI[Forensic Dashboard]
         Store[Zustand State Engine]
         Poll[Async Job Poller]
     end
 
-    subgraph API_Gateway ["API Gateway (FastAPI)"]
+    subgraph API ["API Gateway (FastAPI)"]
         Router[Endpoints & Middleware]
         Manager[Job Queue Orchestrator]
         Session[In-Memory Session Store]
     end
 
-    subgraph Processing_Cores ["Analysis & Intelligence Cores"]
+    subgraph Cores ["Intelligence Cores"]
         HTS[HTS Graph Engine]
         GPS[GPS Spatial Engine]
         TLE[Timeline Correlator]
@@ -62,155 +75,73 @@ graph TD
     UI <--> Router
     Router --> Manager
     Manager --> Session
-    Manager --> Processing_Cores
-    Session --> Processing_Cores
+    Manager --> Cores
+    Session --> Cores
 ```
 
-<br />
-
 ---
 
-<br />
+## 🛡️ Privacy & Forensic Integrity
 
-## 🛠️ Module Deep Dive
+Forenlytics follows **Stateless Ephemeral Processing** principles.
 
-<br />
-
-### 📊 HTS Signal Intelligence
-The HTS (High-Throughput Signaling) module is designed for the analysis of massive communication metadata sets (CDR/HTS).
-
-- **Graph Community Detection**: Uses Louvain Modularity to identify hidden communication clusters.
-- **Node Centrality**: Calculates Degree and Betweenness Centrality to identify "hubs" and "bridges" in the network.
-- **Dynamic Mapping**: Supports Turkish (BTK), US (CDR), and UK (IPA) formats via heuristic column inference.
-
-<br />
-
-### 📍 Geospatial Movement Analysis
-Transforms raw coordinate sequences into behavioral movement profiles.
-
-- **Stop Detection**: Identifies stationary clusters by analyzing temporal density in spatial windows.
-- **Velocity Heuristics**: Detects speed anomalies and path inconsistencies (teleportation detection).
-- **Downsampling**: Adaptive thinning of coordinates to maintain performance on high-frequency GPS logs.
-
-<br />
-
-### 🕰️ Timeline Reconstruction Engine
-The "Master Correlator" that integrates heterogeneous data sources into a single chronological narrative.
-
-- **Signal-to-Location Mapping**: Correlates every communication event with the closest known GPS point in time.
-- **Anomaly Detection**: Flags communication bursts and sudden movements post-communication.
-- **Story Generation**: Heuristic generation of a natural language summary of the target's activity.
-
-<br />
-
-### 🎙️ Multi-Engine Audio Forensics
-A specialized module for vocal authentication and deepfake risk assessment.
-
-- **WavLM Integration**: Utilizes Microsoft’s WavLM for robust, state-of-the-art speaker verification.
-- **Neural Forgery Detection**: Scans vocal samples for synthetic artifacts and neural generation patterns.
-- **Fusion Scoring**: Combines biometric, acoustic, and signal-level similarity into a single forensic confidence score.
-
-<br />
+> [!IMPORTANT]
+> **Zero Persistence**: All uploaded forensic artifacts and processed results exist only in the volatile memory (RAM) of the server. No databases, no logs, no leaks. Data is automatically purged after 30 minutes of inactivity.
 
 ---
-
-<br />
-
-## 🔒 Privacy & Forensic Integrity
-
-<br />
-
-Forenlytics follows **Forensic Data Volatility** principles.
-
-| Feature | Implementation |
-| :--- | :--- |
-| **Data Persistence** | **Zero**. No database is attached. Data exists only in RAM. |
-| **Session Isolation** | Cryptographic UUIDs isolate per-user memory blocks. |
-| **Auto-Cleanup** | Session objects and associated dataframes are purged after 30m of inactivity. |
-| **Local Handling** | Forensic artifacts (CSV/Audio) are processed locally on the server; never cached. |
-
-<br />
-
----
-
-<br />
 
 ## 💻 Technical Implementation
 
-<br />
+### Key Backend Endpoints
 
-### Backend Endpoints (Partial List)
-
-| Method | Endpoint | Description |
+| Method | Endpoint | Forensic Logic |
 | :--- | :--- | :--- |
-| `POST` | `/upload-hts` | Ingest CSV signaling data and auto-map columns. |
-| `POST` | `/confirm-hts-mapping` | Finalize manual column validation. |
-| `GET` | `/hts-graph` | Retrieve graph metrics and community nodes. |
-| `POST` | `/speaker-embedding-compare` | Perform neural speaker verification. |
-| `GET` | `/job-status/{id}` | Track asynchronous background processing. |
-| `GET` | `/download-report` | Generate and stream a forensic PDF docket. |
+| `POST` | `/upload-hts` | Automated parsing & heuristic column mapping |
+| `GET` | `/hts-graph` | Network topology & community metrics |
+| `POST` | `/speaker-embedding-compare` | Neural vocal biometric comparison |
+| `GET` | `/download-report` | PDF Intelligence stream generation |
 
-<br />
-
-### Project Directory Structure
+### Directory Structure
 ```text
 .
-├── src/                    # Next.js Application
-│   ├── app/                # Pages (audio, hts, gps, timeline, reports)
-│   ├── components/         # Forensic UI Modules & Visualizations
-│   ├── lib/                # API Client & Zustand Store
-│   └── styles/             # Global CSS & Glassmorphism design
-├── backend/                # FastAPI Application
-│   ├── services/           # The "Brain" of Forenlytics
-│   │   ├── audio/          # WavLM Neural Inference & Deepfake Detectors
-│   │   ├── hts_analyzer.py # Graph Theory & Pandas Ingestion
-│   │   ├── gps_analyzer.py # Geospatial Math & Stop Detection
-│   │   ├── timeline_engine.py # Cross-module Correlation
-│   │   └── job_manager.py  # Asynchronous Thread Management
-│   └── main.py             # API Routing & Orchestration
-├── requirements.txt        # Python Dependencies
-└── package.json            # Node.js Dependencies
+├── src/                    # Frontend: Next.js + Tailwind
+│   ├── app/                # Forensic Modules (Audio, GPS, HTS, etc.)
+│   ├── components/         # High-fidelity UI Panels & Visualizations
+│   └── lib/                # API Engine & Global State
+├── backend/                # Backend: FastAPI + ML Cores
+│   ├── services/           # The "Brain": Signal & Math Engines
+│   └── main.py             # Orchestration & Job Management
+└── public/                 # Static Assets & Documentation
 ```
-
-<br />
 
 ---
 
-<br />
-
 ## ⚡ Setup & Installation
 
-<br />
+### Prerequisites
+- Node.js 18+ & Python 3.11+
+- FFmpeg (for audio normalization)
 
-### 1. Prerequisites
-- **Node.js**: 18.x or 20.x
-- **Python**: 3.11+
-- **FFmpeg**: Required for audio normalization and processing.
-
-### 2. Backend Configuration
+### 1. Initializing Backend
 ```bash
 cd backend
 python -m venv venv
 source venv/bin/activate # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000
+uvicorn main:app --port 8000
 ```
 
-### 3. Frontend Configuration
+### 2. Initializing Frontend
 ```bash
-# From root directory
+# From root
 npm install
 npm run dev
 ```
 
-<br />
-
 ---
 
-<br />
-
-## 📜 License & Credits
+## 📜 License & Acknowledgments
 
 - **Copyright**: © 2026 Yusuf Çalışır.
 - **License**: Licensed under the [MIT License](LICENSE).
-- **Inspiration**: Built for forensic professionals, analysts, and signal intelligence researchers.
+- **Core Engine**: Powered by Microsoft WavLM, NetworkX, and FastAPI.
