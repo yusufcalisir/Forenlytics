@@ -10,24 +10,34 @@ logger = logging.getLogger("forenlytics.audio.embedding")
 class SpeakerEmbeddingEngine:
     def __init__(self, target_sr: int = 16000):
         self.target_sr = target_sr
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu") # Force CPU for memory stability
         self.model_name = "facebook/wav2vec2-base"
-        
-        logger.info(f"Loading Wav2Vec2 Speaker Embedding framework on {self.device}...")
         self.cache = EmbeddingCache(max_size=100)
         
+        self.processor = None
+        self.model = None
+        self._initialized = False
+
+    def _ensure_loaded(self):
+        if self._initialized:
+            return
+        
+        logger.info(f"Loading Wav2Vec2 Speaker Embedding framework on {self.device}...")
         try:
             self.processor = Wav2Vec2FeatureExtractor.from_pretrained(self.model_name)
-            self.model = Wav2Vec2Model.from_pretrained(self.model_name).to(self.device)
+            self.model = Wav2Vec2Model.from_pretrained(
+                self.model_name,
+                low_cpu_mem_usage=True
+            ).to(self.device)
             self.model.eval()
+            self._initialized = True
+            logger.info("Wav2Vec2 model loaded successfully.")
         except Exception as e:
             logger.error(f"Failed to load ML models: {e}")
-            self.processor = None
-            self.model = None
+            raise Exception(f"Wav2Vec2 engine could not be initialized: {str(e)}")
 
     def get_embedding(self, audio_bytes: bytes, y: np.ndarray) -> torch.Tensor:
-        if self.model is None or self.processor is None:
-            raise Exception("Machine Learning framework is offline. Unable to execute inference.")
+        self._ensure_loaded()
             
         cached = self.cache.get(audio_bytes)
         if cached is not None:
@@ -48,4 +58,5 @@ class SpeakerEmbeddingEngine:
         cos_sim = F.cosine_similarity(emb1, emb2).item()
         return cos_sim
 
+# Lazy instance
 embedding_engine = SpeakerEmbeddingEngine()
