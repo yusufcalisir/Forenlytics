@@ -6,7 +6,17 @@
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Deep Learning](https://img.shields.io/badge/AI-Neural_Audio-e74c3c.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
 
-### [🚀 Live Demo: forenlytics.vercel.app](https://forenlytics.vercel.app/)
+<br />
+
+<div align="center">
+  <a href="https://forenlytics.vercel.app/">
+    <img src="https://img.shields.io/badge/LIVE%20DEMO-ENTER%20COMMAND%20CENTER-blue?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" height="40">
+  </a>
+  <br />
+  <p><b>Visit the Live Application: <a href="https://forenlytics.vercel.app/">forenlytics.vercel.app</a></b></p>
+</div>
+
+<br />
 
 Forenlytics is an elite forensic environment designed for intelligence professionals to ingest raw telecom signaling, geospatial movement logs, and vocal biometric samples—transforming them into high-fidelity investigative intelligence.
 
