@@ -16,7 +16,7 @@
 
 <br />
 
-Forenlytics is an elite forensic environment designed for intelligence professionals to ingest raw telecom signaling, geospatial movement logs, and vocal biometric samples—transforming them into high-fidelity investigative intelligence.
+Forenlytics is an elite forensic environment designed for intelligence professionals to ingest raw telecom signaling, geospatial movement logs, and vocal biometric samples, transforming them into high-fidelity investigative intelligence.
 
 
 ---
