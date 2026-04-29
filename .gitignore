@@ -55,6 +55,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# agent metadata
+AGENTS.md
+CLAUDE.md
+
 # environment variables
 .env*
 !.env.example
