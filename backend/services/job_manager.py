@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 logger = logging.getLogger("forenlytics.jobs")
 
 class JobManager:
-    def __init__(self, max_workers=4):
+    def __init__(self, max_workers=2):
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
         self.jobs: Dict[str, Dict[str, Any]] = {}
         self.lock = threading.Lock()
