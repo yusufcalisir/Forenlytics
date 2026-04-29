@@ -1,14 +1,13 @@
 import logging
 import numpy as np
 from .cache_utils import EmbeddingCache
-from .cache_utils import EmbeddingCache
 
 logger = logging.getLogger("forenlytics.audio.wavlm")
 
 class WavLMEngine:
     def __init__(self, target_sr: int = 16000):
         self.target_sr = target_sr
-        self.device = torch.device("cpu") # Force CPU to save memory on constrained envs
+        self.device = "cpu" 
         self.model_name = "microsoft/wavlm-base-plus-sv"
         self.cache = EmbeddingCache(max_size=100)
         
@@ -52,6 +51,8 @@ class WavLMEngine:
 
     def get_embedding(self, audio_bytes: bytes, y: np.ndarray) -> any:
         self._ensure_loaded()
+        import torch
+        import torch.nn.functional as F
             
         cached = self.cache.get(audio_bytes)
         if cached is not None:

@@ -1,14 +1,13 @@
 import logging
 import numpy as np
 from .cache_utils import EmbeddingCache
-from .cache_utils import EmbeddingCache
 
 logger = logging.getLogger("forenlytics.audio.embedding")
 
 class SpeakerEmbeddingEngine:
     def __init__(self, target_sr: int = 16000):
         self.target_sr = target_sr
-        self.device = torch.device("cpu") # Force CPU for memory stability
+        self.device = "cpu"
         self.model_name = "facebook/wav2vec2-base"
         self.cache = EmbeddingCache(max_size=100)
         
@@ -51,6 +50,7 @@ class SpeakerEmbeddingEngine:
 
     def get_embedding(self, audio_bytes: bytes, y: np.ndarray) -> any:
         self._ensure_loaded()
+        import torch
             
         cached = self.cache.get(audio_bytes)
         if cached is not None:
