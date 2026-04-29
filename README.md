@@ -12,8 +12,6 @@
   <a href="https://forenlytics.vercel.app/">
     <img src="https://img.shields.io/badge/LIVE%20DEMO-ENTER%20COMMAND%20CENTER-blue?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" height="40">
   </a>
-  <br />
-  <p><b>Visit the Live Application: <a href="https://forenlytics.vercel.app/">forenlytics.vercel.app</a></b></p>
 </div>
 
 <br />
