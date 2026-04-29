@@ -13,5 +13,4 @@ matplotlib
 jinja2
 python-dateutil
 reportlab
-speechbrain
 scikit-learn
