@@ -62,7 +62,7 @@ def health_check():
 
 @app.post("/cleanup")
 def perform_cleanup():
-    """Force cleanup of memory, sessions, and temporary files."""
+    """Force cleanup of memory, sessions, jobs, and temporary files."""
     import gc
     import shutil
     import os
@@ -71,7 +71,12 @@ def perform_cleanup():
     session_count = len(session_store._sessions)
     session_store._sessions.clear()
     
-    # 2. Clear temp files
+    # 2. Clear background jobs
+    job_count = len(job_manager.jobs)
+    with job_manager.lock:
+        job_manager.jobs.clear()
+    
+    # 3. Clear temp files
     upload_dir = "uploads"
     temp_dir = "temp"
     cleaned_files = 0
@@ -89,15 +94,16 @@ def perform_cleanup():
                 except Exception as e:
                     logger.warning(f"Failed to delete {file_path}: {e}")
 
-    # 3. Garbage Collection
+    # 4. Garbage Collection
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         
     return {
         "status": "success",
-        "message": "System cleanup performed",
+        "message": "Full system cleanup performed",
         "sessions_cleared": session_count,
+        "jobs_cleared": job_count,
         "files_removed": cleaned_files,
         "memory_freed": True
     }
