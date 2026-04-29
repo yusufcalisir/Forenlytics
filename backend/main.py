@@ -60,6 +60,48 @@ def health_check():
         "version": "1.0.0"
     }
 
+@app.post("/cleanup")
+def perform_cleanup():
+    """Force cleanup of memory, sessions, and temporary files."""
+    import gc
+    import shutil
+    import os
+    
+    # 1. Clear sessions
+    session_count = len(session_store._sessions)
+    session_store._sessions.clear()
+    
+    # 2. Clear temp files
+    upload_dir = "uploads"
+    temp_dir = "temp"
+    cleaned_files = 0
+    
+    for folder in [upload_dir, temp_dir]:
+        if os.path.exists(folder):
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                    cleaned_files += 1
+                except Exception as e:
+                    logger.warning(f"Failed to delete {file_path}: {e}")
+
+    # 3. Garbage Collection
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        
+    return {
+        "status": "success",
+        "message": "System cleanup performed",
+        "sessions_cleared": session_count,
+        "files_removed": cleaned_files,
+        "memory_freed": True
+    }
+
 # Request timing middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
