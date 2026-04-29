@@ -16,18 +16,19 @@ class JobManager:
     def submit_job(self, job_type: str, session_id: Optional[str], func: Callable, *args, **kwargs) -> str:
         job_id = str(uuid.uuid4())
         with self.lock:
+            # Initialize job state with user-requested standard format
             self.jobs[job_id] = {
+                "status": "pending",
+                "created_at": time.time(),
+                "result": None,
                 "id": job_id,
                 "type": job_type,
-                "status": "pending",
                 "session_id": session_id,
-                "result": None,
                 "error": None,
-                "created_at": time.time(),
-                "completed_at": None,
+                "completed_at": None
             }
         
-        logger.info(f"Job {job_id} ({job_type}) submitted.")
+        logger.info(f"Job {job_id} ({job_type}) initialized as pending.")
         
         def _wrapper():
             with self.lock:
