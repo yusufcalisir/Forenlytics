@@ -95,7 +95,10 @@ export default function HTSPage() {
       
       {/* Upload Portal */}
       {!analysisData && !mappingData && (
-        <Panel className="max-w-2xl mx-auto !p-8">
+        <Panel 
+          className="max-w-2xl mx-auto !p-8"
+          loading={isUploading || isSubmitting}
+        >
           <div className="text-center mb-8">
             <div className="w-14 h-14 rounded-2xl bg-brand-cyan/8 border border-brand-cyan/10 flex items-center justify-center mx-auto mb-4">
               <Upload className="w-6 h-6 text-brand-cyan/60" />
@@ -136,7 +139,7 @@ export default function HTSPage() {
              <button 
                 onClick={handleUpload}
                 disabled={!file || isUploading || isSubmitting}
-                className="w-full flex items-center justify-center gap-2.5 py-3 bg-brand-cyan hover:bg-cyan-400 text-black rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
+                className="w-full flex items-center justify-center gap-2.5 py-3 bg-brand-cyan hover:bg-cyan-400 active:scale-[0.98] active:brightness-90 text-black rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
              >
                 {(isUploading || isSubmitting) ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Processing Vectors...</>
@@ -150,7 +153,10 @@ export default function HTSPage() {
 
       {/* Column Mapping UI */}
       {mappingData && !analysisData && (
-        <Panel className="!p-6">
+        <Panel 
+          className="!p-6"
+          loading={isMapping}
+        >
           {error && (
             <div className="mb-4 p-3 bg-red-500/8 border border-red-500/15 rounded-lg flex items-start gap-2.5 text-red-400 text-sm">
               <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />

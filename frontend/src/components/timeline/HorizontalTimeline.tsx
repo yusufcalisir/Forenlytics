@@ -31,7 +31,13 @@ export function HorizontalTimeline({ data }: TimelineProps) {
     return map;
   }, [data.events]);
 
-  if (!timeBounds) return null;
+  if (!timeBounds) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-neutral-500 font-mono text-sm uppercase tracking-widest border border-dashed border-brand-border rounded-2xl bg-brand-surface/30">
+        No chronological events generated from dataset.
+      </div>
+    );
+  }
 
   // Layer vertical positioning
   const layerTop = {

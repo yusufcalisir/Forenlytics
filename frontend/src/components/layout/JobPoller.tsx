@@ -12,6 +12,7 @@ import { apiClient } from "@/lib/apiClient";
 export function JobPoller() {
   const pollingRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const failureCounts = useRef<Record<string, number>>({});
 
   // Stable reference to the poll function that always reads latest store state
   const poll = useCallback(async () => {
@@ -32,6 +33,9 @@ export function JobPoller() {
 
         try {
           const status = await apiClient.getJobStatus(jobId);
+          
+          // Reset failure count on success
+          failureCounts.current[type] = 0;
 
           if (status.status === "completed") {
             const result = status.result;
@@ -46,6 +50,17 @@ export function JobPoller() {
           // "pending" and "running" — keep polling
         } catch (err) {
           console.error(`[JobPoller] Error polling job ${type} (${jobId}):`, err);
+          
+          // Increment failure count
+          failureCounts.current[type] = (failureCounts.current[type] || 0) + 1;
+          
+          // If too many failures, assume backend is dead or job is lost
+          if (failureCounts.current[type] > 10) {
+            console.warn(`[JobPoller] Clearing stuck job ${type} after 10 failures.`);
+            useAppStore.getState().setJobError(type, "Lost connection to background job. Please try again.");
+            useAppStore.getState().clearActiveJob(type);
+            delete failureCounts.current[type];
+          }
         }
       }
     } finally {

@@ -19,7 +19,10 @@ class TimelineEngine:
             has_hts = hts_df is not None and not hts_df.empty
             has_gps = gps_df is not None and not gps_df.empty
 
+            logger.info(f"Unified Timeline Generation: has_hts={has_hts}, has_gps={has_gps}")
+
             if not has_hts and not has_gps:
+                logger.warning("Timeline requested but no data found in HTS or GPS.")
                 return {"error": "NO_DATA", "message": "No data available in either HTS or GPS modules. Please upload target logs in those modules first."}
 
             events = []

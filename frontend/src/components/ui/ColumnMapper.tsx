@@ -213,7 +213,7 @@ export function ColumnMapper({
         <button
           onClick={handleSubmit}
           disabled={!isValid || isSubmitting}
-          className="flex items-center gap-2 px-6 py-2.5 bg-brand-cyan hover:bg-cyan-400 text-black rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
+          className="flex items-center gap-2 px-6 py-2.5 bg-brand-cyan hover:bg-cyan-400 active:scale-[0.98] active:brightness-90 text-black rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
         >
           {isSubmitting ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>

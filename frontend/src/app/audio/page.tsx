@@ -7,6 +7,7 @@ import { Panel } from "@/components/ui/Panel";
 import { apiClient } from "@/lib/apiClient";
 import { clsx } from "clsx";
 import { useAppStore } from "@/lib/store";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 export default function AudioPage() {
   // Audio Comparison State
@@ -89,6 +90,9 @@ export default function AudioPage() {
           subtitle="Acoustic fingerprinting and structural signal comparison"
           icon={Mic}
         />
+        <div className="relative h-1 mb-6 -mt-2 overflow-hidden rounded-full">
+          <ProgressBar isLoading={loading} color="cyan" />
+        </div>
         
         {/* Upload Matrix */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
@@ -150,7 +154,7 @@ export default function AudioPage() {
           <button
             onClick={handleUpload}
             disabled={!file1 || !file2 || loading}
-            className="flex items-center gap-2.5 px-6 py-2.5 bg-brand-cyan hover:bg-cyan-400 text-black font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
+            className="flex items-center gap-2.5 px-6 py-2.5 bg-brand-cyan hover:bg-cyan-400 active:scale-[0.98] active:brightness-90 text-black font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
           >
             {loading ? (
               <><span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" /> Processing...</>
@@ -266,7 +270,10 @@ export default function AudioPage() {
             )}
           </Panel>
 
-          <Panel className="flex flex-col justify-center gap-4">
+          <Panel 
+            className="flex flex-col justify-center gap-4"
+            loading={dfLoading}
+          >
             <div className="p-3 bg-brand-surface border border-brand-border rounded-xl text-[11px] text-neutral-500 flex items-start gap-2.5">
               <ShieldAlert className="w-3.5 h-3.5 text-orange-500 shrink-0 mt-0.5" />
               <p>Probabilistic anomaly detection engine. Results are forensic indicators, not legal proof.</p>
@@ -275,7 +282,7 @@ export default function AudioPage() {
             <button
               onClick={handleDfUpload}
               disabled={!dfFile || dfLoading}
-              className="w-full flex items-center justify-center gap-2.5 py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2.5 py-3 bg-red-600 hover:bg-red-500 active:scale-[0.98] active:brightness-90 text-white font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {dfLoading ? (
                 <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> Scanning...</>

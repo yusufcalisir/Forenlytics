@@ -354,6 +354,20 @@ def get_timeline(x_session_id: Optional[str] = Header(None)):
         if tl_job and tl_job["status"] in ("pending", "running"):
             return {"status": "processing", "session_id": sid, "message": "Timeline is being generated..."}
 
+    # Safety Net: If no result and no active job, but there IS data in HTS or GPS, trigger it now
+    has_hts = session.hts.df is not None and not session.hts.df.empty
+    has_gps = session.gps.df is not None and not session.gps.df.empty
+    
+    if has_hts or has_gps:
+        logger.info(f"Auto-triggering orchestrator for session {sid} via GET /timeline")
+        orch_jobs = trigger_orchestrator(sid)
+        return {
+            "status": "processing", 
+            "session_id": sid, 
+            "message": "Timeline generation started.", 
+            "orchestrator_jobs": orch_jobs
+        }
+
     # No data and no active job
     return {"error": "NO_DATA", "session_id": sid, "message": "No data available in either HTS or GPS modules. Please upload target logs in those modules first."}
 
