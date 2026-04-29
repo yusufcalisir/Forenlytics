@@ -18,6 +18,8 @@ export default function AudioPage() {
   // Deepfake State
   const [dfFile, setDfFile] = useState<File | null>(null);
   const [dfError, setDfError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDfUploading, setIsDfUploading] = useState(false);
 
   const {
     audioSpeakerResult: result,
@@ -40,11 +42,17 @@ export default function AudioPage() {
     setError(null);
     setResult(null);
     clearJobError("audio_compare");
+    setIsUploading(true);
     try {
+      console.log("[AudioPage] Triggering speaker comparison...");
       const data = await apiClient.uploadAudioPair(file1, file2);
+      console.log("[AudioPage] Job created:", data);
       setActiveJob("audio_compare", data.job_id);
     } catch (err: any) {
+      console.error("[AudioPage] Upload failed:", err);
       setError(err.message || "Failed to process audio pair.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -53,11 +61,17 @@ export default function AudioPage() {
     setDfError(null);
     setDfResult(null);
     clearJobError("audio_deepfake");
+    setIsDfUploading(true);
     try {
+      console.log("[AudioPage] Triggering deepfake detection...");
       const data = await apiClient.detectDeepfake(dfFile);
+      console.log("[AudioPage] Job created:", data);
       setActiveJob("audio_deepfake", data.job_id);
     } catch (err: any) {
+      console.error("[AudioPage] Deepfake upload failed:", err);
       setDfError(err.message || "Failed to process audio.");
+    } finally {
+      setIsDfUploading(false);
     }
   };
 
@@ -149,24 +163,60 @@ export default function AudioPage() {
           </Panel>
         </div>
 
-        {/* Action */}
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={handleUpload}
-            disabled={!file1 || !file2 || loading}
-            className="flex items-center gap-2.5 px-6 py-2.5 bg-brand-cyan hover:bg-cyan-400 active:scale-[0.98] active:brightness-90 text-black font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
-          >
-            {loading ? (
-              <><span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" /> Processing...</>
-            ) : (
-              <><Activity className="w-4 h-4" /> Analyze Pair</>
+        {/* Action & Error Display */}
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleUpload}
+              disabled={!file1 || !file2 || loading || isUploading}
+              className="flex items-center gap-2.5 px-6 py-2.5 bg-brand-cyan hover:bg-cyan-400 active:scale-[0.98] active:brightness-90 text-black font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
+            >
+              {loading || isUploading ? (
+                <><span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" /> {isUploading ? "Uploading..." : "Processing..."}</>
+              ) : (
+                <><Activity className="w-4 h-4" /> Analyze Pair</>
+              )}
+            </button>
+            
+            {loading && (
+              <span className="text-[10px] font-mono text-brand-cyan animate-pulse uppercase tracking-widest">
+                Executing multi-engine biometric fusion...
+              </span>
             )}
-          </button>
-          {(error || jobErrors["audio_compare"]) && <p className="text-red-400 text-xs flex items-center gap-2"><AlertTriangle className="w-3.5 h-3.5"/> {error || jobErrors["audio_compare"]}</p>}
+          </div>
+
+          {(error || jobErrors["audio_compare"]) && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+              <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm text-red-400 font-medium">Analysis Failed</p>
+                <p className="text-xs text-red-500/70 mt-1">{error || jobErrors["audio_compare"]}</p>
+                <button 
+                  onClick={() => { setError(null); clearJobError("audio_compare"); }}
+                  className="mt-2 text-[10px] text-red-400 underline hover:text-red-300"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Results */}
-        {result && (
+        {/* Loading State / Results */}
+        {loading ? (
+          <Panel className="!p-12 flex flex-col items-center justify-center border-dashed border-brand-cyan/30 bg-brand-cyan/5">
+            <div className="w-16 h-16 rounded-full border-4 border-brand-cyan/20 border-t-brand-cyan animate-spin mb-6"></div>
+            <h3 className="text-white font-medium text-lg mb-2">Deep Forensic Scan in Progress</h3>
+            <p className="text-neutral-500 text-sm max-w-md text-center leading-relaxed">
+              Applying WavLM embeddings, Biometric acoustic fingerprinting, and Synthetic vocoder artifact detection. This process typically takes 10-20 seconds.
+            </p>
+            <div className="mt-8 flex gap-3">
+               <div className="px-3 py-1 bg-brand-surface border border-brand-border rounded-lg text-[10px] text-neutral-500 font-mono">WavLM: ACTIVE</div>
+               <div className="px-3 py-1 bg-brand-surface border border-brand-border rounded-lg text-[10px] text-neutral-500 font-mono">Biometric: ACTIVE</div>
+               <div className="px-3 py-1 bg-brand-surface border border-brand-border rounded-lg text-[10px] text-neutral-500 font-mono">Fusion: WAIT</div>
+            </div>
+          </Panel>
+        ) : result ? (
           <Panel className="animate-in slide-in-from-bottom-4 duration-500 !p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="col-span-1 lg:border-r border-brand-border lg:pr-8 flex flex-col items-center justify-center">
@@ -281,11 +331,11 @@ export default function AudioPage() {
             
             <button
               onClick={handleDfUpload}
-              disabled={!dfFile || dfLoading}
+              disabled={!dfFile || dfLoading || isDfUploading}
               className="w-full flex items-center justify-center gap-2.5 py-3 bg-red-600 hover:bg-red-500 active:scale-[0.98] active:brightness-90 text-white font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {dfLoading ? (
-                <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> Scanning...</>
+              {dfLoading || isDfUploading ? (
+                <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> {isDfUploading ? "Uploading..." : "Scanning..."}</>
               ) : (
                 <><Activity className="w-4 h-4" /> Run Deepfake Scan</>
               )}

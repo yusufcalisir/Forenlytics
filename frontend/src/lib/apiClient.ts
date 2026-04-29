@@ -1,4 +1,8 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+if (typeof window !== "undefined") {
+  console.log("[Forenlytics API] Initialized with BASE:", API_BASE);
+}
 const TIMEOUT_MS = 120000;
 const SESSION_KEY = "forenlytics_session_id";
 
