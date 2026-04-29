@@ -286,7 +286,7 @@ export default function AudioPage() {
               </div>
             </div>
           </Panel>
-        )}
+        ) : null}
       </section>
 
       {/* SECTION 2: DEEPFAKE DETECTION */}
