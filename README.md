@@ -104,14 +104,15 @@ Forenlytics follows **Stateless Ephemeral Processing** principles.
 ### Directory Structure
 ```text
 .
-├── src/                    # Frontend: Next.js + Tailwind
-│   ├── app/                # Forensic Modules (Audio, GPS, HTS, etc.)
-│   ├── components/         # High-fidelity UI Panels & Visualizations
-│   └── lib/                # API Engine & Global State
-├── backend/                # Backend: FastAPI + ML Cores
+├── frontend/               # Next.js Application
+│   ├── src/                # App Router & Logic
+│   ├── components/         # Forensic UI Modules
+│   └── public/             # Static Assets
+├── backend/                # FastAPI Application
 │   ├── services/           # The "Brain": Signal & Math Engines
-│   └── main.py             # Orchestration & Job Management
-└── public/                 # Static Assets & Documentation
+│   └── main.py             # API Routing & Orchestration
+├── vercel.json             # Multi-service Deployment Config
+└── LICENSE                 # MIT License
 ```
 
 ---
@@ -133,7 +134,7 @@ uvicorn main:app --port 8000
 
 ### 2. Initializing Frontend
 ```bash
-# From root
+cd frontend
 npm install
 npm run dev
 ```

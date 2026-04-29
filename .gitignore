@@ -1,59 +1,35 @@
 # dependencies
-/node_modules
-/.pnp
+**/node_modules
+**/.pnp
 .pnp.*
 .yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
+# next.js (EXTREMELY IMPORTANT: DO NOT REMOVE)
+**/.next/
+**/out/
+.next/
+frontend/.next/
+frontend/out/
 
 # production
-/build
-/dist
+**/build
+**/dist
 
 # python
-__pycache__/
-*.py[cod]
-*$py.class
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-.pytest_cache/
+**/__pycache__/
+**/*.py[cod]
+**/*.venv
+**/venv
+**/env
 
-# forensic data & uploads (Privacy Safeguard)
-/backend/uploads/*
-/backend/temp/*
+# forensic data & uploads
+**/backend/uploads/*
+**/backend/temp/*
 *.csv
 *.wav
 *.mp3
 *.m4a
 *.log
-!/backend/uploads/.gitkeep
-
-# vercel
-.vercel
-
-# misc
-.DS_Store
-*.pem
-*.tsbuildinfo
-next-env.d.ts
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 
 # agent metadata
 AGENTS.md
@@ -62,3 +38,9 @@ CLAUDE.md
 # environment variables
 .env*
 !.env.example
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+next-env.d.ts
