@@ -365,7 +365,16 @@ def get_timeline(x_session_id: Optional[str] = Header(None)):
         }
 
     # No data and no active job
-    return {"error": "NO_DATA", "session_id": sid, "message": "No data available in either HTS or GPS modules. Please upload target logs in those modules first."}
+    logger.warning(f"Timeline requested but no data found for session {sid}. HTS={has_hts}, GPS={has_gps}")
+    return {
+        "error": "NO_DATA", 
+        "session_id": sid, 
+        "message": "No data available in either HTS or GPS modules. Please upload target logs in those modules first.",
+        "data_summary": {
+            "hts_present": has_hts,
+            "gps_present": has_gps
+        }
+    }
 
 
 # ─── REPORTS ───────────────────────────────────────────

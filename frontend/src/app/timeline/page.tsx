@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LayoutList, Loader2, Database } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Panel } from "@/components/ui/Panel";
@@ -9,7 +9,8 @@ import { useAppStore } from "@/lib/store";
 import { apiClient } from "@/lib/apiClient";
 
 export default function TimelinePage() {
-  const { timelineData: data, activeJobs, jobErrors, setTimelineData } = useAppStore();
+  const { timelineData: data, activeJobs, jobErrors, setTimelineData, setActiveJob } = useAppStore();
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const isProcessing = !!activeJobs["timeline"];
   const error = jobErrors["timeline"];
@@ -62,24 +63,30 @@ export default function TimelinePage() {
             
             <button 
               onClick={() => {
-                setTimelineData(null); // Force visual reset
+                setIsSyncing(true);
+                setTimelineData(null); 
                 apiClient.get("/timeline").then(res => {
                    if (res && !res.error) {
                       if (res.status === "processing") {
                          if (res.orchestrator_jobs?.timeline) {
-                           useAppStore.getState().setActiveJob("timeline", res.orchestrator_jobs.timeline);
+                           setActiveJob("timeline", res.orchestrator_jobs.timeline);
                          }
                          if (res.orchestrator_jobs?.report) {
-                           useAppStore.getState().setActiveJob("report", res.orchestrator_jobs.report);
+                           setActiveJob("report", res.orchestrator_jobs.report);
                          }
                       } else {
                         setTimelineData(res);
                       }
                    }
-                }).catch(() => {});
+                }).catch(() => {
+                }).finally(() => {
+                  setIsSyncing(false);
+                });
               }}
-              className="px-6 py-2 bg-brand-surface hover:bg-white/[0.06] text-neutral-300 rounded-xl border border-brand-border transition-all active:scale-[0.98] active:brightness-90 text-sm font-medium"
+              disabled={isSyncing}
+              className="px-6 py-2 bg-brand-surface hover:bg-white/[0.06] text-neutral-300 rounded-xl border border-brand-border transition-all active:scale-[0.98] active:brightness-90 text-sm font-medium disabled:opacity-50 flex items-center gap-2 mx-auto"
             >
+              {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               Sync Engine
             </button>
 
