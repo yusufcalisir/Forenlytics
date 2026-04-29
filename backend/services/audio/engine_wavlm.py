@@ -39,7 +39,18 @@ class WavLMEngine:
             logger.error(f"Failed to load WavLM models: {e}")
             raise Exception(f"Forensic engine could not be initialized: {str(e)}")
 
-    def get_embedding(self, audio_bytes: bytes, y: np.ndarray) -> torch.Tensor:
+    def unload(self):
+        """Purge model from memory to save RAM on restricted environments."""
+        if not self._initialized:
+            return
+        self.model = None
+        self.processor = None
+        self._initialized = False
+        import gc
+        gc.collect()
+        logger.info("WavLM model unloaded from memory.")
+
+    def get_embedding(self, audio_bytes: bytes, y: np.ndarray) -> any:
         self._ensure_loaded()
             
         cached = self.cache.get(audio_bytes)

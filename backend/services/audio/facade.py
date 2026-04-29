@@ -31,14 +31,22 @@ class AudioForensicFacade:
                 # WavLM uses normalized embeddings: cosine sim is [0, 1]
                 wlm_sim = max(0.0, min(100.0, wlm_sim_raw * 100))
             except Exception as e:
-                logger.warning(f"WavLM skipped: {e}")
+                logger.warning(f"WavLM failed or skipped: {e}")
                 wlm_sim = None  # Use None to indicate engine is offline
+            finally:
+                wavlm_engine.unload() # Critical for Render RAM limits
 
             # 3. Wav2Vec2 Engine
-            emb1 = embedding_engine.get_embedding(file1_bytes, y1)
-            emb2 = embedding_engine.get_embedding(file2_bytes, y2)
-            emb_sim_raw = embedding_engine.compare_embeddings(emb1, emb2)
-            emb_sim = max(0.0, min(100.0, (emb_sim_raw + 1) * 50))
+            try:
+                emb1 = embedding_engine.get_embedding(file1_bytes, y1)
+                emb2 = embedding_engine.get_embedding(file2_bytes, y2)
+                emb_sim_raw = embedding_engine.compare_embeddings(emb1, emb2)
+                emb_sim = max(0.0, min(100.0, (emb_sim_raw + 1) * 50))
+            except Exception as e:
+                logger.warning(f"Wav2Vec2 failed: {e}")
+                emb_sim = 0.0
+            finally:
+                embedding_engine.unload() # Critical for Render RAM limits
             
             # 3. Biometric Engine
             bio1 = biometric_engine.extract_features(y1)
@@ -129,5 +137,7 @@ class AudioForensicFacade:
         except Exception as e:
             logger.exception("Deepfake Diagnostic failed")
             return {"error": str(e)}
+        finally:
+            embedding_engine.unload() # Ensure we cleanup if it was used
 
 audio_facade = AudioForensicFacade()
