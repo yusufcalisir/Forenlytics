@@ -44,11 +44,21 @@ def on_startup():
 # Global exception handler — NEVER crash, always return safe JSON
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.exception(f"Unhandled exception on {request.method} {request.url.path}")
+    logger.exception(f"Unhandled error: {str(exc)}")
     return JSONResponse(
         status_code=500,
-        content={"error": True, "message": "An internal server error occurred.", "code": "INTERNAL_ERROR"}
+        content={"status": "error", "message": "An internal server error occurred. Our team has been notified."}
     )
+
+@app.get("/health")
+def health_check():
+    """System health monitor for deployment providers."""
+    return {
+        "status": "ok",
+        "timestamp": time.time(),
+        "active_sessions": len(session_store._sessions),
+        "version": "1.0.0"
+    }
 
 # Request timing middleware
 @app.middleware("http")
