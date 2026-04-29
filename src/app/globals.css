@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-cyan: #00f0ff;
+  --color-brand-emerald: #00ff88;
+  --color-brand-bg: #050508;
+  --color-brand-surface: #0a0b10;
+  --color-brand-panel: #0e0f16;
+  --color-brand-border: #1a1b25;
+  --color-brand-border-hover: #2a2b3a;
+  --color-brand-accent: #00f0ff;
+}
+
+@layer base {
+  :root {
+    --background: #050508;
+    --foreground: #e8e8ed;
+  }
+}
+
+html, body {
+  background-color: var(--background);
+  color: var(--foreground);
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* ── FORENSIC PANEL SYSTEM ── */
+.intel-panel {
+  background: linear-gradient(145deg, #0e0f16 0%, #0a0b10 100%);
+  border: 1px solid #1a1b25;
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.intel-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.intel-panel:hover {
+  border-color: #2a2b3a;
+  box-shadow:
+    0 0 20px rgba(0, 240, 255, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* ── GLOW VARIANTS ── */
+.glow-cyan {
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.08);
+}
+.glow-emerald {
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.08);
+}
+.glow-red {
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.08);
+}
+
+/* ── SIDEBAR ACTIVE GLOW ── */
+.nav-glow {
+  box-shadow: inset 3px 0 0 #00f0ff,
+              0 0 15px rgba(0, 240, 255, 0.06);
+}
+
+/* ── CUSTOM SCROLLBAR ── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1a1b25;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2a2b3a;
+}
+
+/* ── LEAFLET RESET ── */
+.custom-leaflet-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* ── SUBTLE NOISE TEXTURE ── */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+}
+
+/* ── STAT HIGHLIGHT ── */
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ── GRID BACKGROUND ── */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── RANGE INPUT STYLING ── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px;
+  background: #1a1b25;
+  border-radius: 2px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
+  background: #00f0ff;
+  margin-top: -5.5px;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+  transition: box-shadow 0.2s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
+}
