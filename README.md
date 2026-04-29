@@ -1,22 +1,12 @@
-<div align="center">
-
-<img src="public/banner.png" alt="Forenlytics Hero Banner" width="100%" />
-
 # 🛡️ Forenlytics
-**The Command Center for Signal Intelligence & Geospatial Forensic Reconstruction**
+### High-Fidelity Forensic Intelligence & Multi-Signal Analysis Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-f39c12.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js%2015-000000.svg?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Deep Learning](https://img.shields.io/badge/AI-Neural_Audio-e74c3c.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
 
-<p align="center">
-  Forenlytics is an elite forensic environment designed for intelligence professionals to ingest raw telecom signaling, geospatial movement logs, and vocal biometric samples—transforming them into high-fidelity investigative intelligence.
-</p>
-
-[**Explore Documentation**](#-technical-implementation) • [**Setup Guide**](#-setup--installation) • [**Architecture**](#-system-architecture)
-
-</div>
+Forenlytics is an elite forensic environment designed for intelligence professionals to ingest raw telecom signaling, geospatial movement logs, and vocal biometric samples—transforming them into high-fidelity investigative intelligence.
 
 ---
 
@@ -92,7 +82,7 @@ Forenlytics follows **Stateless Ephemeral Processing** principles.
 
 ## 💻 Technical Implementation
 
-### Key Backend Endpoints
+### Backend Endpoints (Partial List)
 
 | Method | Endpoint | Forensic Logic |
 | :--- | :--- | :--- |
@@ -118,10 +108,6 @@ Forenlytics follows **Stateless Ephemeral Processing** principles.
 ---
 
 ## ⚡ Setup & Installation
-
-### Prerequisites
-- Node.js 18+ & Python 3.11+
-- FFmpeg (for audio normalization)
 
 ### 1. Initializing Backend
 ```bash
