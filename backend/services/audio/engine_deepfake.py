@@ -3,7 +3,6 @@ import numpy as np
 import librosa
 from typing import Dict, Any
 from .engine_embedding import embedding_engine
-import torch
 
 logger = logging.getLogger("forenlytics.audio.deepfake")
 
@@ -12,6 +11,7 @@ class DeepfakeEngine:
         self.sr = target_sr
 
     def analyze(self, y: np.ndarray) -> Dict[str, float]:
+        import torch
         metrics = {}
         try:
             # 1. Zero Crossing Rate Variance

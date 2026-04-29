@@ -1,8 +1,6 @@
 import logging
-import torch
-import torch.nn.functional as F
-from transformers import Wav2Vec2FeatureExtractor, WavLMForXVector
 import numpy as np
+from .cache_utils import EmbeddingCache
 from .cache_utils import EmbeddingCache
 
 logger = logging.getLogger("forenlytics.audio.wavlm")
@@ -23,10 +21,13 @@ class WavLMEngine:
         if self._initialized:
             return
             
+        import torch
+        from transformers import Wav2Vec2FeatureExtractor, WavLMForXVector
+        
+        self.device = torch.device("cpu")
         logger.info(f"Loading Microsoft WavLM Speaker Verification framework on {self.device}...")
         try:
             self.processor = Wav2Vec2FeatureExtractor.from_pretrained(self.model_name)
-            # Use low_cpu_mem_usage=True to save RAM during loading
             self.model = WavLMForXVector.from_pretrained(
                 self.model_name, 
                 low_cpu_mem_usage=True
@@ -56,7 +57,8 @@ class WavLMEngine:
         self.cache.set(audio_bytes, embedding)
         return embedding
 
-    def compare_embeddings(self, emb1: torch.Tensor, emb2: torch.Tensor) -> float:
+    def compare_embeddings(self, emb1: any, emb2: any) -> float:
+        import torch.nn.functional as F
         cos_sim = F.cosine_similarity(emb1, emb2).item()
         return cos_sim
 
