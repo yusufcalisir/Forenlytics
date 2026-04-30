@@ -1,7 +1,9 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+// In production, all API calls go through Next.js rewrites (/api/backend/* → Render)
+// This eliminates CORS issues entirely since the browser only talks to same-origin.
+const API_BASE = "/api/backend";
 
 if (typeof window !== "undefined") {
-  console.log("[Forenlytics API] Initialized with BASE:", API_BASE);
+  console.log("[Forenlytics API] Initialized with proxy BASE:", API_BASE);
 }
 const TIMEOUT_MS = 120000;
 const SESSION_KEY = "forenlytics_session_id";

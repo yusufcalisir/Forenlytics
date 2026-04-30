@@ -92,8 +92,12 @@ def perform_cleanup():
 
     # 4. Garbage Collection
     gc.collect()
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+    try:
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except ImportError:
+        pass
         
     return {
         "status": "success",
