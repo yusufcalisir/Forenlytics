@@ -3,8 +3,6 @@ import time
 import threading
 import logging
 from typing import Dict, Any, Optional
-from services.hts_analyzer import HTSAnalyzer
-from services.gps_analyzer import GPSAnalyzer
 
 logger = logging.getLogger("forenlytics.session")
 
@@ -13,19 +11,14 @@ CLEANUP_INTERVAL_SECONDS = 60  # Check every minute
 
 
 class SessionData:
-    """Holds all per-session analyzer instances and metadata."""
+    """Holds all per-session forensic audio results and metadata."""
     def __init__(self, session_id: str):
         self.session_id = session_id
         self.created_at = time.time()
         self.last_accessed = time.time()
-        self.hts = HTSAnalyzer()
-        self.gps = GPSAnalyzer()
-        self.timeline_result: Optional[Dict[str, Any]] = None
+        self.audio_compare_result: Optional[Dict[str, Any]] = None
+        self.audio_deepfake_result: Optional[Dict[str, Any]] = None
         self.report_result: Optional[Dict[str, Any]] = None
-        # Orchestrator-spawned job IDs so the frontend can discover and poll them
-        self.orchestrator_jobs: Dict[str, str] = {}
-        # Audio / deepfake results are stateless (process-and-return),
-        # so we don't store analyzer instances for them.
 
     def touch(self):
         """Update last accessed timestamp."""

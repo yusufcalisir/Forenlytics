@@ -3,7 +3,7 @@
 const API_BASE = "/api/backend";
 
 if (typeof window !== "undefined") {
-  console.log("[Forenlytics API] Initialized with proxy BASE:", API_BASE);
+  console.log("[Forenlytics Audio API] Initialized with proxy BASE:", API_BASE);
 }
 const TIMEOUT_MS = 120000;
 const SESSION_KEY = "forenlytics_session_id";
@@ -33,7 +33,7 @@ function setSessionId(id: string): void {
  * Ensures a valid session exists. Creates one if missing.
  */
 async function ensureSession(): Promise<string> {
-  let sid = getSessionId();
+  const sid = getSessionId();
   if (sid) return sid;
 
   if (sessionPromise) {
@@ -43,7 +43,7 @@ async function ensureSession(): Promise<string> {
   sessionPromise = (async () => {
     try {
       const res = await fetch(`${API_BASE}/session`, { method: "POST" });
-      if (!res.ok) throw new Error("Failed to initialize session.");
+      if (!res.ok) throw new Error("Failed to initialize forensic session.");
       const data = await res.json();
       const newSid = data.session_id;
       setSessionId(newSid);
@@ -67,7 +67,7 @@ function sessionHeaders(extra?: Record<string, string>): Record<string, string> 
 }
 
 /**
- * Extracts session_id from response and stores it (handles new session creation from backend).
+ * Extracts session_id from response and stores it.
  */
 function captureSession(body: any): void {
   if (body?.session_id) {
@@ -87,7 +87,7 @@ async function fetchWithTimeout(url: string, options?: RequestInit): Promise<Res
     return res;
   } catch (err: any) {
     if (err.name === "AbortError") {
-      throw new Error("Request timed out. The server may be processing a large dataset.");
+      throw new Error("Request timed out. The server may be processing heavy audio models.");
     }
     throw err;
   } finally {
@@ -97,7 +97,6 @@ async function fetchWithTimeout(url: string, options?: RequestInit): Promise<Res
 
 /**
  * Extracts a human-readable error from a failed response.
- * Never exposes raw stack traces.
  */
 async function extractError(res: Response, fallback: string): Promise<string> {
   try {
@@ -115,7 +114,7 @@ async function extractError(res: Response, fallback: string): Promise<string> {
 
 export const apiClient = {
   /**
-   * Initialize session on app load. Call this early (e.g. in layout effect).
+   * Initialize session on app load.
    */
   async initSession(): Promise<string> {
     return ensureSession();
@@ -134,7 +133,7 @@ export const apiClient = {
       return res.json();
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running.");
+        throw new Error("Cannot connect to the audio forensics backend server.");
       }
       throw err;
     }
@@ -148,7 +147,7 @@ export const apiClient = {
       });
       if (!res.ok) {
         const msg = await extractError(res, "Data could not be loaded. Please try again.");
-        console.error(`[Forenlytics API] GET ${endpoint} failed: ${res.status} — ${msg}`);
+        console.error(`[Forenlytics Audio API] GET ${endpoint} failed: ${res.status} — ${msg}`);
         throw new Error(msg);
       }
       const body = await res.json();
@@ -156,8 +155,8 @@ export const apiClient = {
       return body;
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
-        console.error(`[Forenlytics API] Network error on GET ${endpoint}`);
-        throw new Error("Cannot connect to the backend server. Please ensure it is running.");
+        console.error(`[Forenlytics Audio API] Network error on GET ${endpoint}`);
+        throw new Error("Cannot connect to the audio forensics backend server.");
       }
       throw err;
     }
@@ -173,7 +172,7 @@ export const apiClient = {
       });
       if (!res.ok) {
         const msg = await extractError(res, "Request failed. Please try again.");
-        console.error(`[Forenlytics API] POST ${endpoint} failed: ${res.status} — ${msg}`);
+        console.error(`[Forenlytics Audio API] POST ${endpoint} failed: ${res.status} — ${msg}`);
         throw new Error(msg);
       }
       const body = await res.json();
@@ -181,107 +180,7 @@ export const apiClient = {
       return body;
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running.");
-      }
-      throw err;
-    }
-  },
-
-  async uploadHts(file: File) {
-    await ensureSession();
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetchWithTimeout(`${API_BASE}/upload-hts`, {
-        method: "POST",
-        headers: sessionHeaders(),
-        body: formData,
-      });
-      if (!res.ok) {
-        const msg = await extractError(res, "HTS file upload failed.");
-        console.error(`[Forenlytics API] HTS upload failed: ${res.status} — ${msg}`);
-        throw new Error(msg);
-      }
-      const body = await res.json();
-      captureSession(body);
-      return body;
-    } catch (err: any) {
-      if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running.");
-      }
-      throw err;
-    }
-  },
-
-  async confirmHtsMapping(mapping: Record<string, string>) {
-    await ensureSession();
-    try {
-      const res = await fetchWithTimeout(`${API_BASE}/confirm-hts-mapping`, {
-        method: "POST",
-        headers: sessionHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify(mapping),
-      });
-      if (!res.ok) {
-        const msg = await extractError(res, "Column mapping confirmation failed.");
-        throw new Error(msg);
-      }
-      const body = await res.json();
-      captureSession(body);
-      return body;
-    } catch (err: any) {
-      if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running.");
-      }
-      throw err;
-    }
-  },
-
-  async confirmGpsMapping(mapping: Record<string, string>) {
-    await ensureSession();
-    try {
-      const res = await fetchWithTimeout(`${API_BASE}/confirm-gps-mapping`, {
-        method: "POST",
-        headers: sessionHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify(mapping),
-      });
-      if (!res.ok) {
-        const msg = await extractError(res, "Column mapping confirmation failed.");
-        throw new Error(msg);
-      }
-      const body = await res.json();
-      captureSession(body);
-      return body;
-    } catch (err: any) {
-      if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running.");
-      }
-      throw err;
-    }
-  },
-
-  async uploadGps(file: File) {
-    await ensureSession();
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetchWithTimeout(`${API_BASE}/upload-gps`, {
-        method: "POST",
-        headers: sessionHeaders(),
-        body: formData,
-      });
-      if (!res.ok) {
-        const msg = await extractError(res, "GPS file upload failed.");
-        console.error(`[Forenlytics API] GPS upload failed: ${res.status} — ${msg}`);
-        throw new Error(msg);
-      }
-      const body = await res.json();
-      captureSession(body);
-      return body;
-    } catch (err: any) {
-      if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running.");
+        throw new Error("Cannot connect to the audio forensics backend server.");
       }
       throw err;
     }
@@ -301,13 +200,13 @@ export const apiClient = {
       });
       if (!res.ok) {
         const msg = await extractError(res, "Audio pair analysis failed.");
-        console.error(`[Forenlytics API] Audio upload failed: ${res.status} — ${msg}`);
+        console.error(`[Forenlytics Audio API] Audio upload failed: ${res.status} — ${msg}`);
         throw new Error(msg);
       }
       return res.json();
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running (port 8000).");
+        throw new Error("Cannot connect to the audio forensics backend server (port 8000).");
       }
       throw err;
     }
@@ -326,13 +225,13 @@ export const apiClient = {
       });
       if (!res.ok) {
         const msg = await extractError(res, "Deepfake detection failed.");
-        console.error(`[Forenlytics API] Deepfake scan failed: ${res.status} — ${msg}`);
+        console.error(`[Forenlytics Audio API] Deepfake scan failed: ${res.status} — ${msg}`);
         throw new Error(msg);
       }
       return res.json();
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running (port 8000).");
+        throw new Error("Cannot connect to the audio forensics backend server (port 8000).");
       }
       throw err;
     }
@@ -345,22 +244,22 @@ export const apiClient = {
         headers: sessionHeaders(),
       });
       if (!res.ok) {
-        console.error(`[Forenlytics API] PDF download failed: ${res.status}`);
-        throw new Error("Failed to generate PDF. Ensure data has been uploaded to at least one module.");
+        console.error(`[Forenlytics Audio API] PDF download failed: ${res.status}`);
+        throw new Error("Failed to generate PDF docket. Ensure an audio analysis has been performed.");
       }
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "Forenlytics_Official_Docket.pdf";
+      a.download = "Forenlytics_Audio_Docket.pdf";
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the backend server. Please ensure it is running.");
+        throw new Error("Cannot connect to the audio forensics backend server.");
       }
       throw err;
     }

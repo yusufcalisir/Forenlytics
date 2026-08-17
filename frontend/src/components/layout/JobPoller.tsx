@@ -5,18 +5,16 @@ import { useAppStore } from "@/lib/store";
 import { apiClient } from "@/lib/apiClient";
 
 /**
- * Global background job poller.
- * Mounted once in AppLayout — survives all route changes.
- * Polls every active job every 2 seconds and dispatches results to the Zustand store.
+ * Global background job poller for audio forensic jobs.
+ * Mounted in AppLayout — survives all route changes.
+ * Polls every active job every 800ms and dispatches results to the Zustand store.
  */
 export function JobPoller() {
   const pollingRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const failureCounts = useRef<Record<string, number>>({});
 
-  // Stable reference to the poll function that always reads latest store state
   const poll = useCallback(async () => {
-    // Guard: don't overlap polls
     if (pollingRef.current) return;
     pollingRef.current = true;
 
@@ -33,8 +31,6 @@ export function JobPoller() {
 
         try {
           const status = await apiClient.getJobStatus(jobId);
-          
-          // Reset failure count on success
           failureCounts.current[type] = 0;
 
           if (status.status === "completed") {
@@ -44,20 +40,16 @@ export function JobPoller() {
             useAppStore.getState().clearJobError(type);
           } else if (status.status === "failed") {
             console.error(`[JobPoller] Job ${type} (${jobId}) failed:`, status.error);
-            useAppStore.getState().setJobError(type, status.error || "Job failed");
+            useAppStore.getState().setJobError(type, status.error || "Audio forensic job failed");
             useAppStore.getState().clearActiveJob(type);
           }
-          // "pending" and "running" — keep polling
         } catch (err) {
           console.error(`[JobPoller] Error polling job ${type} (${jobId}):`, err);
-          
-          // Increment failure count
           failureCounts.current[type] = (failureCounts.current[type] || 0) + 1;
-          
-          // If too many failures, assume backend is dead or job is lost
+
           if (failureCounts.current[type] > 10) {
             console.warn(`[JobPoller] Clearing stuck job ${type} after 10 failures.`);
-            useAppStore.getState().setJobError(type, "Lost connection to background job. Please try again.");
+            useAppStore.getState().setJobError(type, "Lost connection to background audio processor.");
             useAppStore.getState().clearActiveJob(type);
             delete failureCounts.current[type];
           }
@@ -79,39 +71,12 @@ export function JobPoller() {
 }
 
 /**
- * Dispatches completed job results to the correct store slices.
- * Also registers orchestrator jobs (timeline/report) when primary jobs complete.
+ * Dispatches completed audio job results to the Zustand store.
  */
 function handleJobCompleted(type: string, result: any) {
   const store = useAppStore.getState();
 
   switch (type) {
-    case "hts_upload":
-    case "hts_mapping": {
-      if (result.status === "needs_mapping") {
-        store.setHtsMappingData(result);
-      } else {
-        // Analysis succeeded — fetch the graph data
-        fetchHtsAnalysis();
-      }
-      // Register orchestrator jobs if present
-      registerOrchestratorJobs(result);
-      break;
-    }
-
-    case "gps_upload":
-    case "gps_mapping": {
-      if (result.status === "needs_mapping") {
-        store.setGpsMappingData(result);
-      } else {
-        // Analysis succeeded — fetch the analysis data
-        fetchGpsAnalysis();
-      }
-      // Register orchestrator jobs if present
-      registerOrchestratorJobs(result);
-      break;
-    }
-
     case "audio_compare": {
       store.setAudioSpeakerResult(result);
       break;
@@ -122,19 +87,7 @@ function handleJobCompleted(type: string, result: any) {
       break;
     }
 
-    case "timeline": {
-      // Timeline generation completed — store result directly
-      if (result && !result.error) {
-        store.setTimelineData(result);
-      } else if (result?.error === "NO_DATA") {
-        // No data yet, that's fine
-        store.setTimelineData(null);
-      }
-      break;
-    }
-
     case "report": {
-      // Report generation completed — store result directly
       if (result && !result.error) {
         store.setReportData(result);
       }
@@ -143,58 +96,5 @@ function handleJobCompleted(type: string, result: any) {
 
     default:
       console.warn(`[JobPoller] Unknown job type completed: ${type}`);
-  }
-}
-
-/**
- * When a primary analysis job (HTS/GPS) completes, the result may contain
- * orchestrator_jobs = { timeline: "job-id", report: "job-id" }.
- * Register these in activeJobs so the poller picks them up.
- */
-function registerOrchestratorJobs(result: any) {
-  if (!result?.orchestrator_jobs) return;
-
-  const store = useAppStore.getState();
-  const orch = result.orchestrator_jobs;
-
-  // Clear stale timeline/report data since new orchestrator run is starting
-  store.setTimelineData(null);
-  store.setReportData(null);
-
-  if (orch.timeline) {
-    store.setActiveJob("timeline", orch.timeline);
-  }
-  if (orch.report) {
-    store.setActiveJob("report", orch.report);
-  }
-}
-
-/**
- * Fetch HTS analysis after job completion and store it.
- */
-async function fetchHtsAnalysis() {
-  try {
-    const graphData = await apiClient.get("/hts-graph");
-    const store = useAppStore.getState();
-    store.setHtsAnalysisData(graphData);
-    store.setHtsMappingData(null);
-  } catch (e) {
-    console.error("[JobPoller] Failed to load HTS analysis after job completion", e);
-    useAppStore.getState().setJobError("hts_upload", "Analysis completed but failed to load results.");
-  }
-}
-
-/**
- * Fetch GPS analysis after job completion and store it.
- */
-async function fetchGpsAnalysis() {
-  try {
-    const gpsData = await apiClient.get("/gps-analysis");
-    const store = useAppStore.getState();
-    store.setGpsAnalysisData(gpsData);
-    store.setGpsMappingData(null);
-  } catch (e) {
-    console.error("[JobPoller] Failed to load GPS analysis after job completion", e);
-    useAppStore.getState().setJobError("gps_upload", "Analysis completed but failed to load results.");
   }
 }

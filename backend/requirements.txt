@@ -6,7 +6,6 @@ numpy
 torch
 torchaudio
 transformers
-networkx
 scipy
 librosa
 matplotlib

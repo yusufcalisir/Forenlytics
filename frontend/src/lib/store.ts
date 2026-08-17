@@ -1,48 +1,16 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export interface MappingData {
-  detected_columns: Array<{
-    original: string;
-    mapped_to: string | null;
-    samples: string[];
-  }>;
-  required_columns: string[];
-  auto_mapping: Record<string, string>;
-  missing: string[];
-  profile_name?: string;
-  confidence?: number;
-}
-
 interface AppState {
-  // HTS
-  htsAnalysisData: any | null;
-  htsMappingData: MappingData | null;
-  setHtsAnalysisData: (data: any) => void;
-  setHtsMappingData: (data: MappingData | null) => void;
-  resetHts: () => void;
-
-  // GPS
-  gpsAnalysisData: any | null;
-  gpsMappingData: MappingData | null;
-  setGpsAnalysisData: (data: any) => void;
-  setGpsMappingData: (data: MappingData | null) => void;
-  resetGps: () => void;
-
-  // Audio (Speaker)
+  // Audio (Speaker Comparison)
   audioSpeakerResult: any | null;
   setAudioSpeakerResult: (data: any) => void;
   resetAudioSpeaker: () => void;
 
-  // Audio (Deepfake)
+  // Audio (Deepfake Diagnostics)
   audioDeepfakeResult: any | null;
   setAudioDeepfakeResult: (data: any) => void;
   resetAudioDeepfake: () => void;
-
-  // Timeline
-  timelineData: any | null;
-  setTimelineData: (data: any) => void;
-  resetTimeline: () => void;
 
   // Reports
   reportData: any | null;
@@ -65,19 +33,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set, get) => ({
-      htsAnalysisData: null,
-      htsMappingData: null,
-      setHtsAnalysisData: (data) => set({ htsAnalysisData: data }),
-      setHtsMappingData: (data) => set({ htsMappingData: data }),
-      resetHts: () => set({ htsAnalysisData: null, htsMappingData: null }),
-
-      gpsAnalysisData: null,
-      gpsMappingData: null,
-      setGpsAnalysisData: (data) => set({ gpsAnalysisData: data }),
-      setGpsMappingData: (data) => set({ gpsMappingData: data }),
-      resetGps: () => set({ gpsAnalysisData: null, gpsMappingData: null }),
-
+    (set) => ({
       audioSpeakerResult: null,
       setAudioSpeakerResult: (data) => set({ audioSpeakerResult: data }),
       resetAudioSpeaker: () => set({ audioSpeakerResult: null }),
@@ -86,23 +42,14 @@ export const useAppStore = create<AppState>()(
       setAudioDeepfakeResult: (data) => set({ audioDeepfakeResult: data }),
       resetAudioDeepfake: () => set({ audioDeepfakeResult: null }),
 
-      timelineData: null,
-      setTimelineData: (data) => set({ timelineData: data }),
-      resetTimeline: () => set({ timelineData: null }),
-
       reportData: null,
       setReportData: (data) => set({ reportData: data }),
       resetReport: () => set({ reportData: null }),
 
       resetAll: () =>
         set({
-          htsAnalysisData: null,
-          htsMappingData: null,
-          gpsAnalysisData: null,
-          gpsMappingData: null,
           audioSpeakerResult: null,
           audioDeepfakeResult: null,
-          timelineData: null,
           reportData: null,
           activeJobs: {},
           jobErrors: {},

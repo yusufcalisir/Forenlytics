@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { FileText, Download, Loader2, Target, Map, LayoutList, Terminal, Plus, Minus, RotateCcw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, Download, Loader2, Mic, Radar, ShieldCheck, Terminal, Plus, Minus, RotateCcw, Activity } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Panel } from "@/components/ui/Panel";
 import { apiClient } from "@/lib/apiClient";
@@ -11,25 +11,27 @@ export default function ReportsPage() {
   const { reportData: data, setReportData: setData, activeJobs } = useAppStore();
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [openSection, setOpenSection] = useState<string | null>("summary");
+  const [openSection, setOpenSection] = useState<string | null>("speaker");
 
   const isProcessing = !!activeJobs["report"];
 
-  const handleRetry = async () => {
+  // Auto-fetch report if not present
+  useEffect(() => {
+    if (!data && !isProcessing) {
+      handleCompile();
+    }
+  }, []);
+
+  const handleCompile = async () => {
     try {
       setError(null);
       const res = await apiClient.get("/generate-report");
       if (res.status === "processing") {
-        // Still processing, wait for poller
-        return;
-      }
-      if (res.status === "no_data") {
-        setError(res.message || "No data available.");
         return;
       }
       setData(res);
     } catch (err: any) {
-      setError(err.message || "Failed to compile intelligence report.");
+      setError(err.message || "Failed to compile audio forensic report.");
     }
   };
 
@@ -68,10 +70,10 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="animate-in fade-in duration-300 pb-16">
+    <div className="animate-in fade-in duration-300 pb-16 space-y-8">
       <SectionHeader 
-        title="Intelligence Reports" 
-        subtitle="Compile and export forensic analysis dockets"
+        title="Audio Forensic Intelligence Docket" 
+        subtitle="Comprehensive neural vocal biometric and deepfake diagnostic docket"
         icon={FileText}
       />
 
@@ -80,62 +82,99 @@ export default function ReportsPage() {
            <div className="w-14 h-14 rounded-2xl bg-brand-cyan/8 border border-brand-cyan/10 flex items-center justify-center mx-auto mb-4">
              <Loader2 className="w-6 h-6 animate-spin text-brand-cyan" />
            </div>
-           <h3 className="text-white font-medium text-base mb-1.5">Compiling Intelligence Report</h3>
-           <p className="text-neutral-500 text-sm leading-relaxed">Aggregating forensic data across all modules...</p>
+           <h3 className="text-white font-medium text-base mb-1.5">Compiling Forensic Docket</h3>
+           <p className="text-neutral-500 text-sm leading-relaxed">Aggregating vocal biometric and synthetic anomaly telemetry...</p>
         </Panel>
       ) : !data ? (
         <Panel className="max-w-lg mx-auto !p-8 text-center">
            <div className="w-14 h-14 rounded-2xl bg-brand-cyan/8 border border-brand-cyan/10 flex items-center justify-center mx-auto mb-4">
              <Terminal className="w-6 h-6 text-brand-cyan/50" />
            </div>
-           <h3 className="text-white font-medium text-base mb-1.5">Compile Master Docket</h3>
-           <p className="text-neutral-500 text-sm mb-8 leading-relaxed">Run an overarching script capturing logs from HTS matrices, GPS traces, and chronological correlations.</p>
+           <h3 className="text-white font-medium text-base mb-1.5">Compile Forensic Docket</h3>
+           <p className="text-neutral-500 text-sm mb-8 leading-relaxed">Compile session vocal biometrics, neural embeddings (WavLM/Wav2Vec2), and synthetic artifact scan results into an exportable docket.</p>
            
            {error && <p className="text-red-400 text-xs mb-4 bg-red-400/8 py-2 rounded-lg border border-red-400/15">{error}</p>}
            
            <button 
-             onClick={handleRetry}
-             className="flex items-center justify-center gap-2.5 w-full py-3 bg-brand-cyan/10 hover:bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/20 rounded-xl transition-all text-sm font-semibold tracking-widest disabled:opacity-40"
+             onClick={handleCompile}
+             className="flex items-center justify-center gap-2.5 w-full py-3 bg-brand-cyan/10 hover:bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/20 rounded-xl transition-all text-sm font-semibold tracking-widest"
            >
-             COMPILE REPORT
+             COMPILE DOCKET
            </button>
         </Panel>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
            
            <div className="lg:col-span-2 space-y-1">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-600 mb-4 px-1">Structured Data Preview</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-4 px-1">Forensic Docket Preview</p>
               
-              <AccordionSection title="CASE SUMMARY" icon={FileText} id="summary">
-                 <div className="grid grid-cols-2 gap-4">
-                    <div><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Total Signals</span><span className="font-mono text-lg text-white stat-value">{data.case_summary.total_hts_records}</span></div>
-                    <div><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Geo Intercepts</span><span className="font-mono text-lg text-white stat-value">{data.case_summary.total_gps_points}</span></div>
-                    <div className="col-span-2"><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Observation Window</span><span className="font-mono text-sm text-brand-cyan">{data.case_summary.time_range_covered}</span></div>
+              <AccordionSection title="SPEAKER VERIFICATION & NEURAL BIOMETRICS" icon={Mic} id="speaker">
+                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div className="p-3 bg-brand-surface border border-brand-border rounded-xl">
+                      <span className="text-neutral-500 block text-[10px] uppercase tracking-wider">Similarity Score</span>
+                      <span className="font-mono text-xl text-white font-bold stat-value">{data.speaker_verification?.similarity_score ?? 0}%</span>
+                    </div>
+                    <div className="p-3 bg-brand-surface border border-brand-border rounded-xl">
+                      <span className="text-neutral-500 block text-[10px] uppercase tracking-wider">Confidence</span>
+                      <span className="font-mono text-base text-brand-cyan font-semibold">{data.speaker_verification?.confidence_level ?? "N/A"}</span>
+                    </div>
+                    <div className="p-3 bg-brand-surface border border-brand-border rounded-xl">
+                      <span className="text-neutral-500 block text-[10px] uppercase tracking-wider">WavLM Neural</span>
+                      <span className="font-mono text-lg text-neutral-200">{data.speaker_verification?.engine_scores?.wavlm !== null ? `${data.speaker_verification?.engine_scores?.wavlm}%` : "OFFLINE"}</span>
+                    </div>
+                    <div className="p-3 bg-brand-surface border border-brand-border rounded-xl">
+                      <span className="text-neutral-500 block text-[10px] uppercase tracking-wider">Wav2Vec2 Match</span>
+                      <span className="font-mono text-lg text-neutral-200">{data.speaker_verification?.engine_scores?.embedding ?? 0}%</span>
+                    </div>
+                 </div>
+
+                 {data.speaker_verification?.breakdown?.length > 0 && (
+                   <div className="mt-3 pt-3 border-t border-brand-border">
+                     <p className="text-xs font-semibold text-neutral-300 mb-2 uppercase tracking-wider">Telemetry Breakdown</p>
+                     <ul className="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                       {data.speaker_verification.breakdown.map((item: string, idx: number) => (
+                         <li key={idx} className={item.includes("WARNING") ? "text-red-400 font-medium" : ""}>{item}</li>
+                       ))}
+                     </ul>
+                   </div>
+                 )}
+              </AccordionSection>
+
+              <AccordionSection title="DEEPFAKE & SYNTHETIC ANOMALY EVALUATION" icon={Radar} id="deepfake">
+                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                    <div className="p-3 bg-brand-surface border border-brand-border rounded-xl">
+                      <span className="text-neutral-500 block text-[10px] uppercase tracking-wider">Verdict</span>
+                      <span className="font-mono text-lg text-white font-bold">{data.deepfake_diagnostics?.label ?? "N/A"}</span>
+                    </div>
+                    <div className="p-3 bg-brand-surface border border-brand-border rounded-xl">
+                      <span className="text-neutral-500 block text-[10px] uppercase tracking-wider">Anomaly Index</span>
+                      <span className="font-mono text-lg text-red-400 font-bold">{data.deepfake_diagnostics?.deepfake_score ?? 0}%</span>
+                    </div>
+                    <div className="p-3 bg-brand-surface border border-brand-border rounded-xl">
+                      <span className="text-neutral-500 block text-[10px] uppercase tracking-wider">Confidence</span>
+                      <span className="font-mono text-base text-neutral-200 font-semibold">{data.deepfake_diagnostics?.confidence ?? "N/A"}</span>
+                    </div>
+                 </div>
+
+                 <div className="p-3.5 bg-brand-surface border border-brand-border rounded-xl text-xs leading-relaxed text-neutral-300 mb-3">
+                   <p className="font-semibold text-white mb-1">Diagnostic Interpretation:</p>
+                   {data.deepfake_diagnostics?.interpretation}
+                 </div>
+
+                 <div className="grid grid-cols-3 gap-3 text-xs text-neutral-400">
+                    <div><span className="text-neutral-500 block text-[10px] uppercase">ZCR Variance</span><span className="font-mono text-neutral-200">{data.deepfake_diagnostics?.metrics?.zcr_variance ?? "N/A"}</span></div>
+                    <div><span className="text-neutral-500 block text-[10px] uppercase">Rolloff Variance</span><span className="font-mono text-neutral-200">{data.deepfake_diagnostics?.metrics?.rolloff_variance ?? "N/A"}</span></div>
+                    <div><span className="text-neutral-500 block text-[10px] uppercase">Embedding Var</span><span className="font-mono text-neutral-200">{data.deepfake_diagnostics?.metrics?.embedding_variance ?? "N/A"}</span></div>
                  </div>
               </AccordionSection>
 
-              <AccordionSection title="COMMUNICATIONS LOGS" icon={Target} id="comms">
-                 <div className="grid grid-cols-2 gap-4">
-                    <div><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Network Nodes</span><span className="font-mono text-lg text-white stat-value">{data.communication_analysis.unique_numbers}</span></div>
-                    <div className="col-span-2"><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Maximum Frequency Vector</span><span className="font-mono text-sm text-brand-cyan">{data.communication_analysis.top_pair.source} {'→'} {data.communication_analysis.top_pair.target}</span></div>
+              <AccordionSection title="FORENSIC SUMMARY & SYNTHESIS" icon={ShieldCheck} id="summary">
+                 <div className="p-4 bg-brand-surface border border-brand-border rounded-xl text-xs leading-relaxed font-mono text-neutral-300">
+                   {data.final_summary?.observation}
                  </div>
-              </AccordionSection>
-
-              <AccordionSection title="GEOSPATIAL TRACES" icon={Map} id="geo">
-                 <div className="grid grid-cols-2 gap-4">
-                    <div><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Distance</span><span className="font-mono text-lg text-white stat-value">{data.movement_analysis.distance_km} km</span></div>
-                    <div><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Stationary Halts</span><span className="font-mono text-lg text-white stat-value">{data.movement_analysis.total_stops}</span></div>
-                    <div className="col-span-2"><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Primary Grid Lock</span><span className="font-mono text-sm text-brand-cyan">Lat: {data.movement_analysis.most_visited_area.lat} / Lng: {data.movement_analysis.most_visited_area.lng}</span></div>
-                 </div>
-              </AccordionSection>
-
-              <AccordionSection title="CHRONOLOGICAL INTEGRATION" icon={LayoutList} id="chrono">
-                 <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Nodes Processed</span><span className="font-mono text-lg text-white stat-value">{data.timeline_overview.total_events}</span></div>
-                    <div><span className="text-neutral-600 block text-[10px] uppercase tracking-wider">Overlaps</span><span className="font-mono text-lg text-red-400 stat-value">{data.timeline_overview.correlated_overlaps}</span></div>
-                 </div>
-                 <div className="p-4 bg-brand-surface border border-brand-border rounded-xl text-xs leading-relaxed font-mono text-neutral-500">
-                   {data.final_summary.observation}
+                 <div className="mt-3 flex justify-between text-[11px] text-neutral-500">
+                   <span>Platform: {data.case_summary?.target_platform}</span>
+                   <span>Timestamp: {data.case_summary?.generated_at}</span>
                  </div>
               </AccordionSection>
 
@@ -144,7 +183,7 @@ export default function ReportsPage() {
            <div className="lg:col-span-1">
               <div className="sticky top-20">
                 <Panel glow="cyan" className="!p-6">
-                   <h3 className="font-medium text-white tracking-widest text-xs mb-5 border-b border-brand-border pb-3 uppercase">Export Routine</h3>
+                   <h3 className="font-medium text-white tracking-widest text-xs mb-5 border-b border-brand-border pb-3 uppercase">Export Forensic Docket</h3>
                    {error && <p className="text-red-400 text-[11px] mb-4">{error}</p>}
                    
                    <button 
@@ -152,14 +191,14 @@ export default function ReportsPage() {
                      disabled={isDownloading}
                      className="w-full flex items-center justify-center gap-2.5 py-3.5 bg-brand-cyan hover:bg-cyan-400 text-black rounded-xl font-bold transition-all disabled:opacity-40 hover:shadow-[0_0_20px_rgba(0,240,255,0.25)] tracking-widest text-sm"
                    >
-                     {isDownloading ? <><Loader2 className="w-4 h-4 animate-spin" /> ENCODING...</> : <><Download className="w-4 h-4" /> SECURE PDF</>}
+                     {isDownloading ? <><Loader2 className="w-4 h-4 animate-spin" /> ENCODING PDF...</> : <><Download className="w-4 h-4" /> EXPORT PDF DOCKET</>}
                    </button>
                    
                    <button 
-                     onClick={() => setData(null)}
-                     className="w-full mt-3 py-2 flex items-center justify-center gap-2 text-[11px] text-neutral-500 hover:text-white transition-colors"
+                     onClick={handleCompile}
+                     className="w-full mt-3 py-2.5 flex items-center justify-center gap-2 text-xs text-neutral-400 hover:text-white bg-brand-surface hover:bg-white/5 border border-brand-border rounded-xl transition-colors"
                    >
-                     <RotateCcw className="w-3 h-3" /> Reload Dataset
+                     <RotateCcw className="w-3.5 h-3.5" /> Re-sync Session Data
                    </button>
                 </Panel>
               </div>

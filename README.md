@@ -1,8 +1,8 @@
 # 🛡️ Forenlytics
-### High-Fidelity Forensic Intelligence & Multi-Signal Analysis Platform
+### High-Fidelity Neural Audio Forensic Intelligence & Synthetics Analysis Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-f39c12.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2015-000000.svg?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2016-000000.svg?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Deep Learning](https://img.shields.io/badge/AI-Neural_Audio-e74c3c.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
 
@@ -16,8 +16,7 @@
 
 <br />
 
-Forenlytics is an elite forensic environment designed for intelligence professionals to ingest raw telecom signaling, geospatial movement logs, and vocal biometric samples, transforming them into high-fidelity investigative intelligence.
-
+Forenlytics is an elite audio forensics environment designed for intelligence and legal professionals to ingest acoustic specimens and vocal samples, transforming them into high-fidelity investigative intelligence through neural biometric verification and synthetic anomaly detection.
 
 ---
 
@@ -26,22 +25,22 @@ Forenlytics is an elite forensic environment designed for intelligence professio
 <table width="100%">
   <tr>
     <td width="50%" valign="top">
-      <h4>📊 Signal Intelligence (HTS)</h4>
-      <p>Automated graph-based analysis of massive communication matrices. Reconstructs network topologies to identify hubs, bridge-entities, and cluster communities using NetworkX modularity.</p>
+      <h4>🎙️ Neural Speaker Verification</h4>
+      <p>Dual-stream biometric comparison using <b>Microsoft WavLM Large</b> and <b>Wav2Vec2-XLSR</b> deep neural embeddings. Computes cosine similarity across masked speech representations.</p>
     </td>
     <td width="50%" valign="top">
-      <h4>📍 Geospatial Reconstruction</h4>
-      <p>Transforms raw coordinate sequences into behavioral movement profiles. Heuristically identifies stationary halts and detects velocity anomalies or path inconsistencies.</p>
+      <h4>🧬 Physiological Vocal Biometrics</h4>
+      <p>Extracts fundamental frequency (F0), formant bandwidth ratios, shimmer, jitter, and spectral harmonic distributions for non-invasive vocal tract profiling.</p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <h4>🕰️ Unified Timeline Orchestrator</h4>
-      <p>The master correlator integrating heterogeneous data sources. Correlates signal events with physical location to answer exactly where a target was at any given second.</p>
+      <h4>⚡ Synthetic Vocoder & Deepfake Scan</h4>
+      <p>Detects AI voice synthesis and deepfakes by identifying temporal embedding over-smoothing, zero-crossing rate anomalies, and high-frequency spectral roll-off distortions.</p>
     </td>
     <td width="50%" valign="top">
-      <h4>🎙️ Audio Forensic Suite</h4>
-      <p>Neural vocal biometric verification via Microsoft WavLM. Scans for synthetic artifacts, deepfake patterns, and provides high-fidelity similarity scoring.</p>
+      <h4>📄 Court-Ready Forensic PDF Dockets</h4>
+      <p>Instantly compiles and exports structured forensic dockets with mathematical similarity scores, biometric radar breakdowns, diagnostic opinions, and verifiable session telemetry.</p>
     </td>
   </tr>
 </table>
@@ -50,69 +49,77 @@ Forenlytics is an elite forensic environment designed for intelligence professio
 
 ## 🏗️ System Architecture
 
-Forenlytics is built on a state-of-the-art, decoupled architecture designed for high-concurrency data processing.
+Forenlytics is built on a high-throughput, decoupled architecture designed for neural audio model execution and ephemeral session management.
 
 ```mermaid
 graph TD
-    subgraph Client ["Client Layer (Next.js 15)"]
-        UI[Forensic Dashboard]
+    subgraph Client ["Client Layer (Next.js 16)"]
+        UI[Audio Forensics Command Center]
         Store[Zustand State Engine]
         Poll[Async Job Poller]
     end
 
     subgraph API ["API Gateway (FastAPI)"]
-        Router[Endpoints & Middleware]
+        Router[Endpoints & CORS Middleware]
         Manager[Job Queue Orchestrator]
-        Session[In-Memory Session Store]
+        Session[In-Memory Ephemeral Store]
     end
 
-    subgraph Cores ["Intelligence Cores"]
-        HTS[HTS Graph Engine]
-        GPS[GPS Spatial Engine]
-        TLE[Timeline Correlator]
-        AUD[Neural Audio Suite]
+    subgraph Cores ["Neural Audio Cores"]
+        WLM[Microsoft WavLM Large Engine]
+        W2V[Wav2Vec2-XLSR Embedding Engine]
+        BIO[Acoustic Biometric Extractor]
+        DFK[Deepfake & Vocoder Artifact Scanner]
+        RPT[Forensic Docket Generator]
     end
 
     UI <--> Router
     Router --> Manager
     Manager --> Session
     Manager --> Cores
-    Session --> Cores
+    Session --> RPT
 ```
 
 ---
 
 ## 🛡️ Privacy & Forensic Integrity
 
-Forenlytics follows **Stateless Ephemeral Processing** principles.
+Forenlytics follows strict **Stateless Ephemeral Processing** principles.
 
 > [!IMPORTANT]
-> **Zero Persistence**: All uploaded forensic artifacts and processed results exist only in the volatile memory (RAM) of the server. No databases, no logs, no leaks. Data is automatically purged after 30 minutes of inactivity.
+> **Zero Persistence**: All uploaded audio specimens and biometric matrices exist solely in volatile server RAM. No audio files or embeddings are permanently stored on disk or in persistent databases. Sessions are automatically purged after 30 minutes of inactivity.
 
 ---
 
 ## 💻 Technical Implementation
 
-### Backend Endpoints (Partial List)
+### Backend Endpoints
 
 | Method | Endpoint | Forensic Logic |
 | :--- | :--- | :--- |
-| `POST` | `/upload-hts` | Automated parsing & heuristic column mapping |
-| `GET` | `/hts-graph` | Network topology & community metrics |
-| `POST` | `/speaker-embedding-compare` | Neural vocal biometric comparison |
-| `GET` | `/download-report` | PDF Intelligence stream generation |
+| `GET` | `/health` | Real-time health, active sessions & operational telemetry |
+| `POST` | `/session` | Ephemeral session initialization & UUID allocation |
+| `POST` | `/speaker-embedding-compare` | Dual-stream WavLM & biometric voice similarity analysis |
+| `POST` | `/deepfake-detect` | Synthetic vocoder artifact & deepfake probability scan |
+| `GET` | `/job-status/{job_id}` | Async polling for long-running neural audio workloads |
+| `GET` | `/generate-report` | Structured JSON summary of session forensic findings |
+| `GET` | `/download-report` | Official PDF Audio Forensic Docket stream generation |
+| `POST` | `/cleanup` | Force purge of volatile memory, jobs, and temporary caches |
 
 ### Directory Structure
 ```text
 .
-├── frontend/               # Next.js Application
-│   ├── src/                # App Router & Logic
-│   ├── components/         # Forensic UI Modules
+├── frontend/               # Next.js 16 Application
+│   ├── src/
+│   │   ├── app/            # App Router (Dashboard, Audio, Reports)
+│   │   ├── components/     # UI & Audio Forensics Modules
+│   │   └── lib/            # Zustand Store & API Client
 │   └── public/             # Static Assets
 ├── backend/                # FastAPI Application
-│   ├── services/           # The "Brain": Signal & Math Engines
-│   └── main.py             # API Routing & Orchestration
-├── vercel.json             # Multi-service Deployment Config
+│   ├── services/           # Neural Audio, Biometric & Report Engines
+│   │   └── audio/          # WavLM, Wav2Vec2, Biometrics & Deepfake
+│   └── main.py             # API Routing & Job Management
+├── vercel.json             # Multi-service Deployment Configuration
 └── LICENSE                 # MIT License
 ```
 
@@ -142,4 +149,4 @@ npm run dev
 
 - **Copyright**: © 2026 Yusuf Çalışır.
 - **License**: Licensed under the [MIT License](LICENSE).
-- **Core Engine**: Powered by Microsoft WavLM, NetworkX, and FastAPI.
+- **Core Engine**: Powered by Microsoft WavLM, PyTorch, Librosa, and FastAPI.

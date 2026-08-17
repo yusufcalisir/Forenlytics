@@ -1,171 +1,253 @@
 import io
 import logging
 import time
-from typing import Dict, Any
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib import colors
-from services.timeline_engine import TimelineEngine
+from typing import Dict, Any, Optional
 
 logger = logging.getLogger("forenlytics.report")
 
+
 class ReportGenerator:
-    def __init__(self):
-        pass
+    """Generates structured intelligence summaries and official PDF dockets for audio forensics."""
 
-    def generate_json_summary(self, hts_analyzer=None, gps_analyzer=None) -> Dict[str, Any]:
+    def generate_json_summary(
+        self,
+        audio_compare: Optional[Dict[str, Any]] = None,
+        audio_deepfake: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         try:
-            hts = hts_analyzer.get_analysis_payload() if hts_analyzer and hts_analyzer.df is not None else {}
-            gps = gps_analyzer.get_analysis() if gps_analyzer and gps_analyzer.df is not None else {}
-            engine = TimelineEngine()
-            timeline = engine.get_unified_timeline(hts_analyzer, gps_analyzer) if (hts_analyzer and hts_analyzer.df is not None) or (gps_analyzer and gps_analyzer.df is not None) else {}
+            has_compare = audio_compare is not None and "similarity_score" in audio_compare
+            has_deepfake = audio_deepfake is not None and "deepfake_score" in audio_deepfake
 
-            # Safe defaults
-            hts_summary = hts.get('summary', {})
-            gps_summary = gps.get('summary', {})
-            events = timeline.get('events', [])
-            stats = timeline.get('statistics', {})
+            # Speaker comparison data
+            sim_score = audio_compare.get("similarity_score", 0) if has_compare else 0
+            conf_level = audio_compare.get("confidence_level", "N/A") if has_compare else "N/A"
+            engine_scores = audio_compare.get("engine_scores", {}) if has_compare else {}
+            breakdown = audio_compare.get("breakdown", []) if has_compare else []
 
-            # Time range
-            time_range = "N/A"
-            if events:
-                first_ts = events[0].get('timestamp', 'N/A')
-                last_ts = events[-1].get('timestamp', 'N/A')
-                time_range = f"{first_ts} to {last_ts}"
+            # Deepfake detection data
+            df_score = audio_deepfake.get("deepfake_score", 0) if has_deepfake else 0
+            df_label = audio_deepfake.get("label", "N/A") if has_deepfake else "N/A"
+            df_conf = audio_deepfake.get("confidence", "N/A") if has_deepfake else "N/A"
+            df_metrics = audio_deepfake.get("metrics", {}) if has_deepfake else {}
+            df_interp = audio_deepfake.get("interpretation", "No deepfake analysis performed.") if has_deepfake else "No deepfake analysis performed."
+
+            # Construct summary observations
+            obs_parts = []
+            if has_compare:
+                obs_parts.append(
+                    f"Acoustic biometric fusion yielded an overall speaker similarity score of {sim_score}% "
+                    f"({conf_level} confidence) across Microsoft WavLM, Wav2Vec2, and physiological pitch/formant telemetry."
+                )
+            if has_deepfake:
+                obs_parts.append(
+                    f"Synthetic vocoder artifact analysis classified the specimen as '{df_label}' "
+                    f"(Anomaly Index: {df_score}%, Confidence: {df_conf})."
+                )
+            if not has_compare and not has_deepfake:
+                obs_parts.append("No active audio comparison or deepfake analysis data recorded for this session.")
 
             return {
                 "case_summary": {
-                    "total_hts_records": hts_summary.get('total_calls', 0),
-                    "total_gps_points": len(gps_analyzer.df) if gps_analyzer and gps_analyzer.df is not None else 0,
-                    "time_range_covered": time_range
+                    "has_speaker_comparison": has_compare,
+                    "has_deepfake_analysis": has_deepfake,
+                    "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+                    "target_platform": "Forenlytics Neural Audio Forensics Suite"
                 },
-                "communication_analysis": {
-                    "top_pair": hts_summary.get('top_pair', {"source": "N/A", "target": "N/A"}),
-                    "unique_numbers": hts_summary.get('unique_numbers', 0)
+                "speaker_verification": {
+                    "similarity_score": sim_score,
+                    "confidence_level": conf_level,
+                    "engine_scores": {
+                        "wavlm": round(engine_scores.get("wavlm", 0), 1) if engine_scores.get("wavlm") is not None else None,
+                        "embedding": round(engine_scores.get("embedding", 0), 1),
+                        "biometric": round(engine_scores.get("biometric", 0), 1),
+                        "signal": round(engine_scores.get("signal", 0), 1),
+                    },
+                    "breakdown": breakdown
                 },
-                "movement_analysis": {
-                    "distance_km": gps_summary.get('total_distance_km', 0),
-                    "total_stops": gps_summary.get('total_stops', 0),
-                    "most_visited_area": gps_summary.get('top_area', {"lat": "N/A", "lng": "N/A"})
-                },
-                "timeline_overview": {
-                    "total_events": stats.get('total_events', len(events)),
-                    "correlated_overlaps": stats.get('correlated_events', 0)
+                "deepfake_diagnostics": {
+                    "deepfake_score": df_score,
+                    "label": df_label,
+                    "confidence": df_conf,
+                    "metrics": df_metrics,
+                    "interpretation": df_interp
                 },
                 "final_summary": {
-                    "observation": f"A sequential aggregate of {stats.get('total_events', len(events))} procedural entries were derived spanning the designated observation parameters. The intelligence system identified {stats.get('correlated_events', 0)} deterministic geographical timeline overlaps and {stats.get('anomaly_count', 0)} anomalous sequences linking signals directly to tracked behavioral halt metrics."
+                    "observation": " ".join(obs_parts)
                 }
             }
         except Exception as e:
-            logger.exception("Report summary generation failed")
+            logger.exception("Audio report summary generation failed")
             return {
-                "case_summary": {"total_hts_records": 0, "total_gps_points": 0, "time_range_covered": "N/A"},
-                "communication_analysis": {"top_pair": {"source": "N/A", "target": "N/A"}, "unique_numbers": 0},
-                "movement_analysis": {"distance_km": 0, "total_stops": 0, "most_visited_area": {"lat": "N/A", "lng": "N/A"}},
-                "timeline_overview": {"total_events": 0, "correlated_overlaps": 0},
+                "case_summary": {"has_speaker_comparison": False, "has_deepfake_analysis": False},
+                "speaker_verification": {"similarity_score": 0, "confidence_level": "ERROR"},
+                "deepfake_diagnostics": {"deepfake_score": 0, "label": "ERROR"},
                 "final_summary": {"observation": f"Report generation encountered an error: {str(e)}"}
             }
 
-    def generate_pdf(self, hts_analyzer=None, gps_analyzer=None) -> io.BytesIO:
+    def generate_pdf(
+        self,
+        audio_compare: Optional[Dict[str, Any]] = None,
+        audio_deepfake: Optional[Dict[str, Any]] = None
+    ) -> io.BytesIO:
         start = time.time()
         try:
-            data = self.generate_json_summary(hts_analyzer, gps_analyzer)
+            try:
+                from reportlab.lib.pagesizes import letter
+                from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+                from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+                from reportlab.lib import colors
+                has_reportlab = True
+            except ImportError:
+                has_reportlab = False
+
+            data = self.generate_json_summary(audio_compare, audio_deepfake)
             buffer = io.BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+
+            if not has_reportlab:
+                # Fallback simple PDF format byte stream if reportlab is not installed
+                logger.warning("reportlab not installed, generating plain text fallback stream.")
+                text_content = f"FORENLYTICS AUDIO FORENSIC DOCKET\nGenerated: {data['case_summary']['generated_at']}\n\n"
+                text_content += f"Observation: {data['final_summary']['observation']}\n"
+                buffer.write(text_content.encode("utf-8"))
+                buffer.seek(0)
+                return buffer
+
+            doc = SimpleDocTemplate(
+                buffer,
+                pagesize=letter,
+                rightMargin=54,
+                leftMargin=54,
+                topMargin=54,
+                bottomMargin=36
+            )
             styles = getSampleStyleSheet()
 
-            styles.add(ParagraphStyle(name='TitleFormat', parent=styles['Heading1'], fontName='Helvetica-Bold', fontSize=18, spaceAfter=20, alignment=1))
-            styles.add(ParagraphStyle(name='SectionHeader', parent=styles['Heading2'], fontName='Helvetica-Bold', fontSize=12, spaceBefore=20, spaceAfter=10, textColor=colors.black))
+            # Custom styles
+            title_style = ParagraphStyle(
+                name='DocTitle',
+                parent=styles['Heading1'],
+                fontName='Helvetica-Bold',
+                fontSize=18,
+                leading=22,
+                alignment=1,
+                spaceAfter=15,
+                textColor=colors.HexColor("#0f172a")
+            )
+            subtitle_style = ParagraphStyle(
+                name='DocSubtitle',
+                parent=styles['Normal'],
+                fontName='Helvetica',
+                fontSize=9,
+                alignment=1,
+                spaceAfter=20,
+                textColor=colors.HexColor("#64748b")
+            )
+            section_style = ParagraphStyle(
+                name='SecHeader',
+                parent=styles['Heading2'],
+                fontName='Helvetica-Bold',
+                fontSize=11,
+                spaceBefore=14,
+                spaceAfter=8,
+                textColor=colors.HexColor("#0284c7")
+            )
+            body_style = ParagraphStyle(
+                name='BodyTextCustom',
+                parent=styles['Normal'],
+                fontName='Helvetica',
+                fontSize=9,
+                leading=13,
+                textColor=colors.HexColor("#334155")
+            )
 
             flowables = []
 
-            flowables.append(Paragraph("FORENLYTICS OFFICIAL DOCKET", styles['TitleFormat']))
-            flowables.append(Spacer(1, 12))
+            # Header
+            flowables.append(Paragraph("FORENLYTICS AUDIO FORENSIC INTELLIGENCE DOCKET", title_style))
+            flowables.append(Paragraph(f"Official Neural Biometric & Synthetics Analysis Record • Generated {data['case_summary']['generated_at']}", subtitle_style))
+            flowables.append(Spacer(1, 8))
 
-            # A. Case Summary
-            flowables.append(Paragraph("A. CASE SUMMARY", styles['SectionHeader']))
-            case_data = [
-                ["Assessed Signals (HTS Log Count)", str(data['case_summary']['total_hts_records'])],
-                ["Interpolated Coordinates (GPS Logs)", str(data['case_summary']['total_gps_points'])],
-                ["Chronological Bounds Evaluated", str(data['case_summary']['time_range_covered'])]
+            # A. Examination Metadata
+            flowables.append(Paragraph("A. FORENSIC EXAMINATION METADATA", section_style))
+            meta_data = [
+                ["Platform Suite", "Forenlytics Audio Forensic Engine v2.0"],
+                ["Biometric Models", "Microsoft WavLM Large + Facebook Wav2Vec2-XLSR"],
+                ["Synthetic Anomaly Detection", "Vocoder Artifact Scan (Temporal Variance, ZCR, Spectral Rolloff)"],
+                ["Target Session Status", "Active In-Memory Ephemeral Analysis"]
             ]
-            t1 = Table(case_data, colWidths=[220, 230])
-            t1.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            t_meta = Table(meta_data, colWidths=[200, 304])
+            t_meta.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
                 ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('PADDING', (0, 0), (-1, -1), 8),
+                ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+                ('PADDING', (0, 0), (-1, -1), 6),
             ]))
-            flowables.append(t1)
+            flowables.append(t_meta)
 
-            # B. Comms
-            flowables.append(Paragraph("B. COMMUNICATION METAMATRIX", styles['SectionHeader']))
-            top_pair = data['communication_analysis']['top_pair']
-            comms_data = [
-                ["Distinct Network Entities", str(data['communication_analysis']['unique_numbers'])],
-                ["Primary Transmission Vector", f"{top_pair.get('source', 'N/A')} -> {top_pair.get('target', 'N/A')}"]
+            # B. Speaker Verification
+            sv = data["speaker_verification"]
+            flowables.append(Paragraph("B. SPEAKER VERIFICATION & NEURAL BIOMETRIC MATCH", section_style))
+            eng = sv["engine_scores"]
+            wavlm_val = f"{eng['wavlm']}%" if eng['wavlm'] is not None else "OFFLINE"
+            sv_data = [
+                ["Composite Similarity Score", f"{sv['similarity_score']}%"],
+                ["Forensic Confidence Level", str(sv['confidence_level'])],
+                ["Microsoft WavLM Neural Score", wavlm_val],
+                ["Wav2Vec2 Embedding Alignment", f"{eng.get('embedding', 0)}%"],
+                ["Physiological Biometric Telemetry", f"{eng.get('biometric', 0)}%"],
+                ["Spectral Signal Consistency", f"{eng.get('signal', 0)}%"]
             ]
-            t2 = Table(comms_data, colWidths=[220, 230])
-            t2.setStyle(TableStyle([
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            t_sv = Table(sv_data, colWidths=[200, 304])
+            t_sv.setStyle(TableStyle([
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
                 ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('PADDING', (0, 0), (-1, -1), 8),
+                ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+                ('PADDING', (0, 0), (-1, -1), 5),
             ]))
-            flowables.append(t2)
+            flowables.append(t_sv)
 
-            # C. Movement
-            flowables.append(Paragraph("C. MOVEMENT ANALYSIS", styles['SectionHeader']))
-            top_area = data['movement_analysis']['most_visited_area']
-            area_str = f"Lat: {top_area.get('lat', 'N/A')}, Lng: {top_area.get('lng', 'N/A')}" if isinstance(top_area, dict) else str(top_area)
-
-            gps_data = [
-                ["Approximate Ground Track Spanned", f"{data['movement_analysis']['distance_km']} km"],
-                ["Registered Stationary Events", str(data['movement_analysis']['total_stops'])],
-                ["Primary Geographic Center", area_str]
+            # C. Deepfake Diagnostics
+            df = data["deepfake_diagnostics"]
+            flowables.append(Paragraph("C. DEEPFAKE & SYNTHETIC ANOMALY EVALUATION", section_style))
+            df_metrics = df.get("metrics", {})
+            df_data = [
+                ["Anomaly Classification Verdict", str(df['label'])],
+                ["Synthetic Anomaly Probability", f"{df['deepfake_score']}%"],
+                ["Diagnostic Confidence", str(df['confidence'])],
+                ["Zero-Crossing Rate (ZCR) Variance", str(df_metrics.get('zcr_variance', 'N/A'))],
+                ["Spectral Rolloff Variance", str(df_metrics.get('rolloff_variance', 'N/A'))],
+                ["Embedding Temporal Variance", str(df_metrics.get('embedding_variance', 'N/A'))]
             ]
-            t3 = Table(gps_data, colWidths=[220, 230])
-            t3.setStyle(TableStyle([
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            t_df = Table(df_data, colWidths=[200, 304])
+            t_df.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
                 ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('PADDING', (0, 0), (-1, -1), 8),
+                ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+                ('PADDING', (0, 0), (-1, -1), 5),
             ]))
-            flowables.append(t3)
+            flowables.append(t_df)
 
-            # D & E. Timeline
-            flowables.append(Paragraph("D &amp; E. TIMELINE HEURISTICS &amp; CORRELATIONS", styles['SectionHeader']))
-            time_data = [
-                ["Nodes Rendered in Universal Graph", str(data['timeline_overview']['total_events'])],
-                ["Critical Synchronized Overlaps", str(data['timeline_overview']['correlated_overlaps'])]
-            ]
-            t4 = Table(time_data, colWidths=[220, 230])
-            t4.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-                ('PADDING', (0, 0), (-1, -1), 8),
-            ]))
-            flowables.append(t4)
+            # D. Expert Forensic Summary
+            flowables.append(Paragraph("D. FORENSIC SYNTHESIS & OPINION", section_style))
+            flowables.append(Paragraph(data["final_summary"]["observation"], body_style))
+            flowables.append(Spacer(1, 6))
+            flowables.append(Paragraph(f"<b>Diagnostic Note:</b> {df['interpretation']}", body_style))
 
-            # F. Summary
-            flowables.append(Paragraph("F. FACTUAL SYSTEMIC OBSERVATIONS", styles['SectionHeader']))
-            flowables.append(Paragraph(data['final_summary']['observation'], styles['Normal']))
-
+            # Build PDF
             doc.build(flowables)
             buffer.seek(0)
-
             elapsed = round(time.time() - start, 3)
-            logger.info(f"PDF generated in {elapsed}s")
-
+            logger.info(f"Audio Forensic PDF docket generated in {elapsed}s")
             return buffer
 
         except Exception as e:
-            logger.exception("PDF generation failed")
-            # Return a minimal error PDF
+            logger.exception("Audio Forensic PDF generation failed")
             buffer = io.BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=letter)
-            styles = getSampleStyleSheet()
-            doc.build([Paragraph(f"Report generation failed: {str(e)}", styles['Normal'])])
+            buffer.write(f"PDF generation failed: {str(e)}".encode("utf-8"))
             buffer.seek(0)
             return buffer
 
+
+report_generator = ReportGenerator()

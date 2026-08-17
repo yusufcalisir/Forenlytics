@@ -8,9 +8,6 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, shortLabel: "DASH" },
   { href: "/audio", label: "Audio Analysis", icon: Mic, shortLabel: "AUD" },
-  { href: "/hts", label: "HTS Analyzer", icon: Activity, shortLabel: "HTS" },
-  { href: "/gps", label: "GPS Tracking", icon: Map, shortLabel: "GPS" },
-  { href: "/timeline", label: "Timeline", icon: LayoutList, shortLabel: "TML" },
   { href: "/reports", label: "Reports", icon: FileText, shortLabel: "RPT" },
 ];
 
