@@ -19,29 +19,29 @@ export default function DashboardPage() {
       </SectionHeader>
 
       {/* Main Feature Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         
         {/* Speaker Verification Card */}
         <Link href="/audio" className="group block">
-          <Panel className="h-full !p-7 transition-all duration-300 group-hover:border-brand-cyan/40 group-hover:shadow-[0_0_30px_rgba(0,240,255,0.12)] flex flex-col justify-between">
+          <Panel className="h-full !p-5 sm:!p-7 transition-all duration-300 group-hover:border-brand-cyan/40 group-hover:shadow-[0_0_30px_rgba(0,240,255,0.12)] flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan group-hover:scale-110 transition-transform duration-300">
-                  <Mic className="w-6 h-6" />
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan group-hover:scale-110 transition-transform duration-300">
+                  <Mic className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-lg bg-brand-surface border border-brand-border text-neutral-400">
                   Dual-Stream
                 </span>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-brand-cyan transition-colors">
+              <h3 className="text-base sm:text-lg font-bold text-white mb-2 group-hover:text-brand-cyan transition-colors">
                 Speaker Verification
               </h3>
-              <p className="text-neutral-400 text-xs leading-relaxed mb-6">
+              <p className="text-neutral-400 text-xs leading-relaxed mb-5 sm:mb-6">
                 Multi-engine vocal biometric comparison using Microsoft WavLM, Wav2Vec2 embeddings, physiological pitch-jitter metrics, and spectral harmonic alignment.
               </p>
             </div>
 
-            <div className="pt-4 border-t border-brand-border/60 flex items-center justify-between text-xs text-brand-cyan font-medium">
+            <div className="pt-3.5 sm:pt-4 border-t border-brand-border/60 flex items-center justify-between text-xs text-brand-cyan font-medium">
               <span>Launch Audio Comparison</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </div>
@@ -50,25 +50,25 @@ export default function DashboardPage() {
 
         {/* Deepfake Anomaly Card */}
         <Link href="/audio" className="group block">
-          <Panel className="h-full !p-7 transition-all duration-300 group-hover:border-red-500/40 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.12)] flex flex-col justify-between">
+          <Panel className="h-full !p-5 sm:!p-7 transition-all duration-300 group-hover:border-red-500/40 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.12)] flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform duration-300">
-                  <Radar className="w-6 h-6" />
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform duration-300">
+                  <Radar className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-lg bg-brand-surface border border-brand-border text-red-400">
                   Synthetics Scanner
                 </span>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-red-400 transition-colors">
+              <h3 className="text-base sm:text-lg font-bold text-white mb-2 group-hover:text-red-400 transition-colors">
                 Deepfake & AI Voice Scan
               </h3>
-              <p className="text-neutral-400 text-xs leading-relaxed mb-6">
+              <p className="text-neutral-400 text-xs leading-relaxed mb-5 sm:mb-6">
                 Probabilistic synthetic vocoder artifact identification. Evaluates zero-crossing variance, spectral roll-off anomalies, and temporal over-smoothing.
               </p>
             </div>
 
-            <div className="pt-4 border-t border-brand-border/60 flex items-center justify-between text-xs text-red-400 font-medium">
+            <div className="pt-3.5 sm:pt-4 border-t border-brand-border/60 flex items-center justify-between text-xs text-red-400 font-medium">
               <span>Scan Audio Specimen</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </div>
@@ -77,25 +77,25 @@ export default function DashboardPage() {
 
         {/* Intelligence Reports Card */}
         <Link href="/reports" className="group block md:col-span-2 xl:col-span-1">
-          <Panel className="h-full !p-7 transition-all duration-300 group-hover:border-brand-emerald/40 group-hover:shadow-[0_0_30px_rgba(0,255,136,0.12)] flex flex-col justify-between">
+          <Panel className="h-full !p-5 sm:!p-7 transition-all duration-300 group-hover:border-brand-emerald/40 group-hover:shadow-[0_0_30px_rgba(0,255,136,0.12)] flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald group-hover:scale-110 transition-transform duration-300">
-                  <FileText className="w-6 h-6" />
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-lg bg-brand-surface border border-brand-border text-brand-emerald">
                   Court-Ready
                 </span>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-brand-emerald transition-colors">
+              <h3 className="text-base sm:text-lg font-bold text-white mb-2 group-hover:text-brand-emerald transition-colors">
                 Forensic PDF Dockets
               </h3>
-              <p className="text-neutral-400 text-xs leading-relaxed mb-6">
+              <p className="text-neutral-400 text-xs leading-relaxed mb-5 sm:mb-6">
                 Generate and export official forensic documentation with mathematical similarity breakdown, acoustic telemetry tables, and expert diagnostic conclusions.
               </p>
             </div>
 
-            <div className="pt-4 border-t border-brand-border/60 flex items-center justify-between text-xs text-brand-emerald font-medium">
+            <div className="pt-3.5 sm:pt-4 border-t border-brand-border/60 flex items-center justify-between text-xs text-brand-emerald font-medium">
               <span>Compile Intelligence Docket</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </div>
@@ -105,13 +105,13 @@ export default function DashboardPage() {
       </div>
 
       {/* Forensic Engine Architecture Status */}
-      <div className="pt-4">
-        <div className="flex items-center gap-2 mb-4 px-1">
+      <div className="pt-2 sm:pt-4">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4 px-1">
           <Activity className="w-4 h-4 text-brand-cyan" />
-          <h2 className="text-xs uppercase tracking-[0.2em] font-semibold text-neutral-400">Forensic Engine Pipeline</h2>
+          <h2 className="text-[11px] sm:text-xs uppercase tracking-[0.2em] font-semibold text-neutral-400">Forensic Engine Pipeline</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="p-4 rounded-xl border border-brand-border bg-brand-panel/60 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-white">Microsoft WavLM</span>

@@ -191,8 +191,8 @@ function UploadZone({ label, index, file, duration, preview, error, color, disab
             <div className="flex items-center gap-3 min-w-0">
               <FileAudio className={clsx("w-6 h-6 shrink-0", accentIcon)} />
               <div className="min-w-0">
-                <p className="text-sm text-white font-medium truncate max-w-[200px]">{file.name}</p>
-                <div className={clsx("flex items-center gap-3 text-[11px] mt-0.5", accentText)}>
+                <p className="text-xs sm:text-sm text-white font-medium truncate max-w-[130px] sm:max-w-[220px] md:max-w-[260px]">{file.name}</p>
+                <div className={clsx("flex items-center gap-2.5 sm:gap-3 text-[10px] sm:text-[11px] mt-0.5", accentText)}>
                   <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                   {duration !== null && (
                     <span className="flex items-center gap-1">
@@ -206,7 +206,7 @@ function UploadZone({ label, index, file, duration, preview, error, color, disab
             <button
               onClick={() => { onFile(null); onError(null); }}
               disabled={disabled}
-              className="ml-2 p-1 rounded hover:bg-white/10 text-neutral-500 hover:text-white transition-colors shrink-0"
+              className="ml-2 p-1.5 rounded-lg hover:bg-white/10 text-neutral-500 hover:text-white transition-colors shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
@@ -300,7 +300,7 @@ function ScoreGauge({ score, verdict }: { score: number; verdict: string }) {
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Circular gauge */}
-      <div className="relative w-36 h-36">
+      <div className="relative w-32 h-32 sm:w-36 sm:h-36">
         <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
           <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
           <circle
@@ -314,7 +314,7 @@ function ScoreGauge({ score, verdict }: { score: number; verdict: string }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={clsx("text-3xl font-mono font-bold leading-none", style.text)}>{score}</span>
+          <span className={clsx("text-2xl sm:text-3xl font-mono font-bold leading-none", style.text)}>{score}</span>
           <span className="text-[9px] text-neutral-500 mt-0.5 uppercase tracking-widest">/ 100</span>
         </div>
       </div>
@@ -500,7 +500,7 @@ export default function AudioPage() {
             <button
               onClick={handleUpload}
               disabled={!file1 || !file2 || !!err1 || !!err2 || loading || isUploading}
-              className="flex items-center gap-2.5 px-6 py-2.5 bg-brand-cyan hover:bg-cyan-400 active:scale-[0.98] active:brightness-90 text-black font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
+              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 sm:py-2.5 bg-brand-cyan hover:bg-cyan-400 active:scale-[0.98] active:brightness-90 text-black font-semibold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(0,240,255,0.25)]"
             >
               {loading || isUploading ? (
                 <><span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" /> {isUploading ? "Uploading..." : "Processing..."}</>
@@ -543,10 +543,10 @@ export default function AudioPage() {
 
             {/* Main result card */}
             {!result.no_speech_detected && (
-              <Panel className="!p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-8">
+              <Panel className="!p-4 sm:!p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 sm:gap-8">
                   {/* Score gauge */}
-                  <div className="flex flex-col items-center justify-center gap-2 lg:pr-8 lg:border-r border-brand-border">
+                  <div className="flex flex-col items-center justify-center gap-2 lg:pr-8 lg:border-r border-brand-border pb-6 lg:pb-0 border-b lg:border-b-0">
                     <p className="text-[10px] text-neutral-500 uppercase tracking-[0.2em] mb-2">Similarity Score</p>
                     <ScoreGauge score={result.similarity_score} verdict={result.verdict} />
                     <span className={clsx("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider mt-2", getScoreColor(result.similarity_score))}>
@@ -699,15 +699,15 @@ export default function AudioPage() {
 
         {dfResult && (
           <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
-            <Panel className="!p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="col-span-1 lg:border-r border-brand-border lg:pr-8 flex flex-col items-center justify-center">
+            <Panel className="!p-4 sm:!p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+                <div className="col-span-1 lg:border-r border-brand-border lg:pr-8 flex flex-col items-center justify-center pb-6 lg:pb-0 border-b lg:border-b-0">
                   <p className="text-neutral-500 text-[10px] mb-5 uppercase tracking-[0.2em] font-medium">Anomaly Status</p>
-                  <div className={clsx("w-36 h-36 rounded-full border-[6px] flex items-center justify-center flex-col", getRiskColor(dfResult.label))}>
-                    <span className="text-3xl font-mono font-bold text-white">{dfResult.deepfake_score}</span>
+                  <div className={clsx("w-32 h-32 sm:w-36 sm:h-36 rounded-full border-[6px] flex items-center justify-center flex-col", getRiskColor(dfResult.label))}>
+                    <span className="text-2xl sm:text-3xl font-mono font-bold text-white">{dfResult.deepfake_score}</span>
                     <span className="text-[10px] opacity-70 mt-0.5 uppercase text-white font-semibold tracking-widest">{dfResult.label}</span>
                   </div>
-                  <div className="mt-6">
+                  <div className="mt-5">
                     <span className={clsx("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider", getRiskColor(dfResult.label))}>
                       <Fingerprint className="w-3 h-3" /> {dfResult.confidence}
                     </span>
