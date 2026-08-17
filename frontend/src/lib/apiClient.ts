@@ -126,14 +126,20 @@ export const apiClient = {
       const res = await fetchWithTimeout(`${API_BASE}/job-status/${jobId}`, {
         headers: sessionHeaders(),
       });
+      // 502 Bad Gateway / 503 Service Unavailable / 504 Gateway Timeout:
+      // Upstream server (e.g. Render) is under heavy CPU load running models or spinning up.
+      if (res.status === 502 || res.status === 503 || res.status === 504) {
+        return { job_id: jobId, status: "running" };
+      }
       if (!res.ok) {
         const msg = await extractError(res, "Failed to get job status.");
         throw new Error(msg);
       }
       return res.json();
     } catch (err: any) {
-      if (err instanceof TypeError && err.message.includes("fetch")) {
-        throw new Error("Cannot connect to the audio forensics backend server.");
+      if (err instanceof TypeError && (err.message.includes("fetch") || err.message.includes("Failed to fetch"))) {
+        // Transient network blip during heavy CPU compute — report running
+        return { job_id: jobId, status: "running" };
       }
       throw err;
     }

@@ -53,7 +53,7 @@ export function JobPoller() {
             console.error(`[JobPoller] Error polling job ${type} (${jobId}):`, err);
             failureCounts.current[type] = (failureCounts.current[type] || 0) + 1;
 
-            if (failureCounts.current[type] > 8) {
+            if (failureCounts.current[type] > 40) {
               console.warn(`[JobPoller] Clearing stuck job ${type} after repeated failures.`);
               useAppStore.getState().setJobError(type, "Lost connection to background audio processor.");
               useAppStore.getState().clearActiveJob(type);
@@ -68,7 +68,7 @@ export function JobPoller() {
   }, []);
 
   useEffect(() => {
-    intervalRef.current = setInterval(poll, 800);
+    intervalRef.current = setInterval(poll, 1800);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
