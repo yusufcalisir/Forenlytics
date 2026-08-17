@@ -64,7 +64,7 @@ class AudioForensicFacade:
             # WavLM-SV cosine similarity ∈ [-1, 1] — same-speaker pairs typically 0.6–0.95
             # Map [-1,1] → [0,100] for UI display, but keep raw score for debugging
             wlm_sim = max(0.0, min(100.0, (wlm_sim_raw + 1.0) * 50.0))
-            logger.info(f"  WavLM cosine={wlm_sim_raw:.4f} → {wlm_sim:.1f}% | {time.time()-t:.2f}s")
+            logger.info(f"  WavLM cosine={wlm_sim_raw:.4f} -> {wlm_sim:.1f}% | {time.time()-t:.2f}s")
         except Exception as e:
             logger.warning(f"WavLM engine failed (will proceed without): {e}")
         finally:
@@ -78,9 +78,9 @@ class AudioForensicFacade:
             emb1 = embedding_engine.get_embedding(file1_bytes, y1)
             emb2 = embedding_engine.get_embedding(file2_bytes, y2)
             emb_sim_raw = embedding_engine.compare_embeddings(emb1, emb2)
-            # Map cosine ∈ [-1,1] → [0,100]
+            # Map cosine in [-1,1] -> [0,100]
             emb_sim = max(0.0, min(100.0, (emb_sim_raw + 1.0) * 50.0))
-            logger.info(f"  Secondary cosine={emb_sim_raw:.4f} → {emb_sim:.1f}% | {time.time()-t:.2f}s")
+            logger.info(f"  Secondary cosine={emb_sim_raw:.4f} -> {emb_sim:.1f}% | {time.time()-t:.2f}s")
         except Exception as e:
             logger.warning(f"Secondary embedding failed: {e}")
 

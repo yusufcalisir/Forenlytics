@@ -24,17 +24,16 @@ import numpy as np
 
 logger = logging.getLogger("forenlytics.audio.preprocessor")
 
-# ── Tunable constants ─────────────────────────────────────────────────────────
+# Tunable constants
 TARGET_SR: int = 16_000           # 16 kHz mono (WavLM / SpeechBrain requirement)
 MIN_SPEECH_SEC: float = 0.8       # Reject files with < 0.8s of detected speech
 VAD_FRAME_MS: int = 20            # Frame length for energy VAD (20ms is standard)
-VAD_ENERGY_PERCENTILE: float = 2.0   # Use P2 as noise floor (softer than P5)
-VAD_ENERGY_MARGIN_DB: float = 6.0    # 6dB above noise floor → active frame
-                                  # (was 12dB — too aggressive for pre-normalized audio)
+VAD_ENERGY_PERCENTILE: float = 2.0   # Use P2 as noise floor
+VAD_ENERGY_MARGIN_DB: float = 6.0    # dB above noise floor -> active frame
+VAD_UNIFORM_STD_DB: float = 3.0   # If energy std < this, signal is uniformly leveled
 VAD_FALLBACK_RATIO: float = 0.80  # If frame-VAD removes >80%, fall back to librosa trim
-MAX_DURATION_SEC: int = 120        # Hard cap — files > 2 min are truncated to 2 min
+MAX_DURATION_SEC: int = 120        # Hard cap - files > 2 min are truncated to 2 min
 ENVELOPE_POINTS: int = 150         # Number of points in the returned UI waveform
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 class AudioPreprocessingError(ValueError):
@@ -90,7 +89,7 @@ class AudioPreprocessor:
         # ── 2. Mono downmix ────────────────────────────────────────────────
         if y_raw.ndim > 1:
             y_raw = y_raw.mean(axis=0)
-            steps.append("Stereo → Mono downmix")
+            steps.append("Stereo -> Mono downmix")
 
         raw_duration_sec = len(y_raw) / samplerate
 
@@ -106,7 +105,7 @@ class AudioPreprocessor:
             y_raw = librosa.resample(
                 y_raw.astype(np.float32), orig_sr=samplerate, target_sr=self.target_sr
             )
-            steps.append(f"Resampled {samplerate} Hz → {self.target_sr} Hz")
+            steps.append(f"Resampled {samplerate} Hz -> {self.target_sr} Hz")
         else:
             y_raw = y_raw.astype(np.float32)
 
@@ -135,7 +134,7 @@ class AudioPreprocessor:
             y_norm = y_speech * (target_rms / rms)
             # Clip to [-1, 1] in case of loud transients
             y_norm = np.clip(y_norm, -1.0, 1.0)
-            steps.append(f"RMS normalization (source RMS: {rms:.4f} → target: {target_rms})")
+            steps.append(f"RMS normalization (source RMS: {rms:.4f} -> target: {target_rms})")
         else:
             y_norm = y_speech
             steps.append("Skipped RMS normalization (near-silent signal)")
@@ -160,20 +159,27 @@ class AudioPreprocessor:
     # ── Internal helpers ────────────────────────────────────────────────────
 
     def _decode(self, file_content: bytes, steps: List[str]) -> Tuple[np.ndarray, int]:
-        """Try torchaudio first, then soundfile. Raise AudioPreprocessingError on failure."""
+        """
+        Decode audio bytes to a numpy array.
+
+        IMPORTANT — output convention:
+          Always returns shape (channels, samples), float32.
+          The preprocess() mono-downmix uses mean(axis=0) to produce (samples,).
+          - torchaudio: already (channels, samples) — use as-is, no transpose.
+          - soundfile mono:  (samples,)            → unsqueeze → (1, samples)
+          - soundfile stereo: (samples, channels)  → .T        → (channels, samples)
+        """
 
         # Attempt 1: torchaudio (handles WAV, MP3, FLAC, OGG, M4A)
         try:
             import torchaudio
             buf = io.BytesIO(file_content)
-            waveform, sr = torchaudio.load(buf)
-            # torchaudio returns (channels, samples) float32 tensor
-            y = waveform.numpy()
-            if y.ndim == 2:
-                y = y.T  # → (samples, channels) to match soundfile convention
-            elif y.ndim == 1:
-                y = y[:, np.newaxis]
-            steps.append(f"Decoded via torchaudio (format auto-detected, {sr} Hz)")
+            waveform, sr = torchaudio.load(buf)  # → (channels, samples) float32 tensor
+            y = waveform.numpy()                  # keep shape as-is
+            if y.ndim == 1:
+                y = y[np.newaxis, :]              # (samples,) mono → (1, samples)
+            # y is now (channels, samples) ✓
+            steps.append("Decoded via torchaudio (format auto-detected, %d Hz)" % sr)
             return y, sr
         except Exception as ta_err:
             logger.debug(f"torchaudio decode failed: {ta_err}")
@@ -182,8 +188,12 @@ class AudioPreprocessor:
         try:
             import soundfile as sf
             buf = io.BytesIO(file_content)
-            y, sr = sf.read(buf)
-            steps.append(f"Decoded via soundfile ({sr} Hz)")
+            y, sr = sf.read(buf, always_2d=False)
+            if y.ndim == 1:
+                y = y[np.newaxis, :]              # (samples,) mono → (1, samples)
+            else:
+                y = y.T                           # (samples, channels) → (channels, samples)
+            steps.append("Decoded via soundfile (%d Hz)" % sr)
             return y, sr
         except Exception as sf_err:
             logger.debug(f"soundfile decode failed: {sf_err}")
@@ -197,78 +207,109 @@ class AudioPreprocessor:
 
     def _apply_vad(self, y: np.ndarray, steps: List[str]) -> np.ndarray:
         """
-        Energy-based Voice Activity Detection.
+        3-Tier Voice Activity Detection.
 
-        Primary: 20ms frame-level RMS energy gating with a 6dB margin above the
-        P2 noise floor estimate.  This removes leading/trailing silence AND long
-        mid-utterance silent gaps.
+        Tier 1 - Low-Variance Bypass:
+          If frame energy std < VAD_UNIFORM_STD_DB (3dB), the recording is
+          uniformly leveled (phone call, compressed/pre-normalized speech).
+          Frame-energy gating cannot distinguish speech from silence in this
+          case. Use full signal after a lightweight librosa edge-trim.
 
-        Fallback: If the primary VAD removes more than VAD_FALLBACK_RATIO of the
-        signal (can happen with pre-normalized or phone recordings where the
-        energy distribution is very uniform), we fall back to librosa.effects.trim
-        which uses a simple top-decibel threshold on amplitude — a more tolerant
-        approach that at least strips gross silence at the edges.
+        Tier 2 - Frame-Energy Gating:
+          For recordings with clear silence gaps (lectures, interviews).
+          Keeps frames whose energy > noise_floor + VAD_ENERGY_MARGIN_DB.
 
-        Failure: Only raised if the fallback also yields an effectively-empty array,
-        which indicates the file is genuinely silent.
+        Tier 3 - Librosa Edge-Trim Fallback:
+          Frame gating was too aggressive. Edge-trim only.
+
+        Failure: Only if global RMS < -60 dBFS (digital silence).
         """
-        frame_len = int(self.target_sr * VAD_FRAME_MS / 1000)  # samples per 20ms frame
+        frame_len = int(self.target_sr * VAD_FRAME_MS / 1000)
         num_frames = len(y) // frame_len
 
         if num_frames == 0:
-            return y  # too short to frame — pass through
+            steps.append("VAD skipped: audio too short to frame")
+            return y
 
-        # ── Primary: per-frame RMS energy gating ─────────────────────────────
         frames = y[: num_frames * frame_len].reshape(num_frames, frame_len)
         frame_rms = np.sqrt(np.mean(frames ** 2, axis=1))
         frame_rms_db = 20 * np.log10(np.maximum(frame_rms, 1e-10))
 
-        noise_floor_db = np.percentile(frame_rms_db, VAD_ENERGY_PERCENTILE)
+        global_rms = float(np.sqrt(np.mean(y ** 2)))
+        global_rms_db = 20 * np.log10(max(global_rms, 1e-10))
+
+        # Global silence check - only truly digital-silence files fail here
+        if global_rms_db < -60.0:
+            raise AudioPreprocessingError(
+                "No speech detected in the uploaded file. "
+                "The audio appears to be silence or background noise. "
+                "Please upload a file that contains clear speech."
+            )
+
+        energy_std_db = float(np.std(frame_rms_db))
+        noise_floor_db = float(np.percentile(frame_rms_db, VAD_ENERGY_PERCENTILE))
         threshold_db = noise_floor_db + VAD_ENERGY_MARGIN_DB
 
-        active_mask = frame_rms_db >= threshold_db
-        active_ratio = active_mask.mean()
-
         logger.debug(
-            f"VAD primary: noise_floor={noise_floor_db:.1f}dB, "
-            f"threshold={threshold_db:.1f}dB, active_ratio={active_ratio:.2f}"
+            "VAD: global_rms=%.1fdB, energy_std=%.1fdB, noise_floor=%.1fdB, threshold=%.1fdB",
+            global_rms_db, energy_std_db, noise_floor_db, threshold_db
         )
 
+        # Tier 1: Low-variance bypass (uniformly-leveled / pre-normalized audio)
+        if energy_std_db < VAD_UNIFORM_STD_DB:
+            try:
+                import librosa
+                y_trimmed, _ = librosa.effects.trim(y, top_db=40)
+                if len(y_trimmed) >= int(self.target_sr * 0.1):
+                    steps.append(
+                        "VAD tier1 (uniform-energy bypass): edge-trim applied. "
+                        "%.2fs retained (energy_std=%.1fdB < %.1fdB, frame gating skipped)" %
+                        (len(y_trimmed) / self.target_sr, energy_std_db, VAD_UNIFORM_STD_DB)
+                    )
+                    return y_trimmed
+            except Exception as e:
+                logger.debug("librosa trim in uniform bypass failed: %s", e)
+            steps.append(
+                "VAD tier1 (uniform-energy bypass): full signal retained "
+                "(energy_std=%.1fdB)" % energy_std_db
+            )
+            return y
+
+        # Tier 2: Frame-energy gating
+        active_mask = frame_rms_db >= threshold_db
+        active_ratio = float(active_mask.mean())
+
         if active_ratio >= (1.0 - VAD_FALLBACK_RATIO):
-            # Primary VAD kept enough signal — use it
             active_frames = frames[active_mask]
             y_vad = active_frames.flatten()
             remainder = y[num_frames * frame_len :]
-            if len(remainder) > 0 and active_mask[-1]:
+            if len(remainder) > 0 and len(active_mask) > 0 and active_mask[-1]:
                 y_vad = np.concatenate([y_vad, remainder])
             steps.append(
-                f"VAD (frame-energy): {active_mask.sum()}/{num_frames} frames active "
-                f"({active_ratio*100:.0f}% retained, "
-                f"threshold: {noise_floor_db:.1f}dB + {VAD_ENERGY_MARGIN_DB}dB)"
+                "VAD tier2 (frame-energy): %d/%d frames active (%.0f%% retained, "
+                "threshold: %.1fdB + %.1fdB)" %
+                (active_mask.sum(), num_frames, active_ratio * 100,
+                 noise_floor_db, VAD_ENERGY_MARGIN_DB)
             )
             return y_vad
 
-        # ── Fallback: librosa edge-trim ───────────────────────────────────────
-        # Primary VAD was too destructive (uniformly-leveled / pre-normalized audio).
-        # Fall back to a simple amplitude-based top-of-file trim.
+        # Tier 3: Librosa edge-trim fallback
         logger.warning(
-            f"VAD primary removed {(1-active_ratio)*100:.0f}% of signal — "
-            "falling back to librosa.effects.trim"
+            "VAD tier2 removed %.0f%% of signal - falling back to librosa edge-trim",
+            (1 - active_ratio) * 100
         )
         try:
             import librosa
             y_trimmed, _ = librosa.effects.trim(y, top_db=30)
-            if len(y_trimmed) > int(self.target_sr * 0.1):  # at least 100ms left
+            if len(y_trimmed) >= int(self.target_sr * 0.1):
                 steps.append(
-                    f"VAD (librosa fallback): edge-trim top_db=30 — "
-                    f"{len(y_trimmed)/self.target_sr:.2f}s retained "
-                    f"(frame-energy VAD was too aggressive for this file)"
+                    "VAD tier3 (librosa fallback): edge-trim top_db=30 - %.2fs retained" %
+                    (len(y_trimmed) / self.target_sr)
                 )
                 return y_trimmed
         except Exception as e:
-            logger.warning(f"librosa trim fallback failed: {e}")
+            logger.warning("librosa trim fallback failed: %s", e)
 
-        # ── Both failed — genuinely silent file ───────────────────────────────
         raise AudioPreprocessingError(
             "No speech detected in the uploaded file. "
             "The audio appears to be silence or background noise. "
