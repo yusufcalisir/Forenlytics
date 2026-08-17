@@ -17,6 +17,11 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
+# Silence noisy HTTP discovery HEAD requests from Hugging Face clients
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("transformers").setLevel(logging.WARNING)
+
 logger = logging.getLogger("forenlytics.api")
 
 app = FastAPI(title="Forenlytics Audio Forensics Backend API")
