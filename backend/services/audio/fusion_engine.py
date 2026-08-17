@@ -210,8 +210,8 @@ class FusionEngine:
             },
             "forensic_caveat": FORENSIC_CAVEAT,
             "threshold_note": (
-                "Verdict thresholds: ≥80% Very Likely Same, ≥65% Likely Same, "
-                "≥45% Inconclusive, ≥30% Likely Different, <30% Very Likely Different. "
+                "Verdict thresholds: >=80% Very Likely Same, >=65% Likely Same, "
+                ">=45% Inconclusive, >=30% Likely Different, <30% Very Likely Different. "
                 "These are heuristic defaults for WavLM-Base-Plus-SV on clean speech."
             ),
         }
