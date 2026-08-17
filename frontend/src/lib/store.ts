@@ -74,6 +74,12 @@ export const useAppStore = create<AppState>()(
     {
       name: "forenlytics-session-storage",
       storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({
+        audioSpeakerResult: state.audioSpeakerResult,
+        audioDeepfakeResult: state.audioDeepfakeResult,
+        reportData: state.reportData,
+      }),
     }
   )
 );
+

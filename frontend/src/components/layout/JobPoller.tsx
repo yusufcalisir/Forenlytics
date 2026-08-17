@@ -43,15 +43,22 @@ export function JobPoller() {
             useAppStore.getState().setJobError(type, status.error || "Audio forensic job failed");
             useAppStore.getState().clearActiveJob(type);
           }
-        } catch (err) {
-          console.error(`[JobPoller] Error polling job ${type} (${jobId}):`, err);
-          failureCounts.current[type] = (failureCounts.current[type] || 0) + 1;
-
-          if (failureCounts.current[type] > 10) {
-            console.warn(`[JobPoller] Clearing stuck job ${type} after 10 failures.`);
-            useAppStore.getState().setJobError(type, "Lost connection to background audio processor.");
+        } catch (err: any) {
+          const errMsg = err?.message || "";
+          if (errMsg.includes("not found") || errMsg.includes("404")) {
+            console.warn(`[JobPoller] Job ${type} (${jobId}) no longer exists on server. Clearing.`);
             useAppStore.getState().clearActiveJob(type);
             delete failureCounts.current[type];
+          } else {
+            console.error(`[JobPoller] Error polling job ${type} (${jobId}):`, err);
+            failureCounts.current[type] = (failureCounts.current[type] || 0) + 1;
+
+            if (failureCounts.current[type] > 8) {
+              console.warn(`[JobPoller] Clearing stuck job ${type} after repeated failures.`);
+              useAppStore.getState().setJobError(type, "Lost connection to background audio processor.");
+              useAppStore.getState().clearActiveJob(type);
+              delete failureCounts.current[type];
+            }
           }
         }
       }

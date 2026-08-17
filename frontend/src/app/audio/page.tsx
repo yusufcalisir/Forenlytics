@@ -382,27 +382,41 @@ export default function AudioPage() {
   const loading = !!activeJobs["audio_compare"];
   const dfLoading = !!activeJobs["audio_deepfake"];
 
+  // Clear stale errors on mount
+  useEffect(() => {
+    setError(null);
+    setDfError(null);
+    clearJobError("audio_compare");
+    clearJobError("audio_deepfake");
+  }, [clearJobError]);
+
   // ── File handlers with async preview generation ─────────────────────────
   const handleFile1 = useCallback(async (f: File | null) => {
     setFile1(f); setWave1([]); setDur1(null);
+    setError(null);
+    clearJobError("audio_compare");
     if (!f) return;
     const [d, w] = await Promise.all([getAudioDuration(f), buildWaveformPreview(f)]);
     setDur1(d); setWave1(w);
-  }, []);
+  }, [clearJobError]);
 
   const handleFile2 = useCallback(async (f: File | null) => {
     setFile2(f); setWave2([]); setDur2(null);
+    setError(null);
+    clearJobError("audio_compare");
     if (!f) return;
     const [d, w] = await Promise.all([getAudioDuration(f), buildWaveformPreview(f)]);
     setDur2(d); setWave2(w);
-  }, []);
+  }, [clearJobError]);
 
   const handleDfFile = useCallback(async (f: File | null) => {
     setDfFile(f); setDfWave([]); setDfDur(null);
+    setDfError(null);
+    clearJobError("audio_deepfake");
     if (!f) return;
     const [d, w] = await Promise.all([getAudioDuration(f), buildWaveformPreview(f)]);
     setDfDur(d); setDfWave(w);
-  }, []);
+  }, [clearJobError]);
 
   // ── Submit handlers ─────────────────────────────────────────────────────
   const handleUpload = async () => {
