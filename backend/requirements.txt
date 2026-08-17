@@ -8,6 +8,8 @@ torchaudio
 transformers
 scipy
 librosa
+soundfile
+speechbrain
 matplotlib
 jinja2
 python-dateutil

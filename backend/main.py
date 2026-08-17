@@ -34,7 +34,11 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     session_store.start_cleanup_loop()
-    logger.info("Forenlytics Audio Forensics API started. Session store active.")
+    logger.info(
+        "Forenlytics Audio Forensics API started. "
+        "Session store active. "
+        "Supported formats: WAV, MP3, FLAC, OGG (decoded via torchaudio / soundfile)."
+    )
 
 # Global exception handler — NEVER crash, always return safe JSON
 @app.exception_handler(Exception)
@@ -171,9 +175,9 @@ async def upload_audio_pair(
     audio_2: UploadFile = File(...),
     x_session_id: Optional[str] = Header(None)
 ):
-    valid_exts = ('.wav', '.mp3')
+    valid_exts = ('.wav', '.mp3', '.flac', '.ogg', '.m4a')
     if not (audio_1.filename and audio_1.filename.lower().endswith(valid_exts)) or not (audio_2.filename and audio_2.filename.lower().endswith(valid_exts)):
-        raise HTTPException(status_code=400, detail="Only .wav and .mp3 files are supported.")
+        raise HTTPException(status_code=400, detail="Unsupported file format. Supported: WAV, MP3, FLAC, OGG, M4A.")
         
     content_1 = await audio_1.read()
     content_2 = await audio_2.read()
@@ -201,8 +205,8 @@ async def deepfake_detect(
     file: UploadFile = File(...),
     x_session_id: Optional[str] = Header(None)
 ):
-    if not file.filename or not file.filename.lower().endswith(('.wav', '.mp3')):
-        raise HTTPException(status_code=400, detail="Only .wav and .mp3 files are supported for Deepfake detection.")
+    if not file.filename or not file.filename.lower().endswith(('.wav', '.mp3', '.flac', '.ogg', '.m4a')):
+        raise HTTPException(status_code=400, detail="Unsupported file format. Supported: WAV, MP3, FLAC, OGG, M4A.")
         
     content = await file.read()
     if len(content) == 0:

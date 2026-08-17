@@ -1,76 +1,185 @@
+"""
+Secondary Speaker Embedding Engine
+=====================================
+Provides a secondary speaker embedding using ECAPA-TDNN via SpeechBrain
+(speechbrain/spkrec-ecapa-voxceleb), which is a speaker-verification model
+trained on VoxCeleb — the correct model class for this task.
+
+Fallback chain
+--------------
+1. SpeechBrain ECAPA-TDNN (preferred — proper speaker verification)
+2. facebook/wav2vec2-base mean pooling (last resort — weak speaker signal)
+
+The fallback is retained so the system degrades gracefully in environments
+where SpeechBrain can't be installed (e.g. Render free tier with strict RAM).
+The WavLM engine (weight 0.40) is always the dominant signal; this engine
+(weight 0.30) is secondary.
+
+NOTE on facebook/wav2vec2-base:
+  This is a SPEECH RECOGNITION pre-training model. Its mean-pooled hidden
+  states carry some speaker identity but are NOT trained for speaker verification.
+  Only used as a last-resort fallback. When used, a warning is logged.
+"""
+
 import logging
 import numpy as np
 from .cache_utils import EmbeddingCache
 
 logger = logging.getLogger("forenlytics.audio.embedding")
 
+MODEL_SPEECHBRAIN = "speechbrain/spkrec-ecapa-voxceleb"
+MODEL_WAV2VEC2_FALLBACK = "facebook/wav2vec2-base"
+
+
 class SpeakerEmbeddingEngine:
-    def __init__(self, target_sr: int = 16000):
+    def __init__(self, target_sr: int = 16_000):
         self.target_sr = target_sr
         self.device = "cpu"
-        self.model_name = "facebook/wav2vec2-base"
-        self.cache = EmbeddingCache(max_size=100)
-        
+        self.cache = EmbeddingCache(max_size=50)
+
+        # SpeechBrain
+        self._sb_classifier = None
+        self._sb_initialized = False
+
+        # Wav2Vec2 fallback
         self.processor = None
         self.model = None
-        self._initialized = False
+        self._w2v_initialized = False
+
+    # ── Lifecycle ──────────────────────────────────────────────────────────
 
     def _ensure_loaded(self):
-        if self._initialized:
+        if self._sb_initialized or self._w2v_initialized:
             return
-        
+
+        # Try SpeechBrain ECAPA-TDNN first
+        try:
+            self._load_speechbrain()
+            return
+        except Exception as e:
+            logger.warning(f"SpeechBrain ECAPA unavailable ({e}). Falling back to Wav2Vec2.")
+
+        # Fallback: Wav2Vec2 mean pooling
+        try:
+            self._load_wav2vec2_fallback()
+        except Exception as e:
+            raise RuntimeError(
+                f"Both speaker embedding backends failed. Last error: {e}"
+            ) from e
+
+    def _load_speechbrain(self):
+        import torch
+        import importlib
+
+        encoder_cls = None
+        for mod_name in ["speechbrain.inference.speaker", "speechbrain.pretrained"]:
+            try:
+                mod = importlib.import_module(mod_name)
+                if hasattr(mod, "EncoderClassifier"):
+                    encoder_cls = getattr(mod, "EncoderClassifier")
+                    break
+            except (ImportError, ModuleNotFoundError):
+                continue
+
+        if encoder_cls is None:
+            raise ImportError("SpeechBrain is not installed or EncoderClassifier was not found.")
+
+        logger.info(f"Loading SpeechBrain ECAPA-TDNN ({MODEL_SPEECHBRAIN})...")
+        self._sb_classifier = encoder_cls.from_hparams(
+            source=MODEL_SPEECHBRAIN,
+            savedir=f"speechbrain_cache/{MODEL_SPEECHBRAIN.replace('/', '_')}",
+            run_opts={"device": "cpu"},
+        )
+        self._sb_classifier.eval()
+        self._sb_initialized = True
+        self.device = torch.device("cpu")
+        logger.info("SpeechBrain ECAPA-TDNN loaded.")
+
+    def _load_wav2vec2_fallback(self):
         import torch
         from transformers import Wav2Vec2FeatureExtractor, Wav2Vec2Model
-        
+
         self.device = torch.device("cpu")
-        logger.info(f"Loading Wav2Vec2 Speaker Embedding framework on {self.device}...")
-        try:
-            self.processor = Wav2Vec2FeatureExtractor.from_pretrained(self.model_name)
-            self.model = Wav2Vec2Model.from_pretrained(
-                self.model_name,
-                low_cpu_mem_usage=True
-            ).to(self.device)
-            self.model.eval()
-            self._initialized = True
-            logger.info("Wav2Vec2 model loaded successfully.")
-        except Exception as e:
-            logger.error(f"Failed to load ML models: {e}")
-            raise Exception(f"Wav2Vec2 engine could not be initialized: {str(e)}")
+        logger.warning(
+            f"Using {MODEL_WAV2VEC2_FALLBACK} as secondary speaker embedding (NOT optimized for speaker verification). "
+            "Install speechbrain for better results."
+        )
+        self.processor = Wav2Vec2FeatureExtractor.from_pretrained(MODEL_WAV2VEC2_FALLBACK)
+        self.model = Wav2Vec2Model.from_pretrained(
+            MODEL_WAV2VEC2_FALLBACK,
+            low_cpu_mem_usage=True,
+        ).to(self.device)
+        self.model.eval()
+        self._w2v_initialized = True
+        logger.info("Wav2Vec2 fallback loaded.")
 
     def unload(self):
-        """Purge model from memory."""
-        if not self._initialized:
-            return
-        self.model = None
-        self.processor = None
-        self._initialized = False
+        if self._sb_initialized:
+            self._sb_classifier = None
+            self._sb_initialized = False
+        if self._w2v_initialized:
+            self.model = None
+            self.processor = None
+            self._w2v_initialized = False
         import gc
         gc.collect()
-        logger.info("Wav2Vec2 model unloaded from memory.")
+        logger.info("Secondary embedding engine unloaded.")
 
-    def get_embedding(self, audio_bytes: bytes, y: np.ndarray) -> any:
+    # ── Core API ───────────────────────────────────────────────────────────
+
+    def get_embedding(self, audio_bytes: bytes, y: np.ndarray):
+        if y is None or len(y) == 0:
+            raise ValueError("Cannot extract embedding: empty audio array.")
+
         self._ensure_loaded()
-        import torch
-            
+
         cached = self.cache.get(audio_bytes)
         if cached is not None:
             return cached
-            
-        inputs = self.processor(y, sampling_rate=self.target_sr, return_tensors="pt", padding=True)
-        inputs = {k: v.to(self.device) for k, v in inputs.items()}
-        
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-            hidden_states = outputs.last_hidden_state
-            embedding = hidden_states.mean(dim=1)
-            
+
+        if self._sb_initialized:
+            embedding = self._embed_speechbrain(y)
+        else:
+            embedding = self._embed_wav2vec2(y)
+
         self.cache.set(audio_bytes, embedding)
         return embedding
 
-    def compare_embeddings(self, emb1: any, emb2: any) -> float:
+    def compare_embeddings(self, emb1, emb2) -> float:
         import torch.nn.functional as F
-        cos_sim = F.cosine_similarity(emb1, emb2).item()
-        return cos_sim
+        return F.cosine_similarity(emb1, emb2).item()
 
-# Lazy instance
+    # ── Internal helpers ───────────────────────────────────────────────────
+
+    def _embed_speechbrain(self, y: np.ndarray):
+        import torch
+        import torch.nn.functional as F
+
+        wav = torch.tensor(y, dtype=torch.float32).unsqueeze(0)  # (1, samples)
+        with torch.no_grad():
+            embedding = self._sb_classifier.encode_batch(wav)  # (1, 1, 192)
+            embedding = embedding.squeeze(1)                    # (1, 192)
+            embedding = F.normalize(embedding, dim=-1)
+        return embedding
+
+    def _embed_wav2vec2(self, y: np.ndarray):
+        import torch
+        import torch.nn.functional as F
+
+        inputs = self.processor(
+            [y.tolist()],
+            sampling_rate=self.target_sr,
+            return_tensors="pt",
+            padding=True,
+        )
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+            hidden = outputs.last_hidden_state        # (1, T, 768)
+            embedding = hidden.mean(dim=1)            # (1, 768)
+            embedding = F.normalize(embedding, dim=-1)
+        return embedding
+
+
+# Singleton — lazy-loaded on first request
 embedding_engine = SpeakerEmbeddingEngine()
