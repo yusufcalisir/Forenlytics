@@ -11,6 +11,7 @@ import time
 import logging
 from typing import Dict, Any
 
+from . import speechbrain_compat
 from .preprocessor import preprocessor, AudioPreprocessingError
 from .engine_wavlm import wavlm_engine
 from .engine_embedding import embedding_engine
@@ -70,8 +71,6 @@ class AudioForensicFacade:
             logger.info(f"  WavLM cosine={wlm_sim_raw:.4f} -> {wlm_sim:.1f}% | {time.time()-t:.2f}s")
         except Exception as e:
             logger.warning(f"WavLM engine failed (will proceed without): {e}")
-        finally:
-            wavlm_engine.unload()
 
         # ── Step 3: Secondary Embedding ────────────────────────────────────
         logger.info(f"Step 3/{TOTAL_STEPS} — Secondary speaker embedding (ECAPA-TDNN / Wav2Vec2)")
@@ -85,11 +84,6 @@ class AudioForensicFacade:
             logger.info(f"  Secondary cosine={emb_sim_raw:.4f} -> {emb_sim:.1f}% | {time.time()-t:.2f}s")
         except Exception as e:
             logger.warning(f"Secondary embedding failed: {e}")
-        finally:
-            try:
-                embedding_engine.unload()
-            except Exception:
-                pass
 
         # ── Step 4: Pitch (F0) Extraction ──────────────────────────────────
         logger.info(f"Step 4/{TOTAL_STEPS} — Pitch (F0) contour extraction")

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
 from services.session_store import session_store, SessionData
+from services.audio import speechbrain_compat
 from services.audio.facade import audio_facade
 from services.report_generator import report_generator
 from services.job_manager import job_manager
@@ -69,6 +70,20 @@ def health_check():
         "version": "2.0.0",
         "module": "Audio Forensics"
     }
+
+@app.get("/evaluation-results")
+def get_evaluation_results():
+    """Returns empirical benchmark accuracy metrics (EER, AUC, Operating points) from calibration runs."""
+    import json
+    eval_file = os.path.join(os.path.dirname(__file__), "evaluation", "results", "evaluation_results.json")
+    if os.path.exists(eval_file):
+        try:
+            with open(eval_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data
+        except Exception as e:
+            logger.warning(f"Failed to read evaluation results: {e}")
+    raise HTTPException(status_code=404, detail="Evaluation results not yet generated. Run backend/evaluation/run_eval.py first.")
 
 @app.post("/cleanup")
 def perform_cleanup():

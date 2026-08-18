@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, Map, Mic, FileText, LayoutDashboard, LayoutList, ChevronRight } from "lucide-react";
+import { Activity, Map, Mic, FileText, LayoutDashboard, LayoutList, ChevronRight, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, shortLabel: "DASH" },
   { href: "/audio", label: "Audio Analysis", icon: Mic, shortLabel: "AUD" },
   { href: "/reports", label: "Reports", icon: FileText, shortLabel: "RPT" },
+  { href: "/methodology", label: "Methodology", icon: ShieldCheck, shortLabel: "MET" },
 ];
 
 export function Sidebar() {

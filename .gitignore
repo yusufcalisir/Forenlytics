@@ -26,6 +26,8 @@ frontend/out/
 **/backend/uploads/*
 **/backend/temp/*
 **/backend/benchmark_data/*
+**/backend/speechbrain_cache/*
+**/backend/evaluation/data/*
 *.tar.gz
 *.tar
 *.zip

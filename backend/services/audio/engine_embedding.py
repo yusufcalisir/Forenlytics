@@ -23,6 +23,7 @@ NOTE on facebook/wav2vec2-base:
 
 import logging
 import numpy as np
+from . import speechbrain_compat
 from .cache_utils import EmbeddingCache
 
 logger = logging.getLogger("forenlytics.audio.embedding")
@@ -85,15 +86,27 @@ class SpeakerEmbeddingEngine:
             raise ImportError("SpeechBrain is not installed or EncoderClassifier was not found.")
 
         logger.info(f"Loading SpeechBrain ECAPA-TDNN ({MODEL_SPEECHBRAIN})...")
-        self._sb_classifier = encoder_cls.from_hparams(
-            source=MODEL_SPEECHBRAIN,
-            savedir=f"speechbrain_cache/{MODEL_SPEECHBRAIN.replace('/', '_')}",
-            run_opts={"device": "cpu"},
-        )
+        strategy = None
+        try:
+            fetch_mod = importlib.import_module("speechbrain.utils.fetching")
+            if hasattr(fetch_mod, "LocalStrategy"):
+                strategy = getattr(fetch_mod.LocalStrategy, "COPY", None)
+        except Exception:
+            strategy = None
+
+        kwargs = {
+            "source": MODEL_SPEECHBRAIN,
+            "savedir": f"speechbrain_cache/{MODEL_SPEECHBRAIN.replace('/', '_')}",
+            "run_opts": {"device": "cpu"},
+        }
+        if strategy is not None:
+            kwargs["local_strategy"] = strategy
+
+        self._sb_classifier = encoder_cls.from_hparams(**kwargs)
         self._sb_classifier.eval()
         self._sb_initialized = True
         self.device = torch.device("cpu")
-        logger.info("SpeechBrain ECAPA-TDNN loaded.")
+        logger.info("SpeechBrain ECAPA-TDNN loaded successfully.")
 
     def _load_wav2vec2_fallback(self):
         import torch

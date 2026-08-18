@@ -243,6 +243,10 @@ export const apiClient = {
     }
   },
 
+  async getEvaluationResults() {
+    return this.get("/evaluation-results");
+  },
+
   async downloadReport() {
     await ensureSession();
     try {

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Mic, FileText } from "lucide-react";
+import { LayoutDashboard, Mic, FileText, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/audio", label: "Audio Analysis", icon: Mic },
+  { href: "/audio", label: "Audio", icon: Mic },
   { href: "/reports", label: "Reports", icon: FileText },
+  { href: "/methodology", label: "Methodology", icon: ShieldCheck },
 ];
 
 export function MobileNav() {
@@ -16,7 +17,7 @@ export function MobileNav() {
 
   return (
     <div className="md:hidden fixed bottom-0 inset-x-0 bg-brand-panel/95 backdrop-blur-2xl border-t border-brand-border/80 z-40 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-4 gap-1">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
