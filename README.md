@@ -59,24 +59,30 @@ Traditional audio comparison systems rely on a single scalar score (e.g. cosine 
 Instead of reducing biometric comparison to one opaque number, Forenlytics dissects the vocal tract, neural latent space, and temporal cadence across six independent acoustic dimensions:
 
 ```mermaid
-graph TD
+flowchart TD
     subgraph Ingest ["Acoustic Ingestion"]
-        A1["Specimen A"] & A2["Specimen B"] --> DEC["Dual-Stream Audio Ingestion"]
+        A1["Specimen A"] --> DEC["Dual-Stream Audio Ingestion"]
+        A2["Specimen B"] --> DEC
         DEC --> VAD["Adaptive 20ms Frame-Energy VAD"]
         VAD --> NRM["RMS Normalization -20 dBFS @ 16kHz"]
     end
 
     subgraph DIMS ["6 Independent Forensic Analytical Dimensions"]
-        NRM --> D1["1. Pitch Dynamics F0 (25%)<br/>pYIN Fundamental Tracking & Micro-Jitter"]
-        NRM --> D2["2. Vocal Tract Formants (25%)<br/>LPC Order-16 Root Solver (F1–F4 Hz)"]
-        NRM --> D3["3. Neural Identity (30%)<br/>WavLM-Base+ & ECAPA 512-D Latent Space"]
-        NRM --> D4["4. Spectral MFCC (15%)<br/>13-Band Cepstral Envelope & Centroid"]
-        NRM --> D5["5. Speaking Rhythm (3%)<br/>Syllable Onset Tempo & Pause Ratio"]
-        NRM --> D6["6. Energy Dynamics (2%)<br/>Phonation RMS Variability & Crest Factor"]
+        NRM --> D1["1. Pitch Dynamics F0 (25% Weight)<br/>pYIN Fundamental Tracking & Micro-Jitter"]
+        NRM --> D2["2. Vocal Tract Formants (25% Weight)<br/>LPC Order-16 Root Solver (F1-F4 Hz)"]
+        NRM --> D3["3. Neural Identity (30% Weight)<br/>WavLM-Base+ & ECAPA 512-D Latent Space"]
+        NRM --> D4["4. Spectral MFCC (15% Weight)<br/>13-Band Cepstral Envelope & Centroid"]
+        NRM --> D5["5. Speaking Rhythm (3% Weight)<br/>Syllable Onset Tempo & Pause Ratio"]
+        NRM --> D6["6. Energy Dynamics (2% Weight)<br/>Phonation RMS Variability & Crest Factor"]
     end
 
     subgraph Synthesis ["Bayesian Fusion & Synthesis"]
-        D1 & D2 & D3 & D4 & D5 & D6 --> FUS["Bayesian Weighted Fusion Engine"]
+        D1 --> FUS["Bayesian Weighted Fusion Engine"]
+        D2 --> FUS
+        D3 --> FUS
+        D4 --> FUS
+        D5 --> FUS
+        D6 --> FUS
         FUS --> CON["Contradiction & Disagreement Detector"]
         CON --> VER["Calibrated Verdict & Confidence Docket"]
     end
@@ -105,37 +111,46 @@ When dimensions diverge (e.g. neural similarity is high but physical LPC vocal t
 Rather than depending on a single generic model, Forenlytics evaluates synthetic audio through **four triangulated signals**, distinguishing trained deep neural classifiers from signal-processing heuristics:
 
 ```mermaid
-graph TD
+flowchart TD
     IN["Target Specimen Audio"] --> SLICE["1.5s Overlapping Sliding Window / 0.5s Hop"]
 
-    subgraph S1 ["Signal 1: Spectral Splicing Inconsistency (35%) [EER: 23.1% | AUC: 0.892]"]
+    subgraph S1 ["Signal 1: Spectral Splicing Inconsistency (35% Weight - EER: 23.1%)"]
         SLICE --> DELTA["Cross-Window MFCC Euclidean Distance"]
         SLICE --> NOISE["Quiet-Frame Noise Floor Delta"]
-        DELTA & NOISE --> S1_OUT["[TEMPORAL HEURISTIC]<br/>Detects Splicing Discontinuities &gt;2.5σ (90.0% Splice Recall)"]
+        DELTA --> S1_OUT["TEMPORAL HEURISTIC: Detects Splicing Discontinuities >2.5 Sigma"]
+        NOISE --> S1_OUT
     end
 
-    subgraph S2 ["Signal 2: Prosody Naturalness & Pitch Entropy (30%) [EER: 36.9% | AUC: 0.664]"]
-        SLICE --> ENTROPY["F0 Intonation Entropy (&lt;1.4 bits)"]
+    subgraph S2 ["Signal 2: Prosody Naturalness & Pitch Entropy (30% Weight - EER: 36.9%)"]
+        SLICE --> ENTROPY["F0 Intonation Entropy (Low Variance in TTS)"]
         SLICE --> JITTER["Neural Vocoder Tracking Micro-Jitter"]
-        ENTROPY & JITTER --> S2_OUT["[STATISTICAL HEURISTIC]<br/>Flags Constrained Neural Intonation & Vocoder Phase Jitter"]
+        ENTROPY --> S2_OUT["STATISTICAL HEURISTIC: Flags Constrained Pitch Entropy"]
+        JITTER --> S2_OUT
     end
 
-    subgraph S3 ["Signal 3: Vocoder Artifacts (20%) [EER: 35.6% | AUC: 0.749]"]
-        SLICE --> RIPPLE["High-Frequency Periodic Energy &gt;6.5kHz"]
+    subgraph S3 ["Signal 3: Vocoder Artifacts (20% Weight - EER: 35.6%)"]
+        SLICE --> RIPPLE["High-Frequency Periodic Energy >6.5 kHz"]
         SLICE --> HNR["Harmonic-to-Noise Ratio Normal Band"]
         SLICE --> PHASE["Instantaneous Phase Coherence"]
-        RIPPLE & HNR & PHASE --> S3_OUT["[ACOUSTIC HEURISTIC]<br/>Detects HiFi-GAN / MelGAN / WaveGlow Artifacts"]
+        RIPPLE --> S3_OUT["ACOUSTIC HEURISTIC: Detects HiFi-GAN / MelGAN Phase Artifacts"]
+        HNR --> S3_OUT
+        PHASE --> S3_OUT
     end
 
-    subgraph S4 ["Signal 4: Primary SOTA Spoof Model (15%) [EER: 0.0% pure / 62.5% 3-class]"]
+    subgraph S4 ["Signal 4: Primary Neural Spoof Model (15% Weight - Wav2Vec2)"]
         SLICE --> W2V["Wav2Vec2 Deepfake Sequence Classifier"]
-        W2V --> S4_OUT["[TRAINED MODEL]<br/>Softmax Probability across Latent Tokens (garystafford)"]
+        W2V --> S4_OUT["TRAINED MODEL: Softmax Probability across Latent Tokens"]
     end
 
-    S1_OUT & S2_OUT & S3_OUT & S4_OUT --> TIMELINE["4-Line Suspicion Timeline"]
+    S1_OUT --> TIMELINE["4-Line Suspicion Timeline"]
+    S2_OUT --> TIMELINE
+    S3_OUT --> TIMELINE
+    S4_OUT --> TIMELINE
+
     TIMELINE --> INTERVALS["Contiguous Suspect Region Aggregator"]
-    TIMELINE --> BOUNDARIES["Splice Marker Generator (✂)"]
-    INTERVALS & BOUNDARIES --> CATEGORY["Manipulation Categorizer"]
+    TIMELINE --> BOUNDARIES["Splice Marker Generator"]
+    INTERVALS --> CATEGORY["Manipulation Categorizer"]
+    BOUNDARIES --> CATEGORY
 ```
 
 ### 🔍 Diagnostic Indicators Detailed (Calibrated on VITS Neural Benchmark, $N=120$)
