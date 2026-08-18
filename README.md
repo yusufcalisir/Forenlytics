@@ -138,19 +138,18 @@ graph TD
     INTERVALS & BOUNDARIES --> CATEGORY["Manipulation Categorizer"]
 ```
 
-### 🔍 Diagnostic Indicators Detailed (Calibrated on VITS Neural Benchmark, N=120)
+### 🔍 Diagnostic Indicators Detailed (Calibrated on VITS Neural Benchmark, $N=120$)
 
-```
-[Signal 1: Spectral Splicing]   [Signal 2: Prosody Naturalness] [Signal 3: Vocoder Artifacts]   [Signal 4: Primary Model]
-Type: TEMPORAL HEURISTIC        Type: STATISTICAL HEURISTIC     Type: ACOUSTIC HEURISTIC        Type: TRAINED MODEL
-Calibrated Weight: 35%          Calibrated Weight: 30%          Calibrated Weight: 20%          Calibrated Weight: 15%
-Measured EER: 23.1% (AUC: 0.892) Measured EER: 36.9% (AUC: 0.664) Measured EER: 35.6% (AUC: 0.749) Measured EER: 62.5% (AUC: 0.306)*
-Target: Splice boundary jumps   Target: Constrained F0 entropy  Target: GAN Vocoder ripple      Target: Latent spoof tokens
-Metric: Cross-Window ΔMFCC      Metric: pYIN Entropy & Jitter   Band: Freq > 6,500 Hz & HNR     Model: Wav2Vec2 Sequence Model
-*Note: Primary model scores EER 0.00% (AUC 1.0000) on pure synthetic speech, but dilutes on short partial splices within long utterances.
-```
+| Diagnostic Signal | Type & Mechanism | Calibrated Weight | 3-Class EER | ROC AUC | Pure Synthetic EER / AUC | Primary Target & Acoustic Metric |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **1. Spectral Splicing Inconsistency** | `TEMPORAL HEURISTIC` | **35%** | **23.1%** | **0.892** | 55.0% / 0.414 | Cross-window MFCC jumps ($>2.5\sigma$ $\Delta$) & quiet-frame noise floor |
+| **2. Prosody & Pitch Entropy** | `STATISTICAL HEURISTIC` | **30%** | **36.9%** | **0.664** | **0.00% / 1.000** | Constrained pitch entropy ($<1.4$ bits) & micro-phase tracking jitter |
+| **3. Vocoder Artifacts** | `ACOUSTIC HEURISTIC` | **20%** | **35.6%** | **0.749** | 27.5% / 0.733 | High-frequency phase ripple ($>6.5\text{ kHz}$) & HNR normal band |
+| **4. Primary Neural Model** | `TRAINED MODEL` (Wav2Vec2) | **15%** | **62.5%**\* | **0.306**\* | **0.00% / 1.000** | Whole-file latent spoof tokens (dilutes on short partial splices) |
 
-> **Headline 3-Class Benchmark (Real + Full VITS + Partial Spliced, $N=120$)**: Composite Anomaly Equal Error Rate **$20.0\%$** | Area Under Curve (AUC) **$0.870$** (Optimal Cutoff: **$46.0\%$**).
+> **Headline 3-Class Benchmark (Real + Full VITS + Partial Spliced, $N=120$)**: Composite Anomaly Equal Error Rate **$20.0\%$** | Area Under Curve (AUC) **$0.870$** (Optimal Cutoff: **$46.0\%$** | Splice Localization Recall: **$90.0\%$**).
+> 
+> *\*Note: The primary Wav2Vec2 classifier achieves 0.00% EER on full-length synthetic files, but dilutes on short 1.5s partial splices within natural human speech.*
 
 ---
 
