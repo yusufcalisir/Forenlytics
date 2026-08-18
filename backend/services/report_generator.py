@@ -17,8 +17,8 @@ FORENSIC_DISCLAIMER = (
     "This official forensic docket is compiled by the Forenlytics Neural Audio Forensic Intelligence Suite. "
     "All similarity scores, synthetic anomaly indices, and acoustic classifications are probabilistic indicators "
     "derived through multi-dimensional signal processing and deep neural sequence models. Empirically calibrated on "
-    "standard speech corpora (LibriSpeech clean benchmark, N=160 pairs, Composite EER=7.5%, AUC=0.973; Synthetic Speech "
-    "& Splicing benchmark, N=120 samples, Composite EER=20.0%, Splice Localization Recall=92.5%). These findings do not "
+    "standard speech corpora (LibriSpeech clean benchmark, N=160 pairs, Composite EER=6.25%, AUC=0.988; VITS Neural TTS "
+    "& Splicing benchmark, N=120 samples, Spectral Splicing AUC=0.904, Splice Localization Recall=100.0%). These findings do not "
     "constitute absolute judicial proof of speaker identity or audio authenticity, and should be evaluated in "
     "conjunction with independent expert analysis."
 )

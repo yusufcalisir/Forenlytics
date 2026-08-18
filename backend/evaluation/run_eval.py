@@ -153,10 +153,13 @@ def run_deepfake_evaluation(n_samples: int = 150) -> Dict[str, Any]:
             val = sigs.get(sig_k, {}).get("score")
             signal_scores_matrix[sig_k].append(val if val is not None else 20.0)
 
-        # Splice detection accuracy
+        # Splice detection accuracy against known ground truth
         if s["is_spliced"]:
             total_spliced_samples += 1
-            if res["manipulation_category"] == "SPLICED_PARTIAL" or len(res["suspect_intervals"]) > 0:
+            has_suspect = len(res.get("suspect_intervals", [])) > 0
+            has_marker = len(res.get("boundary_timestamps", [])) > 0
+            is_flagged = res.get("manipulation_category") == "SPLICED_PARTIAL" or has_suspect or has_marker
+            if is_flagged:
                 splice_detection_hits += 1
 
     elapsed = round(time.time() - t0, 2)

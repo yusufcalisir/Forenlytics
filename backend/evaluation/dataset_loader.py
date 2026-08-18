@@ -295,51 +295,218 @@ class ForensicDatasetLoader:
             y = (y / peak * 0.85).astype(np.float32)
         return y
 
-    def _generate_synthetic_specimen(self, duration_sec: float = 4.0) -> bytes:
-        """Generates synthetic audio with GAN vocoder ripple (>6.5kHz) and over-smoothed prosody."""
-        n_samples = int(self.sr * duration_sec)
-        t = np.linspace(0, duration_sec, n_samples, endpoint=False)
+    def _ensure_neural_tts_corpus(self, n_samples: int = 40) -> List[str]:
+        """
+        Generates and caches genuine neural TTS speech utterances using the VITS architecture
+        (facebook/mms-tts-eng with HiFi-GAN neural vocoder) across diverse phonetic phrases.
+        """
+        tts_dir = os.path.join(DATA_DIR, "synthetic_neural_tts")
+        os.makedirs(tts_dir, exist_ok=True)
 
-        # Perfectly smooth pitch (zero organic jitter, flat intonation)
-        f0 = 175.0
-        pulse = np.sin(2 * np.pi * f0 * t) + 0.4 * np.sin(2 * np.pi * 2 * f0 * t)
+        existing = [os.path.join(tts_dir, f) for f in os.listdir(tts_dir) if f.endswith(".wav")]
+        if len(existing) >= n_samples:
+            return existing
 
-        # Vocoder high-frequency transposition ripple (>6.5 kHz periodic artifacts)
-        vocoder_ripple = 0.22 * np.sin(2 * np.pi * 7200 * t) + 0.18 * np.sin(2 * np.pi * 7800 * t)
+        logger.info(f"Generating genuine neural TTS benchmark specimens ({n_samples} samples via VITS)...")
+        try:
+            import torch
+            from transformers import VitsModel, AutoTokenizer
 
-        y = pulse + vocoder_ripple
-        y = (y / np.max(np.abs(y)) * 0.85).astype(np.float32)
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            tokenizer = AutoTokenizer.from_pretrained("facebook/mms-tts-eng")
+            model = VitsModel.from_pretrained("facebook/mms-tts-eng").to(device)
+            model.eval()
 
-        buf = io.BytesIO()
-        sf.write(buf, y, self.sr, format="WAV")
-        return buf.getvalue()
+            PHRASES = [
+                "The quick brown fox jumps over the lazy dog in the quiet afternoon.",
+                "Forensic audio authentication requires multi dimensional acoustic triangulation.",
+                "Speaker verification identifies unique vocal tract resonance frequencies across phonemes.",
+                "Synthetic neural voice cloning mimics fundamental frequency intonation curves.",
+                "Acoustic discontinuities at splice boundaries reveal cross window spectral deviations.",
+                "The witness stated that the conversation took place on the fourteenth of March.",
+                "Deep learning models for audio synthesis have improved significantly over recent years.",
+                "Linear predictive coding estimates vocal tract tube filter coefficients with high precision.",
+                "Probabilistic pitch tracking extracts fundamental frequency contours in noisy environments.",
+                "Harmonic to noise ratio provides critical evidence of synthetic vocoder reconstruction artifacts.",
+                "The suspect denied making the phone call recorded on the surveillance tape.",
+                "Mel frequency cepstral coefficients capture the spectral envelope of human vocal resonance.",
+                "Artificial intelligence algorithms can now replicate human speech cadence and timbre.",
+                "Phase derivative variance in high frequency bands indicates non-organic glottal pulses.",
+                "We must compare the unknown questioned recording against authentic reference exemplars.",
+                "The laboratory examined forty two audio files submitted by the investigative team.",
+                "Background acoustic noise floors often shift abruptly when audio segments are spliced.",
+                "Formant dispersion patterns correlate with physical vocal tract anatomical length.",
+                "Neural sequence classifiers evaluate latent acoustic representations across time.",
+                "Biometric verification systems must resist adversarial synthetic voice spoofing attacks."
+            ]
 
-    def _generate_spliced_hybrid(self, real_file_path: str) -> Tuple[bytes, float, float]:
-        """Splices a synthetic speech segment into a real audio recording."""
-        y_real, _ = sf.read(real_file_path)
-        total_len = len(y_real)
-        splice_len = int(self.sr * 1.5)  # 1.5s synthetic injection
+            generated_files = []
+            for idx in range(n_samples):
+                out_path = os.path.join(tts_dir, f"vits_synth_{idx+1:03d}.wav")
+                if not os.path.exists(out_path):
+                    phrase = PHRASES[idx % len(PHRASES)]
+                    if idx >= len(PHRASES):
+                        phrase = f"{phrase} In addition, section {idx} confirms forensic analysis."
+                    inputs = tokenizer(phrase, return_tensors="pt").to(device)
+                    with torch.no_grad():
+                        waveform = model(**inputs).waveform[0].cpu().numpy()
+                    
+                    # Normalize peak
+                    peak = np.max(np.abs(waveform))
+                    if peak > 0:
+                        waveform = (waveform / peak * 0.85).astype(np.float32)
+                    sf.write(out_path, waveform, self.sr)
+                generated_files.append(out_path)
+            return generated_files
+        except Exception as e:
+            logger.warning(f"VITS generation failed ({e}), falling back to existing files or synthesis...")
+            return existing
 
-        if total_len < self.sr * 4.0:
-            # Pad if needed
-            y_real = np.pad(y_real, (0, int(self.sr * 4.0) - total_len))
-            total_len = len(y_real)
+    def _ensure_neural_spliced_corpus(self, real_files: List[str], tts_files: List[str], n_samples: int = 40) -> List[Dict[str, Any]]:
+        """
+        Constructs spliced hybrid audio by inserting genuine neural TTS speech into authentic
+        recordings at known ground-truth timestamps.
+        """
+        splice_dir = os.path.join(DATA_DIR, "spliced_neural")
+        os.makedirs(splice_dir, exist_ok=True)
+        meta_file = os.path.join(splice_dir, "spliced_metadata.json")
 
-        # Inject at 1.5s
-        idx_start = int(self.sr * 1.5)
-        idx_end = idx_start + splice_len
+        if os.path.exists(meta_file):
+            try:
+                import json
+                with open(meta_file, "r") as f:
+                    meta = json.load(f)
+                if len(meta) >= n_samples and all(os.path.exists(m["file_path"]) for m in meta):
+                    return meta
+            except Exception:
+                pass
 
-        # Generate synthetic replacement
-        t = np.linspace(0, 1.5, splice_len, endpoint=False)
-        synth_segment = np.sin(2 * np.pi * 200 * t) + 0.25 * np.sin(2 * np.pi * 7200 * t)
-        synth_segment = (synth_segment / np.max(np.abs(synth_segment)) * np.max(np.abs(y_real))).astype(np.float32)
+        logger.info(f"Constructing {n_samples} ground-truth spliced audio specimens...")
+        meta = []
+        for idx in range(n_samples):
+            out_path = os.path.join(splice_dir, f"splice_neural_{idx+1:03d}.wav")
+            real_file = real_files[idx % len(real_files)]
+            tts_file = tts_files[idx % len(tts_files)] if tts_files else real_files[(idx + 1) % len(real_files)]
 
-        y_spliced = y_real.copy().astype(np.float32)
-        y_spliced[idx_start:idx_end] = synth_segment
+            y_real, _ = sf.read(real_file)
+            y_tts, _ = sf.read(tts_file)
 
-        buf = io.BytesIO()
-        sf.write(buf, y_spliced, self.sr, format="WAV")
-        return buf.getvalue(), 1.5, 3.0
+            # Ensure min 5.0s length for realistic splice evaluation
+            target_len = int(self.sr * 5.0)
+            if len(y_real) < target_len:
+                y_real = np.pad(y_real, (0, target_len - len(y_real)))
+
+            t_start = 1.5
+            t_end = 3.0
+            idx_start = int(self.sr * t_start)
+            idx_end = int(self.sr * t_end)
+            splice_len = idx_end - idx_start
+
+            # Crop or loop TTS segment
+            if len(y_tts) < splice_len:
+                y_tts = np.pad(y_tts, (0, splice_len - len(y_tts)))
+            tts_segment = y_tts[:splice_len].astype(np.float32)
+
+            # Level match
+            rms_real = np.sqrt(np.mean(y_real[idx_start:idx_end] ** 2) + 1e-6)
+            rms_tts = np.sqrt(np.mean(tts_segment ** 2) + 1e-6)
+            tts_segment = tts_segment * (rms_real / rms_tts)
+
+            y_spliced = y_real.copy().astype(np.float32)
+            y_spliced[idx_start:idx_end] = tts_segment
+
+            # Peak normalize
+            peak = np.max(np.abs(y_spliced))
+            if peak > 0:
+                y_spliced = (y_spliced / peak * 0.85).astype(np.float32)
+
+            sf.write(out_path, y_spliced, self.sr)
+            meta.append({
+                "file_path": out_path,
+                "t_start": t_start,
+                "t_end": t_end,
+                "duration_sec": 1.5,
+                "base_real_file": real_file,
+                "injected_tts_file": tts_file
+            })
+
+        import json
+        with open(meta_file, "w") as f:
+            json.dump(meta, f, indent=2)
+
+        return meta
+
+    def prepare_deepfake_benchmark(
+        self,
+        n_samples: int = 120,
+        seed: int = 42
+    ) -> List[Dict[str, Any]]:
+        """
+        Prepares labeled bona-fide (label=0), synthetic VITS neural TTS (label=1),
+        and spliced neural hybrid samples with known ground truth timestamps.
+        """
+        random.seed(seed)
+        np.random.seed(seed)
+
+        speaker_files = self._get_or_download_speech_samples()
+        all_real_files = [f for files in speaker_files.values() for f in files]
+
+        # Generate genuine neural TTS and neural spliced speech
+        tts_files = self._ensure_neural_tts_corpus(n_samples=40)
+        spliced_meta = self._ensure_neural_spliced_corpus(all_real_files, tts_files, n_samples=40)
+
+        samples = []
+        n_bona = min(40, len(all_real_files))
+        n_synth = min(40, len(tts_files))
+        n_splice = min(40, len(spliced_meta))
+
+        # 1. Bona-fide (Authentic human speech)
+        for i in range(n_bona):
+            rf = all_real_files[i % len(all_real_files)]
+            with open(rf, "rb") as b:
+                samples.append({
+                    "file_bytes": b.read(),
+                    "label": 0,
+                    "category_ground_truth": "LIKELY_AUTHENTIC",
+                    "sample_type": "bona_fide",
+                    "is_spliced": False,
+                    "splice_interval": None,
+                    "file_path": rf
+                })
+
+        # 2. Fully Synthetic (VITS Neural TTS with HiFi-GAN Vocoder)
+        for i in range(n_synth):
+            tf = tts_files[i % len(tts_files)]
+            with open(tf, "rb") as b:
+                samples.append({
+                    "file_bytes": b.read(),
+                    "label": 1,
+                    "category_ground_truth": "FULLY_SYNTHETIC",
+                    "sample_type": "synthetic_vits_tts",
+                    "is_spliced": False,
+                    "splice_interval": None,
+                    "file_path": tf
+                })
+
+        # 3. Spliced Neural Hybrids (Real Speech with Injected Neural Speech at known timestamps)
+        for m in spliced_meta[:n_splice]:
+            with open(m["file_path"], "rb") as b:
+                samples.append({
+                    "file_bytes": b.read(),
+                    "label": 1,
+                    "category_ground_truth": "SPLICED_PARTIAL",
+                    "sample_type": "spliced_neural_hybrid",
+                    "is_spliced": True,
+                    "splice_interval": (m["t_start"], m["t_end"]),
+                    "file_path": m["file_path"]
+                })
+
+        random.shuffle(samples)
+        logger.info(
+            f"Prepared {len(samples)} realistic neural benchmark specimens "
+            f"({n_bona} bona-fide, {n_synth} VITS neural TTS, {n_splice} neural spliced)."
+        )
+        return samples
 
 
 dataset_loader = ForensicDatasetLoader()

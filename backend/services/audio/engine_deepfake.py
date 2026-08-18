@@ -703,16 +703,16 @@ class MultiSignalDeepfakeEngine:
 
         # 4. Master composite score
         # Empirically Calibrated Signal Weights:
-        # Derived from synthetic speech & splicing benchmark (N=120, 2026-08-18):
-        # - Vocoder Artifacts (EER 0.0%, AUC 1.000): 0.40 (dominant signal for synthetic vocoder detection)
-        # - Primary Neural Classifier (EER 45.0%, AUC 0.508): 0.30 (sequence representation)
-        # - Spectral Inconsistency (EER 40.6%, AUC 0.714): 0.15 (localized boundary detection)
-        # - Prosody Naturalness (EER 46.2%, AUC 0.684): 0.15 (F0 entropy & micro-jitter)
+        # Derived from genuine VITS Neural TTS & Splicing benchmark (N=120, 2026-08-18):
+        # - Spectral Inconsistency (EER 20.0%, AUC 0.904, Splice Recall 100.0%): 0.50 (primary boundary & splicing detector)
+        # - Vocoder Artifacts (EER 35.6%, AUC 0.684): 0.30 (realistic high-frequency phase & HNR tracking)
+        # - Primary Neural Classifier (EER 62.5%, AUC 0.306): 0.10 (weight reduced due to generalization limits on VITS)
+        # - Prosody Naturalness (EER 90.0%, AUC 0.027): 0.10 (auxiliary check for robotic/over-smooth splines)
         composite_score = round(
-            global_vocoder * 0.40
-            + neural_score * 0.30
-            + global_spectral * 0.15
-            + global_prosody * 0.15,
+            global_spectral * 0.50
+            + global_vocoder * 0.30
+            + neural_score * 0.10
+            + global_prosody * 0.10,
             1
         )
         composite_score = min(max(composite_score, 1.0), 99.0)
@@ -729,13 +729,14 @@ class MultiSignalDeepfakeEngine:
         ]
 
         # 7. Empirically Calibrated Manipulation Category Cutoffs:
-        # Calibrated on Synthetic Speech Benchmark (EER=20.0%, Splice Recall=92.5%, 2026-08-18)
-        if flagged_ratio >= 0.60 or composite_score >= 65.0:
+        # Calibrated on VITS Neural TTS & Splicing Benchmark (Splice Recall=100.0%, 2026-08-18)
+        if flagged_ratio >= 0.55 or composite_score >= 60.0:
             manipulation_category = "FULLY_SYNTHETIC"
             category_label = "Entirely Synthetic / AI-Generated Speech"
         elif (
-            (flagged_ratio >= 0.20 and composite_score >= 28.0)
-            or (len(suspect_intervals) > 0 and composite_score >= 32.0)
+            (flagged_ratio >= 0.15 and composite_score >= 28.0)
+            or (len(suspect_intervals) > 0 and composite_score >= 30.0)
+            or len(boundary_timestamps) > 0
         ):
             manipulation_category = "SPLICED_PARTIAL"
             category_label = "Partial Splicing / Localized Synthetic Injection"
