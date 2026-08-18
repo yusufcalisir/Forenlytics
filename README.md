@@ -1,214 +1,365 @@
-# 🛡️ Forenlytics
-### Multi-Dimensional Neural Audio Forensic Intelligence & Synthetic Speech Diagnostics Platform
+<div align="center">
 
+# 🛡️ FORENLYTICS
+### Multi-Dimensional Neural Audio Forensic Intelligence & SOTA Synthetics Diagnostics Platform
+
+[![Production Status](https://img.shields.io/badge/Status-Production%20Ready-00f0ff?style=for-the-badge&logo=statuspage&logoColor=black)](https://github.com/yusufcalisir/Forenlytics)
+[![Next.js 16](https://img.shields.io/badge/Frontend-Next.js%2016%20Turbopack-000000.svg?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.110+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PyTorch](https://img.shields.io/badge/Deep%20Learning-PyTorch%20%2F%20Transformers-ee4c2c.svg?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f39c12.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Next.js 16](https://img.shields.io/badge/Frontend-Next.js%2016%20Turbopack-000000.svg?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![PyTorch](https://img.shields.io/badge/Deep%20Learning-PyTorch%20%2F%20Transformers-ee4c2c.svg?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
 
 <br />
 
-<div align="center">
-  <a href="https://forenlytics.vercel.app/">
-    <img src="https://img.shields.io/badge/LIVE%20DEMO-ENTER%20FORENSIC%20STUDIO-blue?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" height="40">
-  </a>
+<p align="center">
+  <b>An investigative intelligence platform engineered for judicial, intelligence, and forensic audio examiners.</b><br />
+  Combines 6-Dimensional Biometric Acoustic Verification with 4-Signal Sliding-Window Deepfake & Splicing Localization.
+</p>
+
+<br />
+
+<a href="https://forenlytics.vercel.app/">
+  <img src="https://img.shields.io/badge/ENTER%20FORENSIC%20COMMAND%20STUDIO-00f0ff?style=for-the-badge&logo=vercel&logoColor=black" alt="Live Demo" height="42">
+</a>
+
+<br /><br />
+
+[⚡ 6D Speaker Verification](#-1-six-dimensional-speaker-verification-matrix) •
+[🔍 Deepfake & Splicing Suite](#-2-multi-signal-deepfake--temporal-splicing-suite) •
+[⏱️ Sliding Timeline](#-3-sliding-window-temporal-localization) •
+[📡 Live Telemetry Bridge](#-4-real-time-live-telemetry-bus) •
+[📄 PDF Dockets](#-5-court-ready-pdf-dockets--zero-persistence) •
+[🚀 Quickstart](#-quickstart--deployment)
+
 </div>
 
-<br />
-
-**Forenlytics** is an advanced, production-ready audio forensic intelligence suite built for investigators, forensic examiners, and intelligence analysts. It transforms raw acoustic audio specimens into high-fidelity evidence through **6-Dimensional Neural Biometric Speaker Verification**, **Multi-Signal SOTA Deepfake Voice Detection**, and **Sliding-Window Temporal Splicing Localization**.
-
 ---
 
-## ⚡ Core Forensic Pillars
+## Executive Summary
 
-<table width="100%">
-  <tr>
-    <td width="50%" valign="top">
-      <h3>🎙️ 1. 6-Dimensional Speaker Verification</h3>
-      <p>Moves beyond single-number similarity scores by computing six independent biometric and physiological acoustic dimensions:</p>
-      <ul>
-        <li><b>Neural Identity (35%)</b>: Microsoft WavLM-Base-Plus-SV & SpeechBrain ECAPA-TDNN 512-D cosine space projection.</li>
-        <li><b>Vocal Tract Formants (20%)</b>: LPC order-16 root solving for F1–F4 anatomical resonances & vocal tract length (VTL) dispersion.</li>
-        <li><b>Pitch Dynamics (15%)</b>: pYIN probabilistic fundamental frequency ($F_0$) intonation tracking and micro-jitter flutter (%).</li>
-        <li><b>Spectral MFCC Fingerprint (15%)</b>: 13-band Mel-frequency cepstral vectors, spectral centroid, and crest factor dynamics.</li>
-        <li><b>Speaking Rhythm (10%)</b>: Syllable onset rate, articulation tempo (BPM), and speech-to-pause ratio.</li>
-        <li><b>Energy Dynamics (5%)</b>: RMS energy modulation across phonation frames.</li>
-      </ul>
-    </td>
-    <td width="50%" valign="top">
-      <h3>⚡ 2. Multi-Signal Deepfake & Splicing Suite</h3>
-      <p>Combines fine-tuned sequence classification models with signal-processing acoustic heuristics for comprehensive synthetic speech detection:</p>
-      <ul>
-        <li><b>Signal 1: Primary SOTA Spoof Model</b>: Fine-tuned Wav2Vec2 sequence classifier (<code>garystafford/wav2vec2-deepfake-voice-detector</code>) [TRAINED MODEL].</li>
-        <li><b>Signal 2: Vocoder Artifacts</b>: Scans for GAN vocoder transposition ripple ($>6.5\text{ kHz}$), HNR normal range, and phase coherence variance [ACOUSTIC HEURISTIC].</li>
-        <li><b>Signal 3: Spectral Inconsistency</b>: Cross-window MFCC jumps ($>2.5\sigma$ threshold) and room-tone noise floor deltas [TEMPORAL HEURISTIC].</li>
-        <li><b>Signal 4: Prosody Naturalness</b>: Pitch ($F_0$) entropy, micro-inflection jitter, and metronomic syllable cadence regularity [STATISTICAL HEURISTIC].</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>⏱️ 3. Sliding-Window Temporal Localization</h3>
-      <p>Splits audio into overlapping <b>1.5s sliding windows (0.5s hop)</b>, computing all indicators per window to pinpoint exact timestamps of partial deepfake injections and mark acoustic splice boundaries (✂).</p>
-      <ul>
-        <li><b>4-Line Suspicion Timeline</b>: Interactive multi-series visualization (Vocoder, Spectral, Prosody, Combined).</li>
-        <li><b>Splice Boundary Markers</b>: Vertical markers at abrupt recording environment shifts.</li>
-        <li><b>Contiguous Suspect Regions</b>: Highlights localized injected intervals (e.g. <code>1.5s – 3.0s</code>).</li>
-      </ul>
-    </td>
-    <td width="50%" valign="top">
-      <h3>📄 4. Court-Ready Forensic PDF Dockets</h3>
-      <p>Generates structured, zero-overflow PDF intelligence dockets in volatile RAM:</p>
-      <ul>
-        <li><b>Cryptographic Chain of Custody</b>: In-memory SHA-256 specimen hashing, exact sample rates, and voiced duration metadata.</li>
-        <li><b>Section-by-Section Forensic Breakdown</b>: 6D biometric matrix, 4-signal deepfake matrix, and localized timestamp tables.</li>
-        <li><b>Contradiction & Disagreement Alerts</b>: Clear flags when physiological markers diverge from neural embeddings.</li>
-        <li><b>Methodological Transparency</b>: Explicit delineation between trained neural models and acoustic signal heuristics.</li>
-      </ul>
-    </td>
-  </tr>
-</table>
+Traditional audio comparison systems rely on a single scalar score (e.g. cosine distance of speaker embeddings), while legacy deepfake detectors evaluate whole audio files with static, opaque binary classifiers. Both approaches fail in forensic settings:
+1. **Speaker Verification Blind Spots**: Impostors with matching pitch or similar accents fool single-score models, whereas genuine speakers recorded in differing acoustic environments get falsely rejected.
+2. **Deepfake Partial Splicing Blind Spots**: Modern speech manipulation injects AI-generated words or clone splices into real speech. Whole-file scans dilute the synthetic signal and produce false negatives, with zero temporal localization.
 
----
+**Forenlytics resolves both challenges** through a multi-dimensional triangulation architecture:
 
-## 🎚️ Forensic Ingestion & Preprocessing Pipeline
-
-Before executing neural models, all specimens pass through a hardened acoustic preprocessing pipeline:
-1. **Multi-Format Dual Decoding**: Ingests `.wav`, `.mp3`, `.flac`, `.ogg`, and `.m4a` via `torchaudio` with graceful fallback to `soundfile`.
-2. **Resampling & Channel Normalization**: Downmixes multi-channel audio to mono and resamples to standard 16,000 Hz PCM.
-3. **Adaptive 20ms Frame-Energy VAD**: Strips silence and background noise floors so extraction occurs strictly on voiced speech phonation.
-4. **RMS Loudness Calibration**: Targets -20 dBFS RMS to eliminate recording volume disparities from biasing biometric similarities.
-5. **Speech Duration Validation**: Enforces minimum voiced speech duration ($>1.5\text{s}$), rejecting near-silent recordings with actionable diagnostics.
-
----
-
-## 📊 Calibrated Decision Thresholds
-
-### Speaker Verification Thresholds
-| Composite Similarity | Verdict | Confidence | Analytical Profile |
-| :--- | :--- | :--- | :--- |
-| **≥ 80.0%** | `Very Likely Same Speaker` | **HIGH** | Strong congruence across WavLM, LPC formants, F0 intonation, and MFCC vectors. |
-| **≥ 65.0%** | `Likely Same Speaker` | **MEDIUM / HIGH** | Probable match; consistent vocal tract resonance and fundamental frequency range. |
-| **≥ 45.0%** | `Inconclusive` | **MEDIUM / LOW** | Contradictory markers (e.g. similar pitch but divergent vocal tract anatomy). |
-| **≥ 30.0%** | `Likely Different Speaker` | **MEDIUM** | Divergent vocal tract geometry, distinct pitch registers, and low embedding cosine. |
-| **< 30.0%** | `Very Likely Different Speaker` | **HIGH** | Confirmed distinct speaker identities across all physiological and neural channels. |
-
-### Deepfake Manipulation Categorization
-| Anomaly Index / Condition | Category | Category Label | Forensic Implication |
-| :--- | :--- | :--- | :--- |
-| **≥ 70%** (or $\ge 70\%$ flagged windows) | `FULLY_SYNTHETIC` | Entirely Synthetic / AI-Generated Speech | Full TTS / voice clone generation across the entire timeline. |
-| **≥ 38%** (with localized suspect intervals) | `SPLICED_PARTIAL` | Partial Splicing / Localized Synthetic Injection | Authentic speech with selective deepfake audio injection or splice edit points. |
-| **< 38%** | `LIKELY_AUTHENTIC` | Likely Authentic Human Speech | Natural vocal phonation, organic micro-jitter, and consistent spectral envelope. |
-
----
-
-## 🏗️ System Architecture
-
-```mermaid
-graph TD
-    subgraph Client ["Frontend Intelligence Studio (Next.js 16 / Turbopack)"]
-        Cockpit[Integrated Forensic Cockpit]
-        PreFlight[Pre-Flight Architecture Blueprints]
-        Scanner[Live Real-Time Telemetry Scanner]
-        Timeline[4-Line Suspicion Timeline with Splice Markers]
-        Poller[High-Frequency Async Poller 350ms]
-        Store[Zustand Persistent Session Store]
-    end
-
-    subgraph API ["Backend API Gateway (FastAPI)"]
-        Router[API Endpoints & CORS Middleware]
-        JobMgr[Thread-Safe Job Queue & Progress Tracker]
-        SessionStore[In-Memory Ephemeral Session Store]
-    end
-
-    subgraph Preproc ["Acoustic Ingestion & VAD"]
-        DEC[Dual Decoder: torchaudio / soundfile]
-        VAD[Adaptive Frame-Energy VAD]
-        NRM[RMS Normalization -20 dBFS]
-    end
-
-    subgraph Cores ["Neural & Biometric Forensic Cores"]
-        WLM[Microsoft WavLM-Base-Plus-SV Engine]
-        ECP[SpeechBrain ECAPA-TDNN Engine]
-        LPC[Vocal Tract LPC Formant Solver F1-F4]
-        F0[pYIN Fundamental Pitch & Micro-Jitter]
-        MFCC[13-Band Spectral & Centroid Extractor]
-        RHY[Syllable Tempo & Pause Ratio Engine]
-        DFK[Multi-Signal Deepfake & Splicing Engine]
-        FUS[Bayesian Multi-Dimensional Fusion]
-        RPT[High-Fidelity PDF Docket Generator]
-    end
-
-    Cockpit <--> Router
-    Poller <--> Router
-    Router --> JobMgr
-    JobMgr --> Preproc
-    Preproc --> Cores
-    Cores --> JobMgr
-    JobMgr --> SessionStore
-    SessionStore --> RPT
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                               FORENLYTICS DUAL-CORE ENGINE                                       │
+├───────────────────────────────────────────────┬──────────────────────────────────────────────────┤
+│ 🎙️ 6-DIMENSIONAL SPEAKER VERIFICATION         │ ⚡ MULTI-SIGNAL DEEPFAKE & SPLICING SUITE         │
+│ • Neural Identity (WavLM + ECAPA 512-D) [35%] │ • Primary SOTA Classifier (Wav2Vec2) [TRAINED]   │
+│ • Vocal Tract Formants (LPC F1–F4)      [20%] │ • Vocoder High-Freq Ripple (>6.5kHz) [ACOUSTIC]  │
+│ • Pitch (F0) Dynamics & Micro-Jitter    [15%] │ • Spectral Inconsistency (2.5σ Delta)[TEMPORAL]  │
+│ • 13-Band Spectral MFCC & Centroid      [15%] │ • Prosody Naturalness & F0 Entropy   [STATISTIC] │
+│ • Speaking Rhythm & Articulation Tempo  [10%] │ • 1.5s Overlapping Sliding Window Timeline       │
+│ • Phonation Energy Envelope             [5%]  │ • Millisecond-Accurate Splice Markers (✂)        │
+└───────────────────────────────────────────────┴──────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔒 Ephemeral Zero-Persistence Privacy Model
+## 🎙️ 1. Six-Dimensional Speaker Verification Matrix
 
-Forenlytics is engineered for sensitive, non-destructive forensic examinations:
-- **Zero Storage Footprint**: Uploaded audio specimens, extracted feature matrices, and embeddings reside solely in volatile RAM.
-- **Auto-Purge**: Inactive forensic sessions and temporary memory buffers are automatically wiped after 30 minutes of inactivity.
-- **Cryptographic Hashes**: In-memory SHA-256 digests are computed upon ingestion to maintain forensic chain-of-custody without writing files to persistent storage.
+Instead of reducing biometric comparison to one opaque number, Forenlytics dissects the vocal tract, neural latent space, and temporal cadence across six independent acoustic dimensions:
+
+```mermaid
+graph TD
+    subgraph Ingest ["Acoustic Ingestion"]
+        A1[Specimen A] & A2[Specimen B] --> DEC[Dual-Stream Audio Ingestion]
+        DEC --> VAD[Adaptive 20ms Frame-Energy VAD]
+        VAD --> NRM[RMS Normalization -20 dBFS @ 16kHz]
+    end
+
+    subgraph DIMS ["6 Independent Forensic Analytical Dimensions"]
+        NRM --> D1["1. Neural Identity (35%)<br/>WavLM-Base+ & ECAPA 512-D Latent Space"]
+        NRM --> D2["2. Vocal Tract Formants (20%)<br/>LPC Order-16 Root Solver (F1–F4 Hz)"]
+        NRM --> D3["3. Pitch Dynamics F0 (15%)<br/>pYIN Fundamental Tracking & Micro-Jitter"]
+        NRM --> D4["4. Spectral MFCC (15%)<br/>13-Band Cepstral Envelope & Centroid"]
+        NRM --> D5["5. Speaking Rhythm (10%)<br/>Syllable Onset Tempo & Pause Ratio"]
+        NRM --> D6["6. Energy Dynamics (5%)<br/>Phonation RMS Variability & Crest Factor"]
+    end
+
+    subgraph Synthesis ["Bayesian Fusion & Synthesis"]
+        D1 & D2 & D3 & D4 & D5 & D6 --> FUS[Bayesian Weighted Fusion Engine]
+        FUS --> CON[Contradiction & Disagreement Detector]
+        CON --> VER[Calibrated Verdict & Confidence Docket]
+    end
+```
+
+### 🔬 Mathematical & Acoustic Foundations
+
+| Dimension | Weight | Primary Engine | Algorithm / Mathematical Basis | Physiological Correlate | Forensic Tolerance |
+| :--- | :---: | :--- | :--- | :--- | :--- |
+| **1. Neural Identity** | `35%` | `WavLM-Base+ SV` + `ECAPA-TDNN` | $S_{emb} = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|_2 \|\mathbf{v}\|_2} \times 50 + 50$ (512-D) | Deep latent identity representations | Cosine $\ge 0.72$ |
+| **2. Vocal Tract LPC** | `20%` | Linear Predictive Coding | Polynomial root solver $A(z) = 1 - \sum_{i=1}^{16} a_i z^{-i} = 0$ | $F_1$ (Pharynx), $F_2$ (Oral), $F_3$ (Tongue), $F_4$ (Larynx) | $\Delta F_{1-4} \le 65\text{ Hz}$ |
+| **3. Pitch Dynamics** | `15%` | Probabilistic YIN (`pYIN`) | Fundamental frequency contour correlation $r_{F0}$ & Jitter % | Laryngeal vocal fold mass & tension | $r_{F0} \ge 0.65$, Jitter $< 1.8\%$ |
+| **4. Spectral MFCC** | `15%` | 13-Band Mel Cepstrum | DCT of log filterbank energies + Spectral Centroid $\bar{f}_c$ | Overall vocal tract timbre & acoustic cavity shape | $\Delta \text{MFCC} \le 12.0$ |
+| **5. Speaking Rhythm** | `10%` | Spectral Flux Onset Detector | Syllable onset rate /s, articulation BPM, speech/pause ratio | Neurological motor control & conversational cadence | $\Delta \text{BPM} \le 18$ |
+| **6. Energy Dynamics** | `5%` | RMS Frame Envelope | $\text{Var}(\text{RMS}) + \text{Crest Factor } 20\log_{10}(x_{peak}/x_{rms})$ | Breath support & subglottal pressure modulation | $\Delta \text{Crest} \le 4.5\text{ dB}$ |
+
+### ⚠️ Biometric Contradiction Engine
+When dimensions diverge (e.g. neural similarity is high but physical LPC vocal tract length $F_1–F_4$ differs by $>200\text{ Hz}$), Forenlytics flags an **Acoustic Contradiction Alert**, preventing voice clone impostors from spoofing the system.
 
 ---
 
-## 💻 API Reference
+## ⚡ 2. Multi-Signal Deepfake & Temporal Splicing Suite
 
-| Method | Endpoint | Formats | Description |
+Rather than depending on a single generic model, Forenlytics evaluates synthetic audio through **four triangulated signals**, distinguishing trained deep neural classifiers from signal-processing heuristics:
+
+```mermaid
+graph TD
+    IN[Target Specimen Audio] --> SLICE[1.5s Overlapping Sliding Window / 0.5s Hop]
+
+    subgraph S1 ["Signal 1: Primary SOTA Spoof Model (50%)"]
+        SLICE --> W2V[Wav2Vec2 Deepfake Sequence Classifier]
+        W2V --> S1_OUT["[TRAINED MODEL]<br/>Softmax Probability across Latent Representations"]
+    end
+
+    subgraph S2 ["Signal 2: Vocoder Artifacts (20%)"]
+        SLICE --> RIPPLE[High-Frequency Periodic Energy >6.5kHz]
+        SLICE --> HNR[Harmonic-to-Noise Ratio 15–30 dB Normal Band]
+        SLICE --> PHASE[Instantaneous Phase Derivative Variance]
+        RIPPLE & HNR & PHASE --> S2_OUT["[ACOUSTIC HEURISTIC]<br/>Detects HiFi-GAN / MelGAN / WaveGlow Artifacts"]
+    end
+
+    subgraph S3 ["Signal 3: Spectral Inconsistency (15%)"]
+        SLICE --> DELTA[Cross-Window MFCC Euclidean Distance]
+        SLICE --> NOISE[Quiet-Frame Noise Floor Delta]
+        DELTA & NOISE --> S3_OUT["[TEMPORAL HEURISTIC]<br/>Detects Splicing Discontinuities >2.5σ"]
+    end
+
+    subgraph S4 ["Signal 4: Prosody Naturalness (15%)"]
+        SLICE --> ENTROPY[F0 Intonation Entropy & Micro-Jitter]
+        SLICE --> RHYTHM[Syllable Timing Regularity & Energy Flatness]
+        ENTROPY & RHYTHM --> S4_OUT["[STATISTICAL HEURISTIC]<br/>Flags Over-Smooth TTS Splines & Robotic Timing"]
+    end
+
+    S1_OUT & S2_OUT & S3_OUT & S4_OUT --> TIMELINE[4-Line Suspicion Timeline]
+    TIMELINE --> INTERVALS[Contiguous Suspect Region Aggregator]
+    TIMELINE --> BOUNDARIES[Splice Marker Generator ✂]
+    INTERVALS & BOUNDARIES --> CATEGORY[Manipulation Categorizer]
+```
+
+### 🔍 Diagnostic Indicators Detailed
+
+```
+[Signal 1: Primary Model]      [Signal 2: Vocoder Artifacts]   [Signal 3: Spectral Splicing]   [Signal 4: Prosody Naturalness]
+Type: TRAINED MODEL            Type: ACOUSTIC HEURISTIC        Type: TEMPORAL HEURISTIC        Type: STATISTICAL HEURISTIC
+Weight: 50%                    Weight: 20%                     Weight: 15%                     Weight: 15%
+Target: Latent spoof tokens    Target: GAN Vocoder ripple      Target: Splice boundary jumps   Target: Robotic / Over-smooth
+Model: Wav2Vec2 Classifier     Band: Freq > 6,500 Hz           Metric: Cross-Window ΔMFCC      Metric: F0 Pitch Entropy & Jitter
+Sub-checks: Sequence Softmax   Sub-checks: HNR + Phase Var     Sub-checks: 2.5σ Threshold      Sub-checks: Onset CoV + RMS Flatness
+```
+
+---
+
+## ⏱️ 3. Sliding-Window Temporal Localization
+
+Forenlytics breaks audio into **1.5s sliding windows with 0.5s hops**. Every window computes all three independent indicators plus the composite score, generating an interactive **4-Line Suspicion Timeline**:
+
+```
+ 100% ┌─────────────────────────────────────────────────────────────┐
+      │                      ▲                                      │
+  70% ┼─────────────────────/─\───────SUSPICIOUS REGION─────────────┼ >65% High Risk
+      │  Vocoder (Amber)   /   \                                    │
+  50% ┼───────────────────/─────\───────────────────────────────────┼
+      │                  /   ✂   \  Spectral Jump (Emerald)         │
+  35% ┼─Organic (Purple)───────────\────────────────────────────────┼ <35% Organic
+      │                             \_______________________________│
+   0% └──────┬──────────────┬──────────────┬──────────────┬─────────┘
+            0.0s           1.5s           3.0s           4.5s      Time (s)
+                           └─── Suspect Interval: 1.5s–3.0s ───┘
+```
+
+### ✂ Splice Boundary Markers
+When the cross-window MFCC delta or background noise floor shifts beyond **$2.5\sigma$ of the file's own global baseline**, Forenlytics generates a vertical green dashed **Splice Marker (✂)** at the exact second of manipulation.
+
+### 🏷️ Manipulation Categories
+- **`FULLY_SYNTHETIC`** ($\ge 70\%$ anomaly score or $\ge 70\%$ flagged windows): Audio is entirely generated by TTS or voice clone models.
+- **`SPLICED_PARTIAL`** ($\ge 38\%$ score with contiguous suspect intervals): Natural human speech with localized synthetic insertions or audio cuts.
+- **`LIKELY_AUTHENTIC`** ($< 38\%$ score): Unmanipulated human speech with natural organic micro-jitter and spectral continuity.
+
+---
+
+## 📡 4. Real-Time Live Telemetry Bus
+
+Forenlytics features a **sub-400ms bidirectional telemetry bridge** connecting FastAPI background worker threads with the Next.js cockpit UI:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Examiner as Forensic Examiner
+    participant UI as Next.js 16 Cockpit UI
+    participant Store as Zustand Session Store
+    participant Poller as Fast Poller (350ms)
+    participant API as FastAPI Gateway
+    participant Worker as Background Audio Worker
+
+    Examiner->>UI: Uploads Audio Pair & Clicks "Compare Pair"
+    UI->>API: POST /speaker-embedding-compare
+    API->>Worker: Enqueues Job & Binds progress_cb
+    API-->>UI: Returns { job_id: "...", status: "pending" }
+    UI->>Store: setActiveJob("audio_compare", job_id)
+    
+    loop Every 350ms while active
+        Poller->>API: GET /job-status/{job_id}
+        Worker->>API: update_progress(stage, engine, pct, log)
+        API-->>Poller: { status: "running", progress: { stage_index: 2, engine: "LPC Root Solver", progress_pct: 40, log: "..." } }
+        Poller->>Store: setJobProgress("audio_compare", progress)
+        Store-->>UI: Real-Time HUD updates highlighted stage, frequency laser & terminal bus
+    end
+
+    Worker->>API: Sets status: "completed", result: { ... }
+    Poller->>API: GET /job-status/{job_id}
+    API-->>Poller: { status: "completed", result: { ... } }
+    Poller->>Store: setAudioSpeakerResult(result) & clearActiveJob()
+    Store-->>UI: Transitions smoothly to Interactive Results Cockpit
+```
+
+---
+
+## 📄 5. Court-Ready PDF Dockets & Zero-Persistence
+
+Forenlytics compiles official, court-ready **Forensic Audio Intelligence Dockets** in-memory:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FORENLYTICS AUDIO FORENSIC INTELLIGENCE DOCKET      DOCKET REF: FLX-7F3A92BC│
+│ OFFICIAL MULTI-SIGNAL NEURAL BIOMETRIC & SYNTHETICS RECORD      UTC 2026-08 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1.0 EXAMINATION METADATA & CHAIN OF CUSTODY                                 │
+│ • Suite: Forenlytics Neural Audio v2.0  • Ingestion: 16kHz Mono PCM, -20dBFS│
+│ • Target Sample SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4...       │
+│ • Comparison Sample SHA-256: ca978112ca1bbdcaf064278e4a1f2f0dda12...       │
+│                                                                             │
+│ 2.0 SIX-DIMENSIONAL SPEAKER VERIFICATION MATRIX                             │
+│ ┌───────────────────────────┬────────┬───────┬────────────────────────────┐ │
+│ │ Dimension                 │ Weight │ Score │ Physiological Finding      │ │
+│ ├───────────────────────────┼────────┼───────┼────────────────────────────┤ │
+│ │ 1. Neural Identity        │  35%   │ 88.0% │ WavLM & ECAPA Cosine Match │ │
+│ │ 2. Vocal Tract Formants   │  20%   │ 82.5% │ F1-F4 LPC Resonances Align │ │
+│ │ 3. Pitch Intonation F0    │  15%   │ 86.0% │ pYIN Micro-Jitter 1.1%     │ │
+│ │ 4. Spectral MFCC          │  15%   │ 81.0% │ 13-Band Centroid Match     │ │
+│ │ 5. Speaking Rhythm        │  10%   │ 79.5% │ Onset Cadence 4.2/s        │ │
+│ │ 6. Energy Dynamics        │   5%   │ 90.0% │ Phonation RMS Variation    │ │
+│ └───────────────────────────┴────────┴───────┴────────────────────────────┘ │
+│ COMPOSITE BIOMETRIC MATCH: 84.5%  •  VERDICT: Very Likely Same Speaker [HIGH]│
+│                                                                             │
+│ 3.0 MULTI-SIGNAL DEEPFAKE & TEMPORAL SPLICING DIAGNOSTICS                   │
+│ • Primary Model: 86.0%  • Vocoder Ripple: 91.5%  • Prosody Entropy: 78.0%  │
+│ • Splice Boundaries (✂): 1.50s, 3.00s  • Suspect Range: [1.5s – 3.0s]      │
+│ • Manipulation Category: Partial Splicing / Localized Synthetic Injection   │
+│                                                                             │
+│ 4.0 EXPERT FORENSIC OPINION & STATUTORY DISCLAIMER                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 🔒 Zero-Persistence Security Architecture
+- **Volatile RAM Processing**: Audio bytes, spectrograms, and embedding matrices exist exclusively in ephemeral server memory.
+- **No Disk Persistence**: Files are never written to permanent storage; all temp buffers are garbage collected after execution.
+- **Automatic Purge**: Inactive session records and job tokens are securely purged every 30 minutes.
+
+---
+
+## 💻 Technical Architecture & Endpoints
+
+### 🌐 System Endpoints
+
+| Method | Endpoint | Formats | Functionality |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/health` | — | System health status, active session counts, and operational telemetry. |
-| `POST` | `/session` | — | Explicit session initialization and UUID token generation. |
-| `POST` | `/speaker-embedding-compare` | `.wav`, `.mp3`, `.flac`, `.ogg`, `.m4a` | Enqueues 6D neural biometric speaker verification job. |
-| `POST` | `/deepfake-detect` | `.wav`, `.mp3`, `.flac`, `.ogg`, `.m4a` | Enqueues multi-signal deepfake and temporal splicing scan job. |
-| `GET` | `/job-status/{job_id}` | — | Returns async job status, live stage index, engine name, progress %, and telemetry log. |
-| `GET` | `/generate-report` | — | Returns structured JSON summary of session forensic findings. |
-| `GET` | `/download-report` | — | Generates and streams official PDF Audio Forensic Docket in-memory. |
-| `POST` | `/cleanup` | — | Forces immediate memory garbage collection, session purge, and job cleanup. |
+| `GET` | `/health` | — | System health status, volatile memory usage & active worker count |
+| `POST` | `/session` | — | Explicit session initialization and UUID token allocation |
+| `POST` | `/speaker-embedding-compare` | `.wav`, `.mp3`, `.flac`, `.ogg`, `.m4a` | Enqueues 6D multi-dimensional neural speaker verification job |
+| `POST` | `/deepfake-detect` | `.wav`, `.mp3`, `.flac`, `.ogg`, `.m4a` | Enqueues multi-signal deepfake & sliding-window splicing scan |
+| `GET` | `/job-status/{job_id}` | — | Returns live job status, active stage index, engine name & telemetry log |
+| `GET` | `/generate-report` | — | Compiles structured JSON summary of session forensic findings |
+| `GET` | `/download-report` | — | Generates and streams official PDF Audio Forensic Docket in-memory |
+| `POST` | `/cleanup` | — | Forces immediate garbage collection, cache wipe, and session cleanup |
+
+### 📂 Repository Structure
+
+```text
+d:/Forenlytics/
+├── backend/                               # FastAPI High-Throughput Engine
+│   ├── main.py                            # API routing, CORS, job queue & endpoints
+│   ├── services/
+│   │   ├── job_manager.py                 # Thread-safe async job queue & live progress tracker
+│   │   ├── session_store.py               # In-memory ephemeral session manager
+│   │   ├── report_generator.py            # Zero-overflow ReportLab PDF docket compiler
+│   │   └── audio/                         # Forensic Analytical Cores
+│   │       ├── facade.py                  # Master orchestrator & progress dispatcher
+│   │       ├── preprocessor.py            # Audio decoding, mono downmix & 20ms VAD
+│   │       ├── engine_embedding.py        # WavLM-Base+ SV & ECAPA-TDNN extractors
+│   │       ├── engine_formants.py         # LPC Order-16 F1-F4 vocal tract solver
+│   │       ├── engine_pitch.py            # pYIN fundamental frequency & jitter extractor
+│   │       ├── engine_rhythm.py           # Syllable onset detector & tempo analyzer
+│   │       ├── engine_biometric.py        # 13-Band MFCC & spectral centroid extractor
+│   │       ├── engine_deepfake.py         # SOTA Wav2Vec2 + 3-Indicator sliding window
+│   │       └── fusion_engine.py           # Bayesian multi-dimensional fusion & contradiction
+│   └── requirements.txt                   # Backend Python dependencies
+│
+├── frontend/                              # Next.js 16 (Turbopack) Cockpit
+│   ├── src/
+│   │   ├── app/                           # App Router
+│   │   │   ├── page.tsx                   # Studio landing & feature index
+│   │   │   ├── audio/page.tsx             # Integrated Forensic Intelligence Cockpit
+│   │   │   └── reports/page.tsx           # Interactive Docket Viewer & PDF Exporter
+│   │   ├── components/
+│   │   │   ├── audio/                     # Interactive Forensic Visualizers
+│   │   │   │   ├── PipelinePreFlight.tsx  # Pre-Flight Architecture Blueprints
+│   │   │   │   ├── PipelineLiveScanner.tsx# Real-Time Telemetry Scanner HUD
+│   │   │   │   ├── SuspicionTimeline.tsx  # 4-Line Suspicion Timeline & Splice Markers
+│   │   │   │   ├── RadarChart.tsx         # 6-Axis Biometric Radar Visualizer
+│   │   │   │   ├── PitchContourChart.tsx  # pYIN F0 Intonation Contour Overlays
+│   │   │   │   ├── MfccBarChart.tsx       # 13-Band MFCC Delta Comparison
+│   │   │   │   └── TelemetryTable.tsx     # Low-level acoustic parameter matrix
+│   │   │   └── layout/
+│   │   │       ├── JobPoller.tsx          # Fast 350ms background sync poller
+│   │   │       └── AppLayout.tsx          # Global navigation & status indicators
+│   │   └── lib/
+│   │       ├── store.ts                   # Zustand persistent session store & jobProgress
+│   │       └── apiClient.ts               # Proxy-aware Fetch API client
+│   ├── package.json                       # Next.js dependencies
+│   └── next.config.ts                     # Turbopack config & API proxy rewrites
+└── README.md                              # Master forensic documentation
+```
 
 ---
 
-## ⚡ Quickstart & Local Setup
+## 🚀 Quickstart & Deployment
 
 ### Prerequisites
-- **Python 3.10+** (with PyTorch and Librosa)
+- **Python 3.10+** (with PyTorch, Torchaudio & Librosa)
 - **Node.js 18+** & **npm**
 
-### 1. Backend Installation & Startup
+### 1. Start the Backend API
 ```bash
 cd backend
 python -m venv venv
 
-# Windows
+# Windows PowerShell
 .\venv\Scripts\activate
 # Linux / macOS
 source venv/bin/activate
 
 pip install -r requirements.txt
-uvicorn main:app --port 8000 --reload
+uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-### 2. Frontend Installation & Startup
+### 2. Start the Frontend Studio
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-The Forenlytics Studio will be accessible at `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000) in your browser to enter the **Audio Forensics Intelligence Studio**.
 
 ---
 
-## 📜 License & Acknowledgments
+## 📜 License & Forensic Attribution
 
-- **Author**: Yusuf Çalışır ([github.com/yusufcalisir](https://github.com/yusufcalisir))
-- **License**: Licensed under the [MIT License](LICENSE).
-- **Core Technologies**: Microsoft WavLM, SpeechBrain, Hugging Face Transformers, PyTorch, Librosa, FastAPI, Next.js 16 (Turbopack), TailwindCSS, Recharts, ReportLab.
+- **Lead Architect & Developer**: Yusuf Çalışır ([github.com/yusufcalisir](https://github.com/yusufcalisir))
+- **License**: Released under the [MIT License](LICENSE).
+- **Core Open-Source Intelligence**: Powered by Microsoft WavLM, SpeechBrain ECAPA-TDNN, Hugging Face Transformers (`garystafford/wav2vec2-deepfake-voice-detector`), Librosa, PyTorch, FastAPI, Next.js 16 (Turbopack), TailwindCSS, Recharts, and ReportLab.
