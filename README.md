@@ -158,18 +158,18 @@ Metric: Cross-Window ΔMFCC      Metric: pYIN Entropy & Jitter   Band: Freq > 6,
 
 Forenlytics breaks audio into **1.5s sliding windows with 0.5s hops**. Every window computes all three independent indicators plus the composite score, generating an interactive **4-Line Suspicion Timeline**:
 
-```
- 100% ┌─────────────────────────────────────────────────────────────┐
-      │                      ▲                                      │
-  50% ┼─────────────────────/─\───────SUSPICIOUS REGION─────────────┼ >50% Fully Synthetic
-      │  Spectral Jump (Grn)/   \                                   │
-  30% ┼───────────────────/─────\───────────────────────────────────┼ >30% Spliced Partial
-      │                  /   ✂   \  Prosody (Amber) / Vocoder (Pur) │
-  15% ┼─Organic (Blue)─────────────\────────────────────────────────┼ <30% Likely Authentic
-      │                             \_______________________________│
-   0% └──────┬──────────────┬──────────────┬──────────────┬─────────┘
+```text
+ 100% +-------------------------------------------------------------+
+      |                      ^                                      |
+  50% +---------------------/-\-------SUSPICIOUS REGION-------------+ >50% Fully Synthetic
+      |  Spectral Jump (Grn)/ \                                     |
+  30% +-------------------/-----\-----------------------------------+ >30% Spliced Partial
+      |                  /  [!]  \  Prosody (Amber) / Vocoder (Pur) |
+  15% +--Organic (Blue)------------\--------------------------------+ <30% Likely Authentic
+      |                             \_______________________________|
+   0% +------+--------------+--------------+--------------+---------+
             0.0s           1.5s           3.0s           4.5s      Time (s)
-                           └─── Suspect Interval: 1.5s–3.0s ───┘
+                           +--- Suspect Interval: 1.5s-3.0s ---+
 ```
 
 ### ✂ Splice Boundary Markers
@@ -230,8 +230,8 @@ Forenlytics compiles official, court-ready **Forensic Audio Intelligence Dockets
 +-----------------------------------------------------------------------------+
 | 1.0 EXAMINATION METADATA & CHAIN OF CUSTODY                                 |
 | - Suite: Forenlytics Neural Audio v2.0  - Ingestion: 16kHz Mono PCM, -20dBFS|
-| - Target Sample SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4...       |
-| - Comparison Sample SHA-256: ca978112ca1bbdcaf064278e4a1f2f0dda12...       |
+| - Target Sample SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4...        |
+| - Comparison Sample SHA-256: ca978112ca1bbdcaf064278e4a1f2f0dda12...        |
 |                                                                             |
 | 2.0 SIX-DIMENSIONAL SPEAKER VERIFICATION MATRIX                             |
 | +---------------------------+--------+-------+----------------------------+ |
@@ -244,12 +244,12 @@ Forenlytics compiles official, court-ready **Forensic Audio Intelligence Dockets
 | | 5. Speaking Rhythm        |   3%   | 79.5% | Onset Cadence 4.2/s        | |
 | | 6. Energy Dynamics        |   2%   | 90.0% | Phonation RMS Variation    | |
 | +---------------------------+--------+-------+----------------------------+ |
-| COMPOSITE BIOMETRIC MATCH: 84.5%  *  VERDICT: Very Likely Same Speaker [HIGH] |
+| COMPOSITE MATCH: 84.5%  *  VERDICT: Very Likely Same Speaker [HIGH]         |
 |                                                                             |
 | 3.0 MULTI-SIGNAL DEEPFAKE & TEMPORAL SPLICING DIAGNOSTICS                   |
-| - Spectral Delta (35%): 78.5%  - Prosody (30%): 65.2%  - Vocoder (20%): 34%|
-| - Splice Boundaries: 1.50s, 3.00s  - Suspect Range: [1.50s - 3.00s]        |
-| - Manipulation Category: SPLICED_PARTIAL (Localized Insertion Detected)    |
+| - Spectral Delta (35%): 78.5%  - Prosody (30%): 65.2%  - Vocoder (20%): 34% |
+| - Splice Boundaries: 1.50s, 3.00s  - Suspect Range: [1.50s - 3.00s]         |
+| - Manipulation Category: SPLICED_PARTIAL (Localized Insertion Detected)     |
 |                                                                             |
 | 4.0 EXPERT FORENSIC OPINION & STATUTORY DISCLAIMER                          |
 +-----------------------------------------------------------------------------+
