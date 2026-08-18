@@ -1,0 +1,451 @@
+{
+  "benchmark_name": "Synthetic Speech & Splicing Calibration Benchmark",
+  "sample_size": 120,
+  "bona_fide_samples": 40,
+  "synthetic_samples": 80,
+  "spliced_samples": 40,
+  "evaluation_date": "2026-08-18 20:29:05 UTC",
+  "fused_composite": {
+    "eer_pct": 20.0,
+    "auc": 0.8809,
+    "optimal_threshold": 47.11,
+    "operating_points": {
+      "FAR_1bps": {
+        "threshold": 56.5,
+        "target_far_pct": 0.1,
+        "actual_far_pct": 2.5,
+        "actual_frr_pct": 68.75
+      },
+      "FAR_1pct": {
+        "threshold": 56.5,
+        "target_far_pct": 1.0,
+        "actual_far_pct": 2.5,
+        "actual_frr_pct": 68.75
+      },
+      "FAR_5pct": {
+        "threshold": 56.1,
+        "target_far_pct": 5.0,
+        "actual_far_pct": 5.0,
+        "actual_frr_pct": 68.75
+      }
+    },
+    "curve_samples": [
+      {
+        "threshold": 14.5,
+        "far": 100.0,
+        "frr": 0.0,
+        "accuracy": 66.67
+      },
+      {
+        "threshold": 15.54,
+        "far": 95.0,
+        "frr": 0.0,
+        "accuracy": 68.33
+      },
+      {
+        "threshold": 16.57,
+        "far": 95.0,
+        "frr": 0.0,
+        "accuracy": 68.33
+      },
+      {
+        "threshold": 17.61,
+        "far": 92.5,
+        "frr": 0.0,
+        "accuracy": 69.17
+      },
+      {
+        "threshold": 18.65,
+        "far": 90.0,
+        "frr": 0.0,
+        "accuracy": 70.0
+      },
+      {
+        "threshold": 19.69,
+        "far": 85.0,
+        "frr": 0.0,
+        "accuracy": 71.67
+      },
+      {
+        "threshold": 20.72,
+        "far": 85.0,
+        "frr": 0.0,
+        "accuracy": 71.67
+      },
+      {
+        "threshold": 21.76,
+        "far": 85.0,
+        "frr": 0.0,
+        "accuracy": 71.67
+      },
+      {
+        "threshold": 22.8,
+        "far": 85.0,
+        "frr": 0.0,
+        "accuracy": 71.67
+      },
+      {
+        "threshold": 23.83,
+        "far": 80.0,
+        "frr": 0.0,
+        "accuracy": 73.33
+      },
+      {
+        "threshold": 24.87,
+        "far": 77.5,
+        "frr": 0.0,
+        "accuracy": 74.17
+      },
+      {
+        "threshold": 25.91,
+        "far": 72.5,
+        "frr": 0.0,
+        "accuracy": 75.83
+      },
+      {
+        "threshold": 26.94,
+        "far": 70.0,
+        "frr": 0.0,
+        "accuracy": 76.67
+      },
+      {
+        "threshold": 27.98,
+        "far": 65.0,
+        "frr": 0.0,
+        "accuracy": 78.33
+      },
+      {
+        "threshold": 29.02,
+        "far": 47.5,
+        "frr": 0.0,
+        "accuracy": 84.17
+      },
+      {
+        "threshold": 30.06,
+        "far": 45.0,
+        "frr": 0.0,
+        "accuracy": 85.0
+      },
+      {
+        "threshold": 31.09,
+        "far": 42.5,
+        "frr": 0.0,
+        "accuracy": 85.83
+      },
+      {
+        "threshold": 32.13,
+        "far": 40.0,
+        "frr": 0.0,
+        "accuracy": 86.67
+      },
+      {
+        "threshold": 33.17,
+        "far": 35.0,
+        "frr": 0.0,
+        "accuracy": 88.33
+      },
+      {
+        "threshold": 34.2,
+        "far": 35.0,
+        "frr": 0.0,
+        "accuracy": 88.33
+      },
+      {
+        "threshold": 35.24,
+        "far": 30.0,
+        "frr": 0.0,
+        "accuracy": 90.0
+      },
+      {
+        "threshold": 36.28,
+        "far": 30.0,
+        "frr": 0.0,
+        "accuracy": 90.0
+      },
+      {
+        "threshold": 37.31,
+        "far": 30.0,
+        "frr": 0.0,
+        "accuracy": 90.0
+      },
+      {
+        "threshold": 38.35,
+        "far": 27.5,
+        "frr": 0.0,
+        "accuracy": 90.83
+      },
+      {
+        "threshold": 39.39,
+        "far": 27.5,
+        "frr": 0.0,
+        "accuracy": 90.83
+      },
+      {
+        "threshold": 40.43,
+        "far": 25.0,
+        "frr": 0.0,
+        "accuracy": 91.67
+      },
+      {
+        "threshold": 41.46,
+        "far": 25.0,
+        "frr": 0.0,
+        "accuracy": 91.67
+      },
+      {
+        "threshold": 42.5,
+        "far": 25.0,
+        "frr": 1.25,
+        "accuracy": 90.83
+      },
+      {
+        "threshold": 43.54,
+        "far": 25.0,
+        "frr": 5.0,
+        "accuracy": 88.33
+      },
+      {
+        "threshold": 44.57,
+        "far": 22.5,
+        "frr": 7.5,
+        "accuracy": 87.5
+      },
+      {
+        "threshold": 45.61,
+        "far": 22.5,
+        "frr": 11.25,
+        "accuracy": 85.0
+      },
+      {
+        "threshold": 46.65,
+        "far": 22.5,
+        "frr": 17.5,
+        "accuracy": 80.83
+      },
+      {
+        "threshold": 47.69,
+        "far": 20.0,
+        "frr": 21.25,
+        "accuracy": 79.17
+      },
+      {
+        "threshold": 48.72,
+        "far": 20.0,
+        "frr": 26.25,
+        "accuracy": 75.83
+      },
+      {
+        "threshold": 49.76,
+        "far": 20.0,
+        "frr": 31.25,
+        "accuracy": 72.5
+      },
+      {
+        "threshold": 50.8,
+        "far": 17.5,
+        "frr": 42.5,
+        "accuracy": 65.83
+      },
+      {
+        "threshold": 51.83,
+        "far": 15.0,
+        "frr": 50.0,
+        "accuracy": 61.67
+      },
+      {
+        "threshold": 52.87,
+        "far": 12.5,
+        "frr": 56.25,
+        "accuracy": 58.33
+      },
+      {
+        "threshold": 53.91,
+        "far": 7.5,
+        "frr": 58.75,
+        "accuracy": 58.33
+      },
+      {
+        "threshold": 54.94,
+        "far": 7.5,
+        "frr": 60.0,
+        "accuracy": 57.5
+      },
+      {
+        "threshold": 55.98,
+        "far": 5.0,
+        "frr": 67.5,
+        "accuracy": 53.33
+      },
+      {
+        "threshold": 57.02,
+        "far": 0.0,
+        "frr": 70.0,
+        "accuracy": 53.33
+      },
+      {
+        "threshold": 58.06,
+        "far": 0.0,
+        "frr": 75.0,
+        "accuracy": 50.0
+      },
+      {
+        "threshold": 59.09,
+        "far": 0.0,
+        "frr": 77.5,
+        "accuracy": 48.33
+      },
+      {
+        "threshold": 60.13,
+        "far": 0.0,
+        "frr": 82.5,
+        "accuracy": 45.0
+      },
+      {
+        "threshold": 61.17,
+        "far": 0.0,
+        "frr": 85.0,
+        "accuracy": 43.33
+      },
+      {
+        "threshold": 62.2,
+        "far": 0.0,
+        "frr": 88.75,
+        "accuracy": 40.83
+      },
+      {
+        "threshold": 63.24,
+        "far": 0.0,
+        "frr": 91.25,
+        "accuracy": 39.17
+      },
+      {
+        "threshold": 64.28,
+        "far": 0.0,
+        "frr": 96.25,
+        "accuracy": 35.83
+      },
+      {
+        "threshold": 65.31,
+        "far": 0.0,
+        "frr": 97.5,
+        "accuracy": 35.0
+      }
+    ]
+  },
+  "signals": {
+    "neural_model": {
+      "dimension": "neural_model",
+      "eer_pct": 62.5,
+      "auc": 0.3063,
+      "optimal_threshold": 51.93,
+      "operating_points": {
+        "FAR_1bps": {
+          "threshold": 97.7,
+          "target_far_pct": 0.1,
+          "actual_far_pct": 2.5,
+          "actual_frr_pct": 88.75
+        },
+        "FAR_1pct": {
+          "threshold": 97.7,
+          "target_far_pct": 1.0,
+          "actual_far_pct": 2.5,
+          "actual_frr_pct": 88.75
+        },
+        "FAR_5pct": {
+          "threshold": 97.6,
+          "target_far_pct": 5.0,
+          "actual_far_pct": 5.0,
+          "actual_frr_pct": 88.75
+        }
+      },
+      "mean_positive_score": 36.49,
+      "mean_negative_score": 63.05
+    },
+    "vocoder_artifacts": {
+      "dimension": "vocoder_artifacts",
+      "eer_pct": 35.62,
+      "auc": 0.7488,
+      "optimal_threshold": 27.1,
+      "operating_points": {
+        "FAR_1bps": {
+          "threshold": 32.8,
+          "target_far_pct": 0.1,
+          "actual_far_pct": 2.5,
+          "actual_frr_pct": 78.75
+        },
+        "FAR_1pct": {
+          "threshold": 32.8,
+          "target_far_pct": 1.0,
+          "actual_far_pct": 2.5,
+          "actual_frr_pct": 78.75
+        },
+        "FAR_5pct": {
+          "threshold": 32.0,
+          "target_far_pct": 5.0,
+          "actual_far_pct": 5.0,
+          "actual_frr_pct": 76.25
+        }
+      },
+      "mean_positive_score": 29.06,
+      "mean_negative_score": 23.14
+    },
+    "spectral_consistency": {
+      "dimension": "spectral_consistency",
+      "eer_pct": 23.12,
+      "auc": 0.8916,
+      "optimal_threshold": 78.2,
+      "operating_points": {
+        "FAR_1bps": {
+          "threshold": 86.8,
+          "target_far_pct": 0.1,
+          "actual_far_pct": 5.0,
+          "actual_frr_pct": 65.0
+        },
+        "FAR_1pct": {
+          "threshold": 86.8,
+          "target_far_pct": 1.0,
+          "actual_far_pct": 5.0,
+          "actual_frr_pct": 65.0
+        },
+        "FAR_5pct": {
+          "threshold": 86.8,
+          "target_far_pct": 5.0,
+          "actual_far_pct": 5.0,
+          "actual_frr_pct": 65.0
+        }
+      },
+      "mean_positive_score": 83.05,
+      "mean_negative_score": 28.56
+    },
+    "prosody_naturalness": {
+      "dimension": "prosody_naturalness",
+      "eer_pct": 36.88,
+      "auc": 0.6641,
+      "optimal_threshold": 43.24,
+      "operating_points": {
+        "FAR_1bps": {
+          "threshold": 68.2,
+          "target_far_pct": 0.1,
+          "actual_far_pct": 5.0,
+          "actual_frr_pct": 98.75
+        },
+        "FAR_1pct": {
+          "threshold": 68.2,
+          "target_far_pct": 1.0,
+          "actual_far_pct": 5.0,
+          "actual_frr_pct": 98.75
+        },
+        "FAR_5pct": {
+          "threshold": 68.2,
+          "target_far_pct": 5.0,
+          "actual_far_pct": 5.0,
+          "actual_frr_pct": 98.75
+        }
+      },
+      "mean_positive_score": 47.0,
+      "mean_negative_score": 39.73
+    }
+  },
+  "category_accuracy_pct": 48.33,
+  "splice_localization_recall_pct": 100.0
+}

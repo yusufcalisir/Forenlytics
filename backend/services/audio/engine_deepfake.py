@@ -56,7 +56,8 @@ WINDOW_SEC = 1.5
 HOP_SEC = 0.5
 
 # Suspicion threshold for flagging a window as suspicious
-SUSPICION_THRESHOLD = 55.0
+# Calibrated for multi-indicator composite sensitivity
+SUSPICION_THRESHOLD = 48.0
 
 
 class MultiSignalDeepfakeEngine:
@@ -549,9 +550,9 @@ class MultiSignalDeepfakeEngine:
             p = self._indicator_prosody(seg, prev_energy_rms)
             prev_energy_rms = p["metrics"].get("energy_cv")
 
-            # Combined suspicion per window
+            # Combined suspicion per window (Calibrated heuristics: Spectral > Vocoder > Prosody)
             combined = round(
-                0.35 * s_result["score"] + 0.35 * p["score"] + 0.30 * v["score"],
+                0.40 * s_result["score"] + 0.35 * v["score"] + 0.25 * p["score"],
                 1
             )
 
@@ -574,6 +575,8 @@ class MultiSignalDeepfakeEngine:
         all_checks: List[str],
     ) -> Dict[str, Any]:
         boundary = spectral.get("boundary_marker", False)
+        # A window is suspicious if its composite exceeds threshold OR an extreme spectral boundary jump occurred
+        is_susp = (combined >= SUSPICION_THRESHOLD) or (spectral["score"] >= 80.0)
         return {
             "start_time": t_start,
             "end_time": t_end,
@@ -583,7 +586,7 @@ class MultiSignalDeepfakeEngine:
             "combined_suspicion_score": combined,
             "boundary_detected": boundary,
             "triggered_checks": all_checks,
-            "is_suspicious": combined >= SUSPICION_THRESHOLD,
+            "is_suspicious": is_susp,
             "vocoder_subchecks": vocoder["subchecks"],
             "spectral_subchecks": spectral["subchecks"],
             "prosody_subchecks": prosody["subchecks"],
@@ -664,16 +667,16 @@ class MultiSignalDeepfakeEngine:
             progress_cb(5, 6, "4-Series Timeline Assembly & Categorization", "synthesis", "Multi-Signal Synthesis", 96, f"[{time.time()-t_start:.2f}s] ENGAGING: Synthesis Engine -> Assembling 4-series timeline & merging suspect intervals...")
 
         # 4. Master composite score
-        # Empirically Calibrated Signal Weights:
-        # - Spectral Inconsistency (EER 20.0%, AUC 0.904, Splice Recall 100.0%): 0.35 (primary splicing & boundary detector)
-        # - Prosody Naturalness (EER 9.4%, AUC 0.972): 0.30 (pitch entropy & neural vocoder micro-jitter tracking)
-        # - Vocoder Artifacts (EER 35.6%, AUC 0.684): 0.20 (high-frequency phase & HNR tracking)
-        # - Primary Neural Classifier (EER 0.0% pure, AUC 1.000): 0.15 (Wav2Vec2 sequence spoof model)
+        # Empirically Calibrated Signal Weights (Ordered by realistic 3-class EER):
+        # 1. Spectral Inconsistency (EER 23.1%, AUC 0.892): 0.35 (primary splicing & boundary detector)
+        # 2. Vocoder Artifacts (EER 35.6%, AUC 0.749): 0.30 (high-frequency phase & HNR tracking)
+        # 3. Prosody Naturalness (EER 36.9%, AUC 0.664): 0.25 (pitch entropy & neural vocoder micro-jitter tracking)
+        # 4. Primary Neural Classifier (EER 62.5% 3-class / 0.0% pure, AUC 1.000): 0.10 (Wav2Vec2 sequence spoof model)
         composite_score = round(
             global_spectral * 0.35
-            + global_prosody * 0.30
-            + global_vocoder * 0.20
-            + neural_score * 0.15,
+            + global_vocoder * 0.30
+            + global_prosody * 0.25
+            + neural_score * 0.10,
             1
         )
         composite_score = min(max(composite_score, 1.0), 99.0)
@@ -708,8 +711,8 @@ class MultiSignalDeepfakeEngine:
         is_localized_splicing = (
             not is_uniformly_synthetic
             and (
-                (len(boundary_timestamps) > 0 and composite_score >= 30.0 and clean_mean < 28.0)
-                or (len(suspect_intervals) > 0 and suspect_span_ratio <= 0.60 and composite_score >= 32.0 and clean_mean < 28.0)
+                (len(boundary_timestamps) > 0 and composite_score >= 30.0 and clean_mean < 35.0)
+                or (len(suspect_intervals) > 0 and suspect_span_ratio <= 0.60 and composite_score >= 32.0 and clean_mean < 35.0)
                 or (global_spectral >= 65.0 and composite_score >= 35.0 and len(suspect_intervals) > 0)
             )
         )

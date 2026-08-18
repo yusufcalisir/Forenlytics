@@ -229,22 +229,22 @@ export default function DashboardPage() {
             <div className="p-2.5 rounded-lg bg-brand-surface border border-brand-border">
               <div className="text-neutral-500 text-[10px]">Spectral Splicing (✂)</div>
               <div className="text-white font-bold mt-0.5">35% Weight</div>
-              <div className="text-[10px] text-brand-emerald">AUC: 0.892 | 90% Recall</div>
-            </div>
-            <div className="p-2.5 rounded-lg bg-brand-surface border border-brand-border">
-              <div className="text-neutral-500 text-[10px]">Prosody &amp; F0 Entropy</div>
-              <div className="text-white font-bold mt-0.5">30% Weight</div>
-              <div className="text-[10px] text-amber-400">&lt;1.4 Bits Inverted Pitch</div>
+              <div className="text-[10px] text-brand-emerald">AUC: 0.892 | 100% Recall</div>
             </div>
             <div className="p-2.5 rounded-lg bg-brand-surface border border-brand-border">
               <div className="text-neutral-500 text-[10px]">Vocoder Artifacts</div>
-              <div className="text-white font-bold mt-0.5">20% Weight</div>
+              <div className="text-white font-bold mt-0.5">30% Weight</div>
               <div className="text-[10px] text-purple-400">&gt;6.5kHz HiFi-GAN Phase</div>
             </div>
             <div className="p-2.5 rounded-lg bg-brand-surface border border-brand-border">
+              <div className="text-neutral-500 text-[10px]">Prosody &amp; F0 Entropy</div>
+              <div className="text-white font-bold mt-0.5">25% Weight</div>
+              <div className="text-[10px] text-amber-400">Low Intonation Variance</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-brand-surface border border-brand-border">
               <div className="text-neutral-500 text-[10px]">Primary SOTA Classifier</div>
-              <div className="text-white font-bold mt-0.5">15% Weight</div>
-              <div className="text-[10px] text-brand-cyan">Wav2Vec2 Sequence Softmax</div>
+              <div className="text-white font-bold mt-0.5">10% Weight</div>
+              <div className="text-[10px] text-brand-cyan">Wav2Vec2 Sequence Model</div>
             </div>
           </div>
         </Panel>

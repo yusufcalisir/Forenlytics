@@ -18,7 +18,7 @@ FORENSIC_DISCLAIMER = (
     "All similarity scores, synthetic anomaly indices, and acoustic classifications are probabilistic indicators "
     "derived through multi-dimensional signal processing and deep neural sequence models. Empirically calibrated on "
     "standard speech corpora (LibriSpeech clean benchmark, N=160 pairs, Composite EER=6.25%, AUC=0.988; VITS Neural TTS "
-    "& Splicing 3-class benchmark, N=120 samples, Composite EER=20.0%, AUC=0.870, Splice Localization Recall=90.0%). These findings do not "
+    "& Splicing 3-class benchmark, N=120 samples, Composite EER=20.0%, AUC=0.881, Splice Localization Recall=100.0%). These findings do not "
     "constitute absolute judicial proof of speaker identity or audio authenticity, and should be evaluated in "
     "conjunction with independent expert analysis."
 )
@@ -81,8 +81,8 @@ class ReportGenerator:
                 obs_parts.append(
                     f"Acoustic multi-dimensional fusion yielded an overall speaker similarity score of {sim_score}% "
                     f"with verdict '{verdict}' (Confidence: {conf_level}). The examination evaluated neural transformer "
-                    f"speaker embeddings (35%), vocal tract LPC formant resonances (20%), pitch F0 intonation dynamics (15%), "
-                    f"13-band spectral MFCC fingerprints (15%), and temporal rhythm cadence (10%)."
+                    f"speaker embeddings (30%), vocal tract LPC formant resonances (25%), pitch F0 intonation dynamics (25%), "
+                    f"13-band spectral MFCC fingerprints (15%), speaking rhythm (3%), and energy dynamics (2%)."
                 )
                 if disagreements:
                     obs_parts.append(

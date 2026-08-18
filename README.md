@@ -46,9 +46,9 @@ Traditional audio comparison systems rely on a single scalar score (e.g. cosine 
 | 🎙️ 6-Dimensional Speaker Verification (Pillar 1) | ⚡ Multi-Signal Deepfake & Splicing Suite (Pillar 2) |
 | :--- | :--- |
 | • **Neural Identity**: WavLM + ECAPA 512-D Cosine (`30%`) | • **Spectral Splicing**: MFCC Euclidean $\Delta$ (`35%`) |
-| • **Vocal Tract Formants**: LPC Roots $F_1–F_4$ Hz (`25%`) | • **Prosody Naturalness**: $F_0$ Entropy & Micro-Jitter (`30%`) |
-| • **Pitch Dynamics**: pYIN Fundamental $F_0$ (`25%`) | • **Vocoder Artifacts**: High-Freq Phase & HNR (`20%`) |
-| • **Spectral MFCC**: 13-Band Cepstral Envelope (`15%`) | • **Primary Neural Model**: Wav2Vec2 Sequence (`15%`) |
+| • **Vocal Tract Formants**: LPC Roots $F_1–F_4$ Hz (`25%`) | • **Vocoder Artifacts**: High-Freq Phase & HNR (`30%`) |
+| • **Pitch Dynamics**: pYIN Fundamental $F_0$ (`25%`) | • **Prosody Naturalness**: $F_0$ Entropy & Micro-Jitter (`25%`) |
+| • **Spectral MFCC**: 13-Band Cepstral Envelope (`15%`) | • **Primary Neural Model**: Wav2Vec2 Sequence (`10%`) |
 | • **Speaking Rhythm**: Syllable Onset Tempo (`3%`) | • **Sliding Window**: 1.5s Overlapping Window / 0.5s Hop |
 | • **Energy Dynamics**: RMS Phonation Dynamics (`2%`) | • **Splice Boundary Markers**: Millisecond Localization (✂) |
 
@@ -121,23 +121,23 @@ flowchart TD
         NOISE --> S1_OUT
     end
 
-    subgraph S2 ["Signal 2: Prosody Naturalness & Pitch Entropy (30% Weight - EER: 36.9%)"]
-        SLICE --> ENTROPY["F0 Intonation Entropy (Low Variance in TTS)"]
-        SLICE --> JITTER["Neural Vocoder Tracking Micro-Jitter"]
-        ENTROPY --> S2_OUT["STATISTICAL HEURISTIC: Flags Constrained Pitch Entropy"]
-        JITTER --> S2_OUT
-    end
-
-    subgraph S3 ["Signal 3: Vocoder Artifacts (20% Weight - EER: 35.6%)"]
+    subgraph S2 ["Signal 2: Vocoder Artifacts (30% Weight - EER: 35.6%)"]
         SLICE --> RIPPLE["High-Frequency Periodic Energy >6.5 kHz"]
         SLICE --> HNR["Harmonic-to-Noise Ratio Normal Band"]
         SLICE --> PHASE["Instantaneous Phase Coherence"]
-        RIPPLE --> S3_OUT["ACOUSTIC HEURISTIC: Detects HiFi-GAN / MelGAN Phase Artifacts"]
-        HNR --> S3_OUT
-        PHASE --> S3_OUT
+        RIPPLE --> S2_OUT["ACOUSTIC HEURISTIC: Detects HiFi-GAN / MelGAN Phase Artifacts"]
+        HNR --> S2_OUT
+        PHASE --> S2_OUT
     end
 
-    subgraph S4 ["Signal 4: Primary Neural Spoof Model (15% Weight - Wav2Vec2)"]
+    subgraph S3 ["Signal 3: Prosody Naturalness & Pitch Entropy (25% Weight - EER: 36.9%)"]
+        SLICE --> ENTROPY["F0 Intonation Entropy (Low Variance in TTS)"]
+        SLICE --> JITTER["Neural Vocoder Tracking Micro-Jitter"]
+        ENTROPY --> S3_OUT["STATISTICAL HEURISTIC: Flags Constrained Pitch Entropy"]
+        JITTER --> S3_OUT
+    end
+
+    subgraph S4 ["Signal 4: Primary Neural Spoof Model (10% Weight - Wav2Vec2)"]
         SLICE --> W2V["Wav2Vec2 Deepfake Sequence Classifier"]
         W2V --> S4_OUT["TRAINED MODEL: Softmax Probability across Latent Tokens"]
     end
@@ -158,11 +158,11 @@ flowchart TD
 | Diagnostic Signal | Type & Mechanism | Calibrated Weight | 3-Class EER | ROC AUC | Pure Synthetic EER / AUC | Primary Target & Acoustic Metric |
 | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
 | **1. Spectral Splicing Inconsistency** | `TEMPORAL HEURISTIC` | **35%** | **23.1%** | **0.892** | 55.0% / 0.414 | Cross-window MFCC jumps ($>2.5\sigma$ $\Delta$) & quiet-frame noise floor |
-| **2. Prosody & Pitch Entropy** | `STATISTICAL HEURISTIC` | **30%** | **36.9%** | **0.664** | **0.00% / 1.000** | Constrained pitch entropy ($<1.4$ bits) & micro-phase tracking jitter |
-| **3. Vocoder Artifacts** | `ACOUSTIC HEURISTIC` | **20%** | **35.6%** | **0.749** | 27.5% / 0.733 | High-frequency phase ripple ($>6.5\text{ kHz}$) & HNR normal band |
-| **4. Primary Neural Model** | `TRAINED MODEL` (Wav2Vec2) | **15%** | **62.5%**\* | **0.306**\* | **0.00% / 1.000** | Whole-file latent spoof tokens (dilutes on short partial splices) |
+| **2. Vocoder Artifacts** | `ACOUSTIC HEURISTIC` | **30%** | **35.6%** | **0.749** | 27.5% / 0.733 | High-frequency phase ripple ($>6.5\text{ kHz}$) & HNR normal band |
+| **3. Prosody & Pitch Entropy** | `STATISTICAL HEURISTIC` | **25%** | **36.9%** | **0.664** | **0.00% / 1.000** | Constrained pitch entropy ($<1.4$ bits) & micro-phase tracking jitter |
+| **4. Primary Neural Model** | `TRAINED MODEL` (Wav2Vec2) | **10%** | **62.5%**\* | **0.306**\* | **0.00% / 1.000** | Whole-file latent spoof tokens (dilutes on short partial splices) |
 
-> **Headline 3-Class Benchmark (Real + Full VITS + Partial Spliced, $N=120$)**: Composite Anomaly Equal Error Rate **$20.0\%$** | Area Under Curve (AUC) **$0.870$** (Optimal Cutoff: **$46.0\%$** | Splice Localization Recall: **$90.0\%$**).
+> **Headline 3-Class Benchmark (Real + Full VITS + Partial Spliced, $N=120$)**: Composite Anomaly Equal Error Rate **$20.0\%$** | Area Under Curve (AUC) **$0.881$** (Optimal Cutoff: **$47.1\%$** | Splice Localization Recall: **$100.0\%$**).
 > 
 > *\*Note: The primary Wav2Vec2 classifier achieves 0.00% EER on full-length synthetic files, but dilutes on short 1.5s partial splices within natural human speech.*
 
@@ -261,7 +261,7 @@ Forenlytics compiles official, court-ready **Forensic Audio Intelligence Dockets
 | COMPOSITE MATCH: 84.5%  *  VERDICT: Very Likely Same Speaker [HIGH]         |
 |                                                                             |
 | 3.0 MULTI-SIGNAL DEEPFAKE & TEMPORAL SPLICING DIAGNOSTICS                   |
-| - Spectral Delta (35%): 78.5%  - Prosody (30%): 65.2%  - Vocoder (20%): 34% |
+| - Spectral Delta (35%): 78.5%  - Vocoder (30%): 65.2%  - Prosody (25%): 34% |
 | - Splice Boundaries: 1.50s, 3.00s  - Suspect Range: [1.50s - 3.00s]         |
 | - Manipulation Category: SPLICED_PARTIAL (Localized Insertion Detected)     |
 |                                                                             |
