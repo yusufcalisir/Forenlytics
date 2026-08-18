@@ -702,18 +702,18 @@ class MultiSignalDeepfakeEngine:
         clean_mean = float(np.mean([w["combined_suspicion_score"] for w in non_flagged])) if non_flagged else 100.0
 
         is_uniformly_synthetic = (
-            neural_score >= 60.0
-            or (composite_score >= 45.0 and (global_prosody >= 35.0 or global_vocoder >= 25.0 or flagged_ratio >= 0.35))
-            or flagged_ratio >= 0.50
-            or (suspect_span_ratio >= 0.65 and composite_score >= 40.0)
+            neural_score >= 50.0
+            or (composite_score >= 47.0 and suspect_span_ratio >= 0.60)
+            or (composite_score >= 48.0 and global_prosody >= 40.0 and flagged_ratio >= 0.40)
+            or (suspect_span_ratio >= 0.65 and composite_score >= 45.0)
         )
 
         is_localized_splicing = (
             not is_uniformly_synthetic
             and (
-                (len(boundary_timestamps) > 0 and composite_score >= 30.0 and clean_mean < 35.0)
-                or (len(suspect_intervals) > 0 and suspect_span_ratio <= 0.60 and composite_score >= 32.0 and clean_mean < 35.0)
-                or (global_spectral >= 65.0 and composite_score >= 35.0 and len(suspect_intervals) > 0)
+                (len(boundary_timestamps) > 0 and composite_score >= 32.0)
+                or (len(suspect_intervals) > 0 and suspect_span_ratio <= 0.65 and composite_score >= 38.0)
+                or (global_spectral >= 70.0 and composite_score >= 38.0 and suspect_span_ratio <= 0.65)
             )
         )
 
