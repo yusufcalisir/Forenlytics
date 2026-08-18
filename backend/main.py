@@ -2,7 +2,7 @@ import logging
 import os
 import time
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Header
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
@@ -44,6 +44,11 @@ def on_startup():
         "Session store active. "
         "Supported formats: WAV, MP3, FLAC, OGG (decoded via torchaudio / soundfile)."
     )
+
+# Silence browser favicon 404 noise
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return Response(status_code=204)
 
 # Global exception handler — NEVER crash, always return safe JSON
 @app.exception_handler(Exception)
@@ -161,7 +166,8 @@ def get_job_status(job_id: str):
         "job_id": job["id"],
         "status": job["status"],
         "type": job["type"],
-        "session_id": job["session_id"]
+        "session_id": job["session_id"],
+        "progress": job.get("progress")
     }
     
     if job["status"] == "completed":
@@ -195,13 +201,57 @@ async def upload_audio_pair(
         
     sid, session = _get_session(x_session_id)
     
-    def process_audio_compare(c1, c2):
-        result = audio_facade.analyze_pair(c1, c2)
+    def process_audio_compare(c1, c2, jid):
+        def cb(*args):
+            job_manager.update_progress(jid, *args)
+        result = audio_facade.analyze_pair(c1, c2, progress_cb=cb)
         if result and "error" not in result:
             session.audio_compare_result = result
         return result
         
-    job_id = job_manager.submit_job("AUDIO_COMPARE", sid, process_audio_compare, content_1, content_2)
+    # Generate job ID first to bind progress callback
+    import uuid
+    job_id = str(uuid.uuid4())
+    job_manager.jobs[job_id] = {
+        "status": "pending",
+        "created_at": time.time(),
+        "result": None,
+        "id": job_id,
+        "type": "AUDIO_COMPARE",
+        "session_id": sid,
+        "error": None,
+        "completed_at": None,
+        "progress": {
+            "stage_index": 0,
+            "total_stages": 7,
+            "stage_name": "Initializing 6D Biometric Pipeline...",
+            "stage_key": "vad",
+            "engine": "VAD Filter (16kHz)",
+            "progress_pct": 5,
+            "telemetry_log": "[0.00s] INITIALIZING: Allocating worker thread and audio buffers..."
+        }
+    }
+    def _run_compare():
+        job_manager.jobs[job_id]["status"] = "running"
+        try:
+            res = process_audio_compare(content_1, content_2, job_id)
+            if isinstance(res, dict) and "error" in res and res.get("error") != "NO_DATA":
+                job_manager.jobs[job_id]["status"] = "failed"
+                job_manager.jobs[job_id]["error"] = res["error"]
+            else:
+                job_manager.jobs[job_id]["status"] = "completed"
+                job_manager.jobs[job_id]["result"] = res
+                if job_manager.jobs[job_id].get("progress"):
+                    job_manager.jobs[job_id]["progress"]["progress_pct"] = 100
+                    job_manager.jobs[job_id]["progress"]["stage_name"] = "Analysis Complete"
+                    job_manager.jobs[job_id]["progress"]["telemetry_log"] = "Completed: Full 6D Biometric Comparison synthesized."
+            job_manager.jobs[job_id]["completed_at"] = time.time()
+        except Exception as e:
+            job_manager.jobs[job_id]["status"] = "failed"
+            job_manager.jobs[job_id]["error"] = str(e)
+            job_manager.jobs[job_id]["completed_at"] = time.time()
+
+    job_manager.executor.submit(_run_compare)
     return {"job_id": job_id, "status": "pending", "session_id": sid}
 
 
@@ -221,13 +271,56 @@ async def deepfake_detect(
         
     sid, session = _get_session(x_session_id)
     
-    def process_deepfake(c):
-        result = audio_facade.detect_deepfake(c)
+    def process_deepfake(c, jid):
+        def cb(*args):
+            job_manager.update_progress(jid, *args)
+        result = audio_facade.detect_deepfake(c, progress_cb=cb)
         if result and "error" not in result:
             session.audio_deepfake_result = result
         return result
         
-    job_id = job_manager.submit_job("AUDIO_DEEPFAKE", sid, process_deepfake, content)
+    import uuid
+    job_id = str(uuid.uuid4())
+    job_manager.jobs[job_id] = {
+        "status": "pending",
+        "created_at": time.time(),
+        "result": None,
+        "id": job_id,
+        "type": "AUDIO_DEEPFAKE",
+        "session_id": sid,
+        "error": None,
+        "completed_at": None,
+        "progress": {
+            "stage_index": 0,
+            "total_stages": 6,
+            "stage_name": "Initializing Synthetic Speech Scanner...",
+            "stage_key": "segmentation",
+            "engine": "Overlap Window Slicer",
+            "progress_pct": 5,
+            "telemetry_log": "[0.00s] INITIALIZING: Allocating worker thread and audio buffers..."
+        }
+    }
+    def _run_deepfake():
+        job_manager.jobs[job_id]["status"] = "running"
+        try:
+            res = process_deepfake(content, job_id)
+            if isinstance(res, dict) and "error" in res and res.get("error") != "NO_DATA":
+                job_manager.jobs[job_id]["status"] = "failed"
+                job_manager.jobs[job_id]["error"] = res["error"]
+            else:
+                job_manager.jobs[job_id]["status"] = "completed"
+                job_manager.jobs[job_id]["result"] = res
+                if job_manager.jobs[job_id].get("progress"):
+                    job_manager.jobs[job_id]["progress"]["progress_pct"] = 100
+                    job_manager.jobs[job_id]["progress"]["stage_name"] = "Scan Complete"
+                    job_manager.jobs[job_id]["progress"]["telemetry_log"] = "Completed: Multi-Signal Deepfake Diagnostics synthesized."
+            job_manager.jobs[job_id]["completed_at"] = time.time()
+        except Exception as e:
+            job_manager.jobs[job_id]["status"] = "failed"
+            job_manager.jobs[job_id]["error"] = str(e)
+            job_manager.jobs[job_id]["completed_at"] = time.time()
+
+    job_manager.executor.submit(_run_deepfake)
     return {"job_id": job_id, "status": "pending", "session_id": sid}
 
 

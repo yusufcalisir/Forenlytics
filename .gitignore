@@ -25,6 +25,10 @@ frontend/out/
 # forensic data & uploads
 **/backend/uploads/*
 **/backend/temp/*
+**/backend/benchmark_data/*
+*.tar.gz
+*.tar
+*.zip
 *.csv
 *.wav
 *.mp3

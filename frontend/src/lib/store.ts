@@ -1,6 +1,16 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+export interface JobProgress {
+  stage_index: number;
+  total_stages: number;
+  stage_name: string;
+  stage_key: string;
+  engine: string;
+  progress_pct: number;
+  telemetry_log: string;
+}
+
 interface AppState {
   // Audio (Speaker Comparison)
   audioSpeakerResult: any | null;
@@ -21,6 +31,11 @@ interface AppState {
   activeJobs: Record<string, string>;
   setActiveJob: (type: string, jobId: string) => void;
   clearActiveJob: (type: string) => void;
+
+  // Real-Time Job Progress Tracking (streaming from backend)
+  jobProgress: Record<string, JobProgress>;
+  setJobProgress: (type: string, progress: JobProgress) => void;
+  clearJobProgress: (type: string) => void;
 
   // Job Errors — surfaced from background job failures
   jobErrors: Record<string, string>;
@@ -52,6 +67,7 @@ export const useAppStore = create<AppState>()(
           audioDeepfakeResult: null,
           reportData: null,
           activeJobs: {},
+          jobProgress: {},
           jobErrors: {},
         }),
 
@@ -61,6 +77,16 @@ export const useAppStore = create<AppState>()(
         const next = { ...state.activeJobs };
         delete next[type];
         return { activeJobs: next };
+      }),
+
+      jobProgress: {},
+      setJobProgress: (type, progress) => set((state) => ({
+        jobProgress: { ...state.jobProgress, [type]: progress }
+      })),
+      clearJobProgress: (type) => set((state) => {
+        const next = { ...state.jobProgress };
+        delete next[type];
+        return { jobProgress: next };
       }),
 
       jobErrors: {},
@@ -82,4 +108,3 @@ export const useAppStore = create<AppState>()(
     }
   )
 );
-

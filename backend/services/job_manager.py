@@ -16,7 +16,7 @@ class JobManager:
     def submit_job(self, job_type: str, session_id: Optional[str], func: Callable, *args, **kwargs) -> str:
         job_id = str(uuid.uuid4())
         with self.lock:
-            # Initialize job state with user-requested standard format
+            # Initialize job state with user-requested standard format + real-time progress
             self.jobs[job_id] = {
                 "status": "pending",
                 "created_at": time.time(),
@@ -25,7 +25,16 @@ class JobManager:
                 "type": job_type,
                 "session_id": session_id,
                 "error": None,
-                "completed_at": None
+                "completed_at": None,
+                "progress": {
+                    "stage_index": 0,
+                    "total_stages": 7 if job_type == "AUDIO_COMPARE" else 6,
+                    "stage_name": "Initializing forensic worker...",
+                    "stage_key": "init",
+                    "engine": "Forensic Ingestion Pipeline",
+                    "progress_pct": 5,
+                    "telemetry_log": "[0.00s] INITIALIZING: Allocating worker thread and audio buffers..."
+                }
             }
         
         logger.info(f"Job {job_id} ({job_type}) initialized as pending.")
@@ -36,8 +45,7 @@ class JobManager:
                     self.jobs[job_id]["status"] = "running"
             
             try:
-                # We expect func to either return a dict or raise an exception
-                # If func returns {"error": "..."} we can optionally mark as failed.
+                # Pass progress callback if accepted or kwargs
                 result = func(*args, **kwargs)
                 
                 with self.lock:
@@ -48,6 +56,10 @@ class JobManager:
                         else:
                             self.jobs[job_id]["status"] = "completed"
                             self.jobs[job_id]["result"] = result
+                            if self.jobs[job_id].get("progress"):
+                                self.jobs[job_id]["progress"]["progress_pct"] = 100
+                                self.jobs[job_id]["progress"]["stage_name"] = "Analysis Complete"
+                                self.jobs[job_id]["progress"]["telemetry_log"] = "Completed: Full forensic analysis synthesized."
                         self.jobs[job_id]["completed_at"] = time.time()
                 logger.info(f"Job {job_id} ({job_type}) finished.")
             except Exception as e:
@@ -60,6 +72,30 @@ class JobManager:
 
         self.executor.submit(_wrapper)
         return job_id
+
+    def update_progress(
+        self,
+        job_id: str,
+        stage_index: int,
+        total_stages: int,
+        stage_name: str,
+        stage_key: str,
+        engine: str,
+        progress_pct: int,
+        telemetry_log: str
+    ):
+        """Thread-safe update of current executing stage."""
+        with self.lock:
+            if job_id in self.jobs:
+                self.jobs[job_id]["progress"] = {
+                    "stage_index": stage_index,
+                    "total_stages": total_stages,
+                    "stage_name": stage_name,
+                    "stage_key": stage_key,
+                    "engine": engine,
+                    "progress_pct": progress_pct,
+                    "telemetry_log": telemetry_log
+                }
 
     def get_job_status(self, job_id: str) -> Optional[Dict[str, Any]]:
         with self.lock:
