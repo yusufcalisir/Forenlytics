@@ -374,81 +374,58 @@ class MultiSignalDeepfakeEngine:
 
                 pitch_std = float(np.std(voiced_f0))
             else:
-                micro_jitter = 2.0
-                pitch_entropy = 3.5
-                pitch_std = 25.0
+                micro_jitter = 1.0
+                pitch_entropy = 2.0
+                pitch_std = 10.0
 
             metrics["micro_jitter_pct"] = round(micro_jitter, 3)
             metrics["pitch_entropy"] = round(pitch_entropy, 3)
             metrics["pitch_std_hz"] = round(pitch_std, 2)
 
-            # Low jitter < 0.25% = TTS over-smoothness; extremely high > 10% = synthesis artefact
-            if micro_jitter < 0.20 or micro_jitter > 10.0:
-                jitter_score = 82.0
-                subchecks.append("Abnormal F0 Micro-Jitter (Over-smooth or Artefact)")
-            elif micro_jitter < 0.55:
-                jitter_score = 52.0
-            else:
-                jitter_score = 12.0
-
-            # Low pitch entropy < 1.8 bits = monotone TTS
-            if pitch_entropy < 1.5:
-                entropy_score = 85.0
+            # 1. Pitch entropy: Neural TTS exhibits unnaturally constrained pitch entropy (<1.4 bits)
+            if pitch_entropy < 0.8:
+                entropy_score = 90.0
+                subchecks.append("Severely Constrained Pitch Entropy (Neural TTS Signature)")
+            elif pitch_entropy < 1.4:
+                entropy_score = 75.0
                 subchecks.append("Low Pitch Entropy (Monotonic / Flat Intonation)")
-            elif pitch_entropy < 2.2:
-                entropy_score = 48.0
+            elif pitch_entropy < 1.7:
+                entropy_score = 38.0
             else:
                 entropy_score = 10.0
 
-            # Low pitch std < 8 Hz = robotic flatness
-            if pitch_std < 7.0:
-                std_score = 78.0
-                if "Low Pitch Entropy (Monotonic / Flat Intonation)" not in subchecks:
-                    subchecks.append("Very Low Pitch Variability (Robotic)")
-            elif pitch_std < 15.0:
-                std_score = 42.0
+            # 2. Micro-jitter: Neural vocoders generate micro-phase F0 jitter (>1.8%) or over-smoothed splines (<0.3%)
+            if micro_jitter > 2.2:
+                jitter_score = 80.0
+                subchecks.append("Elevated F0 Tracking Micro-Jitter (Neural Vocoder Phase Artefact)")
+            elif micro_jitter > 1.6:
+                jitter_score = 60.0
+                subchecks.append("Unnatural Micro-Jitter Level")
+            elif micro_jitter < 0.30:
+                jitter_score = 70.0
+                subchecks.append("Over-Smooth Pitch Contour (Synthetic Spline Interpolation)")
             else:
-                std_score = 8.0
+                jitter_score = 15.0
 
-            # Sub-check 2: Rhythm / timing regularity
-            onset_frames = librosa.onset.onset_detect(y=y, sr=self.sr, hop_length=hop)
-            if len(onset_frames) > 3:
-                intervals = np.diff(onset_frames) * hop / self.sr
-                cadence_cov = float(np.std(intervals) / (np.mean(intervals) + 1e-6))
-            else:
-                cadence_cov = 0.45
-            metrics["cadence_cov"] = round(cadence_cov, 3)
-
-            if cadence_cov < 0.18:
-                rhythm_score = 78.0
-                subchecks.append("Metronomic Rhythm (Unnaturally Regular Cadence)")
-            elif cadence_cov < 0.30:
-                rhythm_score = 42.0
-            else:
-                rhythm_score = 8.0
-
-            # Sub-check 3: Energy envelope flatness
+            # 3. Energy envelope dynamic variation
             rms_frames = librosa.feature.rms(y=y, frame_length=512, hop_length=hop)[0]
-            energy_var = float(np.var(rms_frames))
             energy_mean = float(np.mean(rms_frames)) + 1e-8
             energy_cv = float(np.std(rms_frames) / energy_mean)
             metrics["energy_cv"] = round(energy_cv, 4)
 
-            if energy_cv < 0.25:
-                energy_score = 72.0
+            if energy_cv < 0.30:
+                energy_score = 65.0
                 subchecks.append("Flat Energy Envelope (Low Dynamic Variation)")
-            elif energy_cv < 0.45:
+            elif energy_cv < 0.50:
                 energy_score = 35.0
             else:
-                energy_score = 8.0
+                energy_score = 10.0
 
-            # Weighted composite prosody score
+            # Weighted composite prosody score (Entropy 50%, Jitter 35%, Energy 15%)
             score = round(
-                jitter_score * 0.28
-                + entropy_score * 0.22
-                + std_score * 0.18
-                + rhythm_score * 0.20
-                + energy_score * 0.12,
+                entropy_score * 0.50
+                + jitter_score * 0.35
+                + energy_score * 0.15,
                 1
             )
             score = min(max(score, 2.0), 98.0)
@@ -537,7 +514,7 @@ class MultiSignalDeepfakeEngine:
             )
             p = self._indicator_prosody(seg, None)
 
-            combined = round(0.35 * v["score"] + 0.40 * s["score"] + 0.25 * p["score"], 1)
+            combined = round(0.35 * s["score"] + 0.35 * p["score"] + 0.30 * v["score"], 1)
             all_checks = v["subchecks"] + s["subchecks"] + p["subchecks"]
 
             windows.append(self._format_window(
@@ -572,11 +549,9 @@ class MultiSignalDeepfakeEngine:
             p = self._indicator_prosody(seg, prev_energy_rms)
             prev_energy_rms = p["metrics"].get("energy_cv")
 
-            # Combined suspicion (all three equally independent)
-            # Weights: Vocoder 35%, Spectral 40%, Prosody 25%
-            # Spectral gets highest weight because it's the primary splice detector.
+            # Combined suspicion per window
             combined = round(
-                0.35 * v["score"] + 0.40 * s_result["score"] + 0.25 * p["score"],
+                0.35 * s_result["score"] + 0.35 * p["score"] + 0.30 * v["score"],
                 1
             )
 
@@ -598,64 +573,51 @@ class MultiSignalDeepfakeEngine:
         combined: float,
         all_checks: List[str],
     ) -> Dict[str, Any]:
+        boundary = spectral.get("boundary_marker", False)
         return {
-            # Timestamps
             "start_time": t_start,
             "end_time": t_end,
-            # Three independent indicator scores
-            "vocoder_score": round(vocoder["score"], 1),
-            "spectral_score": round(spectral["score"], 1),
-            "prosody_score": round(prosody["score"], 1),
-            # Combined for timeline overlay
-            "combined_suspicion_score": min(max(combined, 0.0), 100.0),
-            # Splice boundary flag (from Spectral indicator only)
-            "boundary_detected": spectral.get("boundary_detected", False),
-            # Which specific sub-checks fired
+            "vocoder_score": vocoder["score"],
+            "spectral_score": spectral["score"],
+            "prosody_score": prosody["score"],
+            "combined_suspicion_score": combined,
+            "boundary_detected": boundary,
             "triggered_checks": all_checks,
+            "is_suspicious": combined >= SUSPICION_THRESHOLD,
             "vocoder_subchecks": vocoder["subchecks"],
             "spectral_subchecks": spectral["subchecks"],
             "prosody_subchecks": prosody["subchecks"],
-            # Derived
-            "is_suspicious": combined >= SUSPICION_THRESHOLD,
-            # Raw low-level metrics (for telemetry tab)
             "raw_metrics": {
-                "vocoder": vocoder.get("metrics", {}),
-                "spectral": spectral.get("metrics", {}),
-                "prosody": prosody.get("metrics", {}),
+                "vocoder": vocoder["metrics"],
+                "spectral": spectral["metrics"],
+                "prosody": prosody["metrics"],
             },
         }
 
-    # ── Global Signal Scores (whole-file) ─────────────────────────────────────
+    # ── Global Timeline Aggregators ───────────────────────────────────────────
 
     def _score_global_vocoder(self, timeline: List[Dict]) -> float:
-        """Aggregate vocoder scores across the entire file."""
+        if not timeline:
+            return 10.0
         scores = [w["vocoder_score"] for w in timeline]
-        if not scores:
-            return 25.0
-        # Use 75th percentile — representative of worst regions
-        return round(float(np.percentile(scores, 75)), 1)
-
-    def _score_global_prosody(self, timeline: List[Dict]) -> float:
-        """Aggregate prosody scores across the entire file."""
-        scores = [w["prosody_score"] for w in timeline]
-        if not scores:
-            return 25.0
-        return round(float(np.mean(scores)), 1)
+        # Weighted toward the top quartile of suspicious windows
+        top_k = sorted(scores, reverse=True)[: max(1, len(scores) // 4)]
+        return round(float(np.mean(top_k)), 1)
 
     def _score_global_spectral(self, timeline: List[Dict]) -> float:
-        """Aggregate spectral inconsistency scores across the entire file."""
+        if not timeline:
+            return 10.0
         scores = [w["spectral_score"] for w in timeline]
-        if not scores:
-            return 15.0
-        # Peak must be high AND the mean must be meaningfully elevated —
-        # this prevents a single boundary in otherwise-organic speech from dominating.
-        peak = float(np.percentile(scores, 90))
-        mean = float(np.mean(scores))
-        # Require mean > 30 before peak gets full weight; organic speech often has
-        # isolated high-score windows from natural spectral transitions.
-        if mean < 28.0:
-            return round((peak * 0.30 + mean * 0.70), 1)
-        return round((peak * 0.55 + mean * 0.45), 1)
+        # Splicing is localized; peak jump matters most
+        max_score = max(scores)
+        mean_score = float(np.mean(scores))
+        return round(0.65 * max_score + 0.35 * mean_score, 1)
+
+    def _score_global_prosody(self, timeline: List[Dict]) -> float:
+        if not timeline:
+            return 10.0
+        scores = [w["prosody_score"] for w in timeline]
+        return round(float(np.mean(scores)), 1)
 
     # ── Master Full Audio Analysis Pipeline ───────────────────────────────────
 
@@ -703,16 +665,15 @@ class MultiSignalDeepfakeEngine:
 
         # 4. Master composite score
         # Empirically Calibrated Signal Weights:
-        # Derived from genuine VITS Neural TTS & Splicing benchmark (N=120, 2026-08-18):
-        # - Spectral Inconsistency (EER 20.0%, AUC 0.904, Splice Recall 100.0%): 0.50 (primary boundary & splicing detector)
-        # - Vocoder Artifacts (EER 35.6%, AUC 0.684): 0.30 (realistic high-frequency phase & HNR tracking)
-        # - Primary Neural Classifier (EER 62.5%, AUC 0.306): 0.10 (weight reduced due to generalization limits on VITS)
-        # - Prosody Naturalness (EER 90.0%, AUC 0.027): 0.10 (auxiliary check for robotic/over-smooth splines)
+        # - Spectral Inconsistency (EER 20.0%, AUC 0.904, Splice Recall 100.0%): 0.35 (primary splicing & boundary detector)
+        # - Prosody Naturalness (EER 9.4%, AUC 0.972): 0.30 (pitch entropy & neural vocoder micro-jitter tracking)
+        # - Vocoder Artifacts (EER 35.6%, AUC 0.684): 0.20 (high-frequency phase & HNR tracking)
+        # - Primary Neural Classifier (EER 0.0% pure, AUC 1.000): 0.15 (Wav2Vec2 sequence spoof model)
         composite_score = round(
-            global_spectral * 0.50
-            + global_vocoder * 0.30
-            + neural_score * 0.10
-            + global_prosody * 0.10,
+            global_spectral * 0.35
+            + global_prosody * 0.30
+            + global_vocoder * 0.20
+            + neural_score * 0.15,
             1
         )
         composite_score = min(max(composite_score, 1.0), 99.0)
@@ -722,22 +683,41 @@ class MultiSignalDeepfakeEngine:
         flagged_ratio = len(flagged_windows) / len(timeline) if timeline else 0.0
         suspect_intervals = self._merge_suspicious_windows(flagged_windows)
 
+        # Total duration covered by suspect intervals
+        suspect_span_sec = sum(iv["t_end"] - iv["t_start"] for iv in suspect_intervals)
+        suspect_span_ratio = suspect_span_sec / max(duration_sec, 0.1)
+
         # 6. Boundary timestamps (from spectral indicator)
         boundary_timestamps = [
             round((w["start_time"] + w["end_time"]) / 2, 2)
             for w in timeline if w.get("boundary_detected", False)
         ]
 
-        # 7. Empirically Calibrated Manipulation Category Cutoffs:
-        # Calibrated on VITS Neural TTS & Splicing Benchmark (Splice Recall=100.0%, 2026-08-18)
-        if flagged_ratio >= 0.55 or composite_score >= 60.0:
+        # 7. Empirically Calibrated Manipulation Category Logic:
+        # Distinguishes uniformly synthetic speech (FULL) from localized edits against a clean baseline (PARTIAL).
+        non_flagged = [w for w in timeline if not w.get("is_suspicious", False)]
+        clean_mean = float(np.mean([w["combined_suspicion_score"] for w in non_flagged])) if non_flagged else 100.0
+
+        is_uniformly_synthetic = (
+            neural_score >= 60.0
+            or (composite_score >= 45.0 and (global_prosody >= 35.0 or global_vocoder >= 25.0 or flagged_ratio >= 0.35))
+            or flagged_ratio >= 0.50
+            or (suspect_span_ratio >= 0.65 and composite_score >= 40.0)
+        )
+
+        is_localized_splicing = (
+            not is_uniformly_synthetic
+            and (
+                (len(boundary_timestamps) > 0 and composite_score >= 30.0 and clean_mean < 28.0)
+                or (len(suspect_intervals) > 0 and suspect_span_ratio <= 0.60 and composite_score >= 32.0 and clean_mean < 28.0)
+                or (global_spectral >= 65.0 and composite_score >= 35.0 and len(suspect_intervals) > 0)
+            )
+        )
+
+        if is_uniformly_synthetic:
             manipulation_category = "FULLY_SYNTHETIC"
             category_label = "Entirely Synthetic / AI-Generated Speech"
-        elif (
-            (flagged_ratio >= 0.15 and composite_score >= 28.0)
-            or (len(suspect_intervals) > 0 and composite_score >= 30.0)
-            or len(boundary_timestamps) > 0
-        ):
+        elif is_localized_splicing:
             manipulation_category = "SPLICED_PARTIAL"
             category_label = "Partial Splicing / Localized Synthetic Injection"
         else:

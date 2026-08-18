@@ -113,28 +113,28 @@ Rather than depending on a single generic model, Forenlytics evaluates synthetic
 graph TD
     IN[Target Specimen Audio] --> SLICE[1.5s Overlapping Sliding Window / 0.5s Hop]
 
-    subgraph S1 ["Signal 1: Spectral Splicing Inconsistency (50%) [EER: 20.0% | AUC: 0.904]"]
+    subgraph S1 ["Signal 1: Spectral Splicing Inconsistency (35%) [EER: 23.1% | AUC: 0.892]"]
         SLICE --> DELTA[Cross-Window MFCC Euclidean Distance]
         SLICE --> NOISE[Quiet-Frame Noise Floor Delta]
-        DELTA & NOISE --> S1_OUT["[TEMPORAL HEURISTIC]<br/>Detects Splicing Discontinuities >2.5σ (100% Splice Recall)"]
+        DELTA & NOISE --> S1_OUT["[TEMPORAL HEURISTIC]<br/>Detects Splicing Discontinuities >2.5σ (90.0% Splice Recall)"]
     end
 
-    subgraph S2 ["Signal 2: Vocoder Artifacts (30%) [EER: 35.6% | AUC: 0.684]"]
+    subgraph S2 ["Signal 2: Prosody Naturalness & Pitch Entropy (30%) [EER: 36.9% | AUC: 0.664]"]
+        SLICE --> ENTROPY[F0 Intonation Entropy (<1.4 bits)]
+        SLICE --> JITTER[Neural Vocoder Tracking Micro-Jitter]
+        ENTROPY & JITTER --> S2_OUT["[STATISTICAL HEURISTIC]<br/>Flags Constrained Neural Intonation & Vocoder Phase Jitter"]
+    end
+
+    subgraph S3 ["Signal 3: Vocoder Artifacts (20%) [EER: 35.6% | AUC: 0.749]"]
         SLICE --> RIPPLE[High-Frequency Periodic Energy >6.5kHz]
-        SLICE --> HNR[Harmonic-to-Noise Ratio 15–30 dB Normal Band]
-        SLICE --> PHASE[Instantaneous Phase Derivative Variance]
-        RIPPLE & HNR & PHASE --> S2_OUT["[ACOUSTIC HEURISTIC]<br/>Detects HiFi-GAN / MelGAN / WaveGlow Artifacts"]
+        SLICE --> HNR[Harmonic-to-Noise Ratio Normal Band]
+        SLICE --> PHASE[Instantaneous Phase Coherence]
+        RIPPLE & HNR & PHASE --> S3_OUT["[ACOUSTIC HEURISTIC]<br/>Detects HiFi-GAN / MelGAN / WaveGlow Artifacts"]
     end
 
-    subgraph S3 ["Signal 3: Primary SOTA Spoof Model (10%) [EER: 62.5% | AUC: 0.306]"]
+    subgraph S4 ["Signal 4: Primary SOTA Spoof Model (15%) [EER: 0.0% pure / 62.5% 3-class]"]
         SLICE --> W2V[Wav2Vec2 Deepfake Sequence Classifier]
-        W2V --> S3_OUT["[TRAINED MODEL]<br/>Softmax Probability across Latent Representations (garystafford)"]
-    end
-
-    subgraph S4 ["Signal 4: Prosody Naturalness (10%) [EER: 90.0% | AUC: 0.027]"]
-        SLICE --> ENTROPY[F0 Intonation Entropy & Micro-Jitter]
-        SLICE --> RHYTHM[Syllable Timing Regularity & Energy Flatness]
-        ENTROPY & RHYTHM --> S4_OUT["[STATISTICAL HEURISTIC]<br/>Flags Over-Smooth TTS Splines & Robotic Timing"]
+        W2V --> S4_OUT["[TRAINED MODEL]<br/>Softmax Probability across Latent Tokens (garystafford)"]
     end
 
     S1_OUT & S2_OUT & S3_OUT & S4_OUT --> TIMELINE[4-Line Suspicion Timeline]
@@ -143,16 +143,19 @@ graph TD
     INTERVALS & BOUNDARIES --> CATEGORY[Manipulation Categorizer]
 ```
 
-### 🔍 Diagnostic Indicators Detailed (Calibrated on VITS Neural Benchmark)
+### 🔍 Diagnostic Indicators Detailed (Calibrated on VITS Neural Benchmark, N=120)
 
 ```
-[Signal 1: Spectral Splicing]   [Signal 2: Vocoder Artifacts]   [Signal 3: Primary Model]      [Signal 4: Prosody Naturalness]
-Type: TEMPORAL HEURISTIC        Type: ACOUSTIC HEURISTIC        Type: TRAINED MODEL            Type: STATISTICAL HEURISTIC
-Calibrated Weight: 50%          Calibrated Weight: 30%          Calibrated Weight: 10%          Calibrated Weight: 10%
-Measured EER: 20.0% (AUC: 0.904) Measured EER: 35.6% (AUC: 0.684) Measured EER: 62.5% (AUC: 0.306) Measured EER: 90.0% (AUC: 0.027)
-Target: Splice boundary jumps   Target: GAN Vocoder ripple      Target: Latent spoof tokens    Target: Robotic / Over-smooth
-Metric: Cross-Window ΔMFCC      Band: Freq > 6,500 Hz           Model: Wav2Vec2 Classifier     Metric: F0 Pitch Entropy & Jitter
+[Signal 1: Spectral Splicing]   [Signal 2: Prosody Naturalness] [Signal 3: Vocoder Artifacts]   [Signal 4: Primary Model]
+Type: TEMPORAL HEURISTIC        Type: STATISTICAL HEURISTIC     Type: ACOUSTIC HEURISTIC        Type: TRAINED MODEL
+Calibrated Weight: 35%          Calibrated Weight: 30%          Calibrated Weight: 20%          Calibrated Weight: 15%
+Measured EER: 23.1% (AUC: 0.892) Measured EER: 36.9% (AUC: 0.664) Measured EER: 35.6% (AUC: 0.749) Measured EER: 62.5% (AUC: 0.306)*
+Target: Splice boundary jumps   Target: Constrained F0 entropy  Target: GAN Vocoder ripple      Target: Latent spoof tokens
+Metric: Cross-Window ΔMFCC      Metric: pYIN Entropy & Jitter   Band: Freq > 6,500 Hz & HNR     Model: Wav2Vec2 Sequence Model
+*Note: Primary model scores EER 0.00% (AUC 1.0000) on pure synthetic speech, but dilutes on short partial splices within long utterances.
 ```
+
+> **Headline 3-Class Benchmark (Real + Full VITS + Partial Spliced, $N=120$)**: Composite Anomaly Equal Error Rate **$20.0\%$** | Area Under Curve (AUC) **$0.870$** (Optimal Cutoff: **$46.0\%$**).
 
 ---
 
@@ -163,11 +166,11 @@ Forenlytics breaks audio into **1.5s sliding windows with 0.5s hops**. Every win
 ```
  100% ┌─────────────────────────────────────────────────────────────┐
       │                      ▲                                      │
-  60% ┼─────────────────────/─\───────SUSPICIOUS REGION─────────────┼ >60% Fully Synthetic
+  50% ┼─────────────────────/─\───────SUSPICIOUS REGION─────────────┼ >50% Fully Synthetic
       │  Spectral Jump (Grn)/   \                                   │
-  28% ┼───────────────────/─────\───────────────────────────────────┼ >28% Spliced Partial
-      │                  /   ✂   \  Vocoder (Purple)                │
-  15% ┼─Organic (Blue)─────────────\────────────────────────────────┼ <28% Likely Authentic
+  30% ┼───────────────────/─────\───────────────────────────────────┼ >30% Spliced Partial
+      │                  /   ✂   \  Prosody (Amber) / Vocoder (Pur) │
+  15% ┼─Organic (Blue)─────────────\────────────────────────────────┼ <30% Likely Authentic
       │                             \_______________________________│
    0% └──────┬──────────────┬──────────────┬──────────────┬─────────┘
             0.0s           1.5s           3.0s           4.5s      Time (s)
@@ -175,12 +178,12 @@ Forenlytics breaks audio into **1.5s sliding windows with 0.5s hops**. Every win
 ```
 
 ### ✂ Splice Boundary Markers
-When the cross-window MFCC delta or background noise floor shifts beyond **$2.5\sigma$ of the file's own global baseline**, Forenlytics generates a vertical green dashed **Splice Marker (✂)** at the exact second of manipulation. Evaluated with a **100.0% localization recall** (40/40 ground-truth hits) on benchmark spliced recordings.
+When the cross-window MFCC delta or background noise floor shifts beyond **$2.5\sigma$ of the file's own global baseline**, Forenlytics generates a vertical green dashed **Splice Marker (✂)** at the exact second of manipulation. Evaluated with a **90.0% localization recall** (36/40 ground-truth hits) on benchmark spliced recordings.
 
 ### 🏷️ Manipulation Categories
-- **`FULLY_SYNTHETIC`** ($\ge 60.0\%$ composite score or $\ge 55\%$ flagged windows): Audio is entirely generated by TTS or voice clone models.
-- **`SPLICED_PARTIAL`** ($\ge 28.0\%$ score with localized suspect intervals or detected splice boundaries): Natural human speech with localized synthetic insertions or audio cuts.
-- **`LIKELY_AUTHENTIC`** ($< 28.0\%$ score): Unmanipulated human speech with natural organic micro-jitter and spectral continuity.
+- **`FULLY_SYNTHETIC`**: Audio exhibits uniformly high synthetic indicators (`neural >= 60%`, `prosody >= 35%` with composite $\ge 45\%$, or $\ge 50\%$ flagged windows across the entire file).
+- **`SPLICED_PARTIAL`**: Audio contains localized suspect intervals ($\le 60\%$ duration) or detected boundary markers (✂) with a composite score $\ge 30\%$ against a surrounding clean authentic baseline (`clean_mean < 28%`).
+- **`LIKELY_AUTHENTIC`**: Unmanipulated human speech with natural organic micro-jitter, continuous spectral flow, and low anomaly indices across all windows.
 
 ---
 
