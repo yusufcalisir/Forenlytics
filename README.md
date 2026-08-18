@@ -43,19 +43,14 @@ Traditional audio comparison systems rely on a single scalar score (e.g. cosine 
 
 **Forenlytics resolves both challenges** through a multi-dimensional triangulation architecture:
 
-```
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                               FORENLYTICS DUAL-CORE ENGINE                                       │
-├───────────────────────────────────────────────┬──────────────────────────────────────────────────┤
-│ 🎙️ 6-DIMENSIONAL SPEAKER VERIFICATION         │ ⚡ MULTI-SIGNAL DEEPFAKE & SPLICING SUITE         │
-│ • Neural Identity (WavLM + ECAPA 512-D) [35%] │ • Primary SOTA Classifier (Wav2Vec2) [TRAINED]   │
-│ • Vocal Tract Formants (LPC F1–F4)      [20%] │ • Vocoder High-Freq Ripple (>6.5kHz) [ACOUSTIC]  │
-│ • Pitch (F0) Dynamics & Micro-Jitter    [15%] │ • Spectral Inconsistency (2.5σ Delta)[TEMPORAL]  │
-│ • 13-Band Spectral MFCC & Centroid      [15%] │ • Prosody Naturalness & F0 Entropy   [STATISTIC] │
-│ • Speaking Rhythm & Articulation Tempo  [10%] │ • 1.5s Overlapping Sliding Window Timeline       │
-│ • Phonation Energy Envelope             [5%]  │ • Millisecond-Accurate Splice Markers (✂)        │
-└───────────────────────────────────────────────┴──────────────────────────────────────────────────┘
-```
+| 🎙️ 6-Dimensional Speaker Verification (Pillar 1) | ⚡ Multi-Signal Deepfake & Splicing Suite (Pillar 2) |
+| :--- | :--- |
+| • **Neural Identity**: WavLM + ECAPA 512-D Cosine (`30%`) | • **Spectral Splicing**: MFCC Euclidean $\Delta$ (`35%`) |
+| • **Vocal Tract Formants**: LPC Roots $F_1–F_4$ Hz (`25%`) | • **Prosody Naturalness**: $F_0$ Entropy & Micro-Jitter (`30%`) |
+| • **Pitch Dynamics**: pYIN Fundamental $F_0$ (`25%`) | • **Vocoder Artifacts**: High-Freq Phase & HNR (`20%`) |
+| • **Spectral MFCC**: 13-Band Cepstral Envelope (`15%`) | • **Primary Neural Model**: Wav2Vec2 Sequence (`15%`) |
+| • **Speaking Rhythm**: Syllable Onset Tempo (`3%`) | • **Sliding Window**: 1.5s Overlapping Window / 0.5s Hop |
+| • **Energy Dynamics**: RMS Phonation Dynamics (`2%`) | • **Splice Boundary Markers**: Millisecond Localization (✂) |
 
 ---
 
@@ -66,24 +61,24 @@ Instead of reducing biometric comparison to one opaque number, Forenlytics disse
 ```mermaid
 graph TD
     subgraph Ingest ["Acoustic Ingestion"]
-        A1[Specimen A] & A2[Specimen B] --> DEC[Dual-Stream Audio Ingestion]
-        DEC --> VAD[Adaptive 20ms Frame-Energy VAD]
-        VAD --> NRM[RMS Normalization -20 dBFS @ 16kHz]
+        A1["Specimen A"] & A2["Specimen B"] --> DEC["Dual-Stream Audio Ingestion"]
+        DEC --> VAD["Adaptive 20ms Frame-Energy VAD"]
+        VAD --> NRM["RMS Normalization -20 dBFS @ 16kHz"]
     end
 
     subgraph DIMS ["6 Independent Forensic Analytical Dimensions"]
-        NRM --> D1["1. Neural Identity (35%)<br/>WavLM-Base+ & ECAPA 512-D Latent Space"]
-        NRM --> D2["2. Vocal Tract Formants (20%)<br/>LPC Order-16 Root Solver (F1–F4 Hz)"]
-        NRM --> D3["3. Pitch Dynamics F0 (15%)<br/>pYIN Fundamental Tracking & Micro-Jitter"]
+        NRM --> D1["1. Pitch Dynamics F0 (25%)<br/>pYIN Fundamental Tracking & Micro-Jitter"]
+        NRM --> D2["2. Vocal Tract Formants (25%)<br/>LPC Order-16 Root Solver (F1–F4 Hz)"]
+        NRM --> D3["3. Neural Identity (30%)<br/>WavLM-Base+ & ECAPA 512-D Latent Space"]
         NRM --> D4["4. Spectral MFCC (15%)<br/>13-Band Cepstral Envelope & Centroid"]
-        NRM --> D5["5. Speaking Rhythm (10%)<br/>Syllable Onset Tempo & Pause Ratio"]
-        NRM --> D6["6. Energy Dynamics (5%)<br/>Phonation RMS Variability & Crest Factor"]
+        NRM --> D5["5. Speaking Rhythm (3%)<br/>Syllable Onset Tempo & Pause Ratio"]
+        NRM --> D6["6. Energy Dynamics (2%)<br/>Phonation RMS Variability & Crest Factor"]
     end
 
     subgraph Synthesis ["Bayesian Fusion & Synthesis"]
-        D1 & D2 & D3 & D4 & D5 & D6 --> FUS[Bayesian Weighted Fusion Engine]
-        FUS --> CON[Contradiction & Disagreement Detector]
-        CON --> VER[Calibrated Verdict & Confidence Docket]
+        D1 & D2 & D3 & D4 & D5 & D6 --> FUS["Bayesian Weighted Fusion Engine"]
+        FUS --> CON["Contradiction & Disagreement Detector"]
+        CON --> VER["Calibrated Verdict & Confidence Docket"]
     end
 ```
 
@@ -111,36 +106,36 @@ Rather than depending on a single generic model, Forenlytics evaluates synthetic
 
 ```mermaid
 graph TD
-    IN[Target Specimen Audio] --> SLICE[1.5s Overlapping Sliding Window / 0.5s Hop]
+    IN["Target Specimen Audio"] --> SLICE["1.5s Overlapping Sliding Window / 0.5s Hop"]
 
     subgraph S1 ["Signal 1: Spectral Splicing Inconsistency (35%) [EER: 23.1% | AUC: 0.892]"]
-        SLICE --> DELTA[Cross-Window MFCC Euclidean Distance]
-        SLICE --> NOISE[Quiet-Frame Noise Floor Delta]
-        DELTA & NOISE --> S1_OUT["[TEMPORAL HEURISTIC]<br/>Detects Splicing Discontinuities >2.5σ (90.0% Splice Recall)"]
+        SLICE --> DELTA["Cross-Window MFCC Euclidean Distance"]
+        SLICE --> NOISE["Quiet-Frame Noise Floor Delta"]
+        DELTA & NOISE --> S1_OUT["[TEMPORAL HEURISTIC]<br/>Detects Splicing Discontinuities &gt;2.5σ (90.0% Splice Recall)"]
     end
 
     subgraph S2 ["Signal 2: Prosody Naturalness & Pitch Entropy (30%) [EER: 36.9% | AUC: 0.664]"]
-        SLICE --> ENTROPY[F0 Intonation Entropy (<1.4 bits)]
-        SLICE --> JITTER[Neural Vocoder Tracking Micro-Jitter]
+        SLICE --> ENTROPY["F0 Intonation Entropy (&lt;1.4 bits)"]
+        SLICE --> JITTER["Neural Vocoder Tracking Micro-Jitter"]
         ENTROPY & JITTER --> S2_OUT["[STATISTICAL HEURISTIC]<br/>Flags Constrained Neural Intonation & Vocoder Phase Jitter"]
     end
 
     subgraph S3 ["Signal 3: Vocoder Artifacts (20%) [EER: 35.6% | AUC: 0.749]"]
-        SLICE --> RIPPLE[High-Frequency Periodic Energy >6.5kHz]
-        SLICE --> HNR[Harmonic-to-Noise Ratio Normal Band]
-        SLICE --> PHASE[Instantaneous Phase Coherence]
+        SLICE --> RIPPLE["High-Frequency Periodic Energy &gt;6.5kHz"]
+        SLICE --> HNR["Harmonic-to-Noise Ratio Normal Band"]
+        SLICE --> PHASE["Instantaneous Phase Coherence"]
         RIPPLE & HNR & PHASE --> S3_OUT["[ACOUSTIC HEURISTIC]<br/>Detects HiFi-GAN / MelGAN / WaveGlow Artifacts"]
     end
 
     subgraph S4 ["Signal 4: Primary SOTA Spoof Model (15%) [EER: 0.0% pure / 62.5% 3-class]"]
-        SLICE --> W2V[Wav2Vec2 Deepfake Sequence Classifier]
+        SLICE --> W2V["Wav2Vec2 Deepfake Sequence Classifier"]
         W2V --> S4_OUT["[TRAINED MODEL]<br/>Softmax Probability across Latent Tokens (garystafford)"]
     end
 
-    S1_OUT & S2_OUT & S3_OUT & S4_OUT --> TIMELINE[4-Line Suspicion Timeline]
-    TIMELINE --> INTERVALS[Contiguous Suspect Region Aggregator]
-    TIMELINE --> BOUNDARIES[Splice Marker Generator ✂]
-    INTERVALS & BOUNDARIES --> CATEGORY[Manipulation Categorizer]
+    S1_OUT & S2_OUT & S3_OUT & S4_OUT --> TIMELINE["4-Line Suspicion Timeline"]
+    TIMELINE --> INTERVALS["Contiguous Suspect Region Aggregator"]
+    TIMELINE --> BOUNDARIES["Splice Marker Generator (✂)"]
+    INTERVALS & BOUNDARIES --> CATEGORY["Manipulation Categorizer"]
 ```
 
 ### 🔍 Diagnostic Indicators Detailed (Calibrated on VITS Neural Benchmark, N=120)
@@ -228,36 +223,36 @@ sequenceDiagram
 
 Forenlytics compiles official, court-ready **Forensic Audio Intelligence Dockets** in-memory:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ FORENLYTICS AUDIO FORENSIC INTELLIGENCE DOCKET      DOCKET REF: FLX-7F3A92BC│
-│ OFFICIAL MULTI-SIGNAL NEURAL BIOMETRIC & SYNTHETICS RECORD      UTC 2026-08 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ 1.0 EXAMINATION METADATA & CHAIN OF CUSTODY                                 │
-│ • Suite: Forenlytics Neural Audio v2.0  • Ingestion: 16kHz Mono PCM, -20dBFS│
-│ • Target Sample SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4...       │
-│ • Comparison Sample SHA-256: ca978112ca1bbdcaf064278e4a1f2f0dda12...       │
-│                                                                             │
-│ 2.0 SIX-DIMENSIONAL SPEAKER VERIFICATION MATRIX                             │
-│ ┌───────────────────────────┬────────┬───────┬────────────────────────────┐ │
-│ │ Dimension                 │ Weight │ Score │ Physiological Finding      │ │
-│ ├───────────────────────────┼────────┼───────┼────────────────────────────┤ │
-│ │ 1. Neural Identity        │  35%   │ 88.0% │ WavLM & ECAPA Cosine Match │ │
-│ │ 2. Vocal Tract Formants   │  20%   │ 82.5% │ F1-F4 LPC Resonances Align │ │
-│ │ 3. Pitch Intonation F0    │  15%   │ 86.0% │ pYIN Micro-Jitter 1.1%     │ │
-│ │ 4. Spectral MFCC          │  15%   │ 81.0% │ 13-Band Centroid Match     │ │
-│ │ 5. Speaking Rhythm        │  10%   │ 79.5% │ Onset Cadence 4.2/s        │ │
-│ │ 6. Energy Dynamics        │   5%   │ 90.0% │ Phonation RMS Variation    │ │
-│ └───────────────────────────┴────────┴───────┴────────────────────────────┘ │
-│ COMPOSITE BIOMETRIC MATCH: 84.5%  •  VERDICT: Very Likely Same Speaker [HIGH]│
-│                                                                             │
-│ 3.0 MULTI-SIGNAL DEEPFAKE & TEMPORAL SPLICING DIAGNOSTICS                   │
-│ • Primary Model: 86.0%  • Vocoder Ripple: 91.5%  • Prosody Entropy: 78.0%  │
-│ • Splice Boundaries (✂): 1.50s, 3.00s  • Suspect Range: [1.5s – 3.0s]      │
-│ • Manipulation Category: Partial Splicing / Localized Synthetic Injection   │
-│                                                                             │
-│ 4.0 EXPERT FORENSIC OPINION & STATUTORY DISCLAIMER                          │
-└─────────────────────────────────────────────────────────────────────────────┘
+```text
++-----------------------------------------------------------------------------+
+| FORENLYTICS AUDIO FORENSIC INTELLIGENCE DOCKET      DOCKET REF: FLX-7F3A92BC|
+| OFFICIAL MULTI-SIGNAL NEURAL BIOMETRIC & SYNTHETICS RECORD      UTC 2026-08 |
++-----------------------------------------------------------------------------+
+| 1.0 EXAMINATION METADATA & CHAIN OF CUSTODY                                 |
+| - Suite: Forenlytics Neural Audio v2.0  - Ingestion: 16kHz Mono PCM, -20dBFS|
+| - Target Sample SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4...       |
+| - Comparison Sample SHA-256: ca978112ca1bbdcaf064278e4a1f2f0dda12...       |
+|                                                                             |
+| 2.0 SIX-DIMENSIONAL SPEAKER VERIFICATION MATRIX                             |
+| +---------------------------+--------+-------+----------------------------+ |
+| | Dimension                 | Weight | Score | Physiological Finding      | |
+| +---------------------------+--------+-------+----------------------------+ |
+| | 1. Neural Identity        |  30%   | 88.0% | WavLM & ECAPA Cosine Match | |
+| | 2. Vocal Tract Formants   |  25%   | 82.5% | F1-F4 LPC Resonances Align | |
+| | 3. Pitch Intonation F0    |  25%   | 86.0% | pYIN Micro-Jitter 1.1%     | |
+| | 4. Spectral MFCC          |  15%   | 81.0% | 13-Band Centroid Match     | |
+| | 5. Speaking Rhythm        |   3%   | 79.5% | Onset Cadence 4.2/s        | |
+| | 6. Energy Dynamics        |   2%   | 90.0% | Phonation RMS Variation    | |
+| +---------------------------+--------+-------+----------------------------+ |
+| COMPOSITE BIOMETRIC MATCH: 84.5%  *  VERDICT: Very Likely Same Speaker [HIGH] |
+|                                                                             |
+| 3.0 MULTI-SIGNAL DEEPFAKE & TEMPORAL SPLICING DIAGNOSTICS                   |
+| - Spectral Delta (35%): 78.5%  - Prosody (30%): 65.2%  - Vocoder (20%): 34%|
+| - Splice Boundaries: 1.50s, 3.00s  - Suspect Range: [1.50s - 3.00s]        |
+| - Manipulation Category: SPLICED_PARTIAL (Localized Insertion Detected)    |
+|                                                                             |
+| 4.0 EXPERT FORENSIC OPINION & STATUTORY DISCLAIMER                          |
++-----------------------------------------------------------------------------+
 ```
 
 ### 🔒 Zero-Persistence Security Architecture

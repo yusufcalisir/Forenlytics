@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Mic, Upload, FileAudio, Activity, CheckCircle2, AlertTriangle,
   Radar, ShieldAlert, Fingerprint, X, Info, Clock, Shield,
@@ -293,10 +294,21 @@ function UploadZone({ label, index, file, duration, preview, error, color, disab
   );
 }
 
-// ── Main Audio Studio Page ───────────────────────────────────────────────────
-export default function AudioPage() {
+// ── Main Audio Studio Content ────────────────────────────────────────────────
+function AudioStudioContent() {
+  const searchParams = useSearchParams();
+  const modeParam = searchParams.get("mode");
+
   // Mode switcher: "compare" (Speaker Comparison) vs "deepfake" (Deepfake Detection)
   const [activeStudioMode, setActiveStudioMode] = useState<"compare" | "deepfake">("compare");
+
+  useEffect(() => {
+    if (modeParam === "deepfake" || modeParam === "synth" || modeParam === "splice" || modeParam === "synthetics") {
+      setActiveStudioMode("deepfake");
+    } else if (modeParam === "compare" || modeParam === "speaker" || modeParam === "verify") {
+      setActiveStudioMode("compare");
+    }
+  }, [modeParam]);
 
   // Speaker Comparison Files & previews
   const [file1, setFile1] = useState<File | null>(null);
@@ -1149,5 +1161,18 @@ export default function AudioPage() {
       )}
 
     </div>
+  );
+}
+
+export default function AudioPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-8 text-center text-xs font-mono text-neutral-500 flex items-center justify-center gap-2">
+        <span className="w-3 h-3 rounded-full border-2 border-brand-cyan/20 border-t-brand-cyan animate-spin"></span>
+        <span>Initializing Forenlytics Audio Studio...</span>
+      </div>
+    }>
+      <AudioStudioContent />
+    </Suspense>
   );
 }
