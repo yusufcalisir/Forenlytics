@@ -161,36 +161,28 @@ class ForensicDatasetLoader:
 
     def _get_or_download_speech_samples(self) -> Dict[str, List[str]]:
         """
-        Scans SPEAKER_DATA_DIR for audio files grouped by speaker directory.
-        If empty, extracts clean benchmark utterances or generates speech calibration corpus.
+        Scans for authentic LibriSpeech human audio files grouped by speaker ID.
+        Falls back to SPEAKER_DATA_DIR if needed.
         """
         speaker_map: Dict[str, List[str]] = {}
 
-        # Check existing files
-        for root, _, files in os.walk(SPEAKER_DATA_DIR):
-            for f in files:
-                if f.lower().endswith((".wav", ".flac", ".mp3")):
-                    spk_id = os.path.basename(root)
-                    full_path = os.path.join(root, f)
-                    if spk_id not in speaker_map:
-                        speaker_map[spk_id] = []
-                    speaker_map[spk_id].append(full_path)
+        # 1. Primary: Genuine LibriSpeech corpus
+        libri_dir = os.path.join(DATA_DIR, "librispeech_bona_fide")
+        if os.path.exists(libri_dir):
+            for root, _, files in os.walk(libri_dir):
+                for f in files:
+                    if f.lower().endswith(".flac"):
+                        parts = os.path.normpath(root).split(os.sep)
+                        spk_id = parts[-2] if len(parts) >= 2 else os.path.basename(root)
+                        full_path = os.path.join(root, f)
+                        if spk_id not in speaker_map:
+                            speaker_map[spk_id] = []
+                        speaker_map[spk_id].append(full_path)
 
         if len(speaker_map) >= 10:
             return speaker_map
 
-        # Download or extract LibriSpeech mini subset
-        logger.info("Downloading standard speech calibration corpus...")
-        try:
-            tar_path = os.path.join(DATA_DIR, "librispeech_mini.tar.gz")
-            if not os.path.exists(tar_path):
-                # Download small subset or generate clean speech calibration speakers
-                self._download_or_create_corpus()
-        except Exception as e:
-            logger.warning(f"Download failed ({e}), creating calibrated speech corpus...")
-            self._create_calibrated_corpus()
-
-        # Re-scan
+        # 2. Secondary: Check SPEAKER_DATA_DIR
         for root, _, files in os.walk(SPEAKER_DATA_DIR):
             for f in files:
                 if f.lower().endswith((".wav", ".flac", ".mp3")):

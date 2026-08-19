@@ -157,14 +157,18 @@ flowchart TD
 
 | Diagnostic Signal | Type & Mechanism | Calibrated Weight | 3-Class EER | ROC AUC | Pure Synthetic EER / AUC | Primary Target & Acoustic Metric |
 | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
-| **1. Spectral Splicing Inconsistency** | `TEMPORAL HEURISTIC` | **35%** | **23.1%** | **0.892** | 55.0% / 0.414 | Cross-window MFCC jumps ($>2.5\sigma$ $\Delta$) & quiet-frame noise floor |
+| **1. Spectral Splicing Inconsistency** | `TEMPORAL HEURISTIC` | **35%** | **23.1%** | **0.892** | 55.0% / 0.414 | Cross-window MFCC jumps ($>\mu + 2.2\sigma$ $\Delta$) & quiet-frame noise floor |
 | **2. Vocoder Artifacts** | `ACOUSTIC HEURISTIC` | **30%** | **35.6%** | **0.749** | 27.5% / 0.733 | High-frequency phase ripple ($>6.5\text{ kHz}$) & HNR normal band |
-| **3. Prosody & Pitch Entropy** | `STATISTICAL HEURISTIC` | **25%** | **36.9%** | **0.664** | **0.00% / 1.000** | Constrained pitch entropy ($<1.4$ bits) & micro-phase tracking jitter |
+| **3. Prosody & Pitch Entropy** | `STATISTICAL HEURISTIC` | **25%** | **36.9%** | **0.664** | **0.00% / 1.000** | Discrete pitch entropy ($<1.8$ bits) & micro-phase tracking jitter |
 | **4. Primary Neural Model** | `TRAINED MODEL` (Wav2Vec2) | **10%** | **62.5%**\* | **0.306**\* | **0.00% / 1.000** | Whole-file latent spoof tokens (dilutes on short partial splices) |
 
-> **Headline 3-Class Benchmark (Real + Full VITS + Partial Spliced, $N=120$)**: Composite Anomaly Equal Error Rate **$20.0\%$** | Area Under Curve (AUC) **$0.881$** (Optimal Cutoff: **$47.1\%$** | Splice Localization Recall: **$100.0\%$**).
+> **Headline 3-Class Benchmark (Real LibriSpeech + Full VITS + Partial Spliced, $N=120$)**:
+> - **Bona-Fide Human Accuracy**: **$84.6\%$** (Bona-Fide False Positive Rate: **$15.4\%$**)
+> - **Pure Synthetic Accuracy (VITS TTS)**: **$82.5\%$**
+> - **Splicing Anomaly Recall Rate**: **$87.5\%$**
+> - **Composite 3-Class EER / AUC**: **$30.4\%$ EER** | **$0.741$ ROC AUC** (Optimal Operational Cutoff: **$30.0\%$**)
 > 
-> *\*Note: The primary Wav2Vec2 classifier achieves 0.00% EER on full-length synthetic files, but dilutes on short 1.5s partial splices within natural human speech.*
+> *\*Note on Wav2Vec2: While achieving near-zero EER on full-length synthetic training distribution, standalone neural classifiers suffer from domain-shift false positives on unseen conversational speech; Forenlytics enforces multi-signal acoustic consensus to prevent lone-model misclassification.*
 
 ---
 

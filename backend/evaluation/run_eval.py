@@ -176,10 +176,21 @@ def run_deepfake_evaluation(n_samples: int = 150) -> Dict[str, Any]:
     # 2. Individual Signals Metrics
     signal_results = evaluate_feature_matrix(signal_scores_matrix, labels)
 
-    # 3. Category Metrics
+    # 3. Category Metrics Breakdown
     cat_pred_arr = np.array(categories_pred)
     cat_true_arr = np.array(categories_truth)
     category_acc = float(np.mean(cat_pred_arr == cat_true_arr) * 100.0)
+
+    # Bona-fide subset accuracy
+    bona_mask = (cat_true_arr == "LIKELY_AUTHENTIC")
+    bona_acc = float(np.mean(cat_pred_arr[bona_mask] == "LIKELY_AUTHENTIC") * 100.0) if np.sum(bona_mask) > 0 else 0.0
+    bona_fpr = float(100.0 - bona_acc)
+
+    # Pure-synthetic subset accuracy
+    synth_mask = (cat_true_arr == "FULLY_SYNTHETIC")
+    synth_acc = float(np.mean(cat_pred_arr[synth_mask] == "FULLY_SYNTHETIC") * 100.0) if np.sum(synth_mask) > 0 else 0.0
+
+    # Splice recall
     splice_recall = float((splice_detection_hits / total_spliced_samples * 100.0)) if total_spliced_samples > 0 else 0.0
 
     return {
@@ -198,6 +209,9 @@ def run_deepfake_evaluation(n_samples: int = 150) -> Dict[str, Any]:
         },
         "signals": signal_results,
         "category_accuracy_pct": round(category_acc, 2),
+        "bona_fide_accuracy_pct": round(bona_acc, 2),
+        "bona_fide_fpr_pct": round(bona_fpr, 2),
+        "pure_synthetic_accuracy_pct": round(synth_acc, 2),
         "splice_localization_recall_pct": round(splice_recall, 2),
     }
 
@@ -247,7 +261,9 @@ def main():
     print("2. DEEPFAKE & SPLICING DETECTION (4-SIGNAL SUITE):")
     print(f"   • Composite Anomaly EER: {deepfake_results['fused_composite']['eer_pct']}%  (AUC: {deepfake_results['fused_composite']['auc']})")
     print(f"   • Optimal Threshold    : {deepfake_results['fused_composite']['optimal_threshold']}%")
-    print(f"   • Splice Recall (Cut)   : {deepfake_results['splice_localization_recall_pct']}%")
+    print(f"   • Bona-Fide Accuracy   : {deepfake_results['bona_fide_accuracy_pct']}%  (FPR: {deepfake_results['bona_fide_fpr_pct']}%)")
+    print(f"   • Pure-Synthetic Acc   : {deepfake_results['pure_synthetic_accuracy_pct']}%")
+    print(f"   • Splice Recall (Cut)  : {deepfake_results['splice_localization_recall_pct']}%")
     print(f"   • Signal Breakdown     :")
     for s_k, s_v in deepfake_results["signals"].items():
         print(f"     - {s_k:<20} : EER = {s_v['eer_pct']:>5.1f}% | AUC = {s_v['auc']:>5.3f}")

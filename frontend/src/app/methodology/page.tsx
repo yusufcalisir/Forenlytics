@@ -57,6 +57,9 @@ interface EvaluationData {
     };
     signals: Record<string, any>;
     category_accuracy_pct?: number;
+    bona_fide_accuracy_pct?: number;
+    bona_fide_fpr_pct?: number;
+    pure_synthetic_accuracy_pct?: number;
     calibrated_weights_proposed?: Record<string, number>;
     splice_localization_recall_pct: number;
   };
@@ -138,7 +141,10 @@ const STATIC_FALLBACK: EvaluationData = {
       prosody_naturalness: 0.25,
       neural_model: 0.10,
     },
-    splice_localization_recall_pct: 100.0,
+    bona_fide_accuracy_pct: 84.6,
+    bona_fide_fpr_pct: 15.4,
+    pure_synthetic_accuracy_pct: 82.5,
+    splice_localization_recall_pct: 87.5,
   },
 };
 
@@ -218,15 +224,15 @@ export default function MethodologyPage() {
         </Panel>
 
         <Panel className="!p-5 relative overflow-hidden group hover:border-amber-500/40 transition-all">
-          <div className="text-xs font-mono text-neutral-400 mb-1">SPLICE LOCALIZATION (✂)</div>
+          <div className="text-xs font-mono text-neutral-400 mb-1">BONA-FIDE AUTHENTIC RATE</div>
           <div className="text-3xl font-bold text-amber-400 font-mono tracking-tight">
-            100.0%
+            {dfk.bona_fide_accuracy_pct ?? 84.6}%
           </div>
           <div className="text-xs text-neutral-400 mt-2 flex items-center justify-between">
-            <span>Temporal Precision: <strong className="text-neutral-200">±0.5s</strong></span>
-            <span className="text-amber-400 font-mono text-[11px]">40/40 hits</span>
+            <span>False Alarm (FPR): <strong className="text-neutral-200">{dfk.bona_fide_fpr_pct ?? 15.4}%</strong></span>
+            <span className="text-amber-400 font-mono text-[11px]">LibriSpeech Real</span>
           </div>
-          <div className="text-[11px] text-neutral-500 mt-1">Ground-Truth Spliced Hybrids</div>
+          <div className="text-[11px] text-neutral-500 mt-1">Calibrated Human Baseline</div>
         </Panel>
 
         <Panel className="!p-5 relative overflow-hidden group hover:border-purple-500/40 transition-all">

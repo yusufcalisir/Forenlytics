@@ -1,451 +1,454 @@
 {
   "benchmark_name": "Synthetic Speech & Splicing Calibration Benchmark",
-  "sample_size": 120,
-  "bona_fide_samples": 40,
+  "sample_size": 119,
+  "bona_fide_samples": 39,
   "synthetic_samples": 80,
   "spliced_samples": 40,
-  "evaluation_date": "2026-08-18 20:29:05 UTC",
+  "evaluation_date": "2026-08-19 14:39:40 UTC",
   "fused_composite": {
-    "eer_pct": 20.0,
-    "auc": 0.8809,
-    "optimal_threshold": 47.11,
+    "eer_pct": 30.38,
+    "auc": 0.741,
+    "optimal_threshold": 30.03,
     "operating_points": {
       "FAR_1bps": {
-        "threshold": 56.5,
+        "threshold": 52.3,
         "target_far_pct": 0.1,
-        "actual_far_pct": 2.5,
-        "actual_frr_pct": 68.75
+        "actual_far_pct": 2.56,
+        "actual_frr_pct": 100.0
       },
       "FAR_1pct": {
-        "threshold": 56.5,
+        "threshold": 52.3,
         "target_far_pct": 1.0,
-        "actual_far_pct": 2.5,
-        "actual_frr_pct": 68.75
+        "actual_far_pct": 2.56,
+        "actual_frr_pct": 100.0
       },
       "FAR_5pct": {
-        "threshold": 56.1,
+        "threshold": 45.6,
         "target_far_pct": 5.0,
-        "actual_far_pct": 5.0,
-        "actual_frr_pct": 68.75
+        "actual_far_pct": 5.13,
+        "actual_frr_pct": 100.0
       }
     },
     "curve_samples": [
       {
-        "threshold": 14.5,
+        "threshold": 10.8,
         "far": 100.0,
         "frr": 0.0,
-        "accuracy": 66.67
+        "accuracy": 67.23
       },
       {
-        "threshold": 15.54,
-        "far": 95.0,
+        "threshold": 11.63,
+        "far": 97.44,
         "frr": 0.0,
-        "accuracy": 68.33
+        "accuracy": 68.07
       },
       {
-        "threshold": 16.57,
-        "far": 95.0,
+        "threshold": 12.46,
+        "far": 97.44,
         "frr": 0.0,
-        "accuracy": 68.33
+        "accuracy": 68.07
       },
       {
-        "threshold": 17.61,
-        "far": 92.5,
+        "threshold": 13.29,
+        "far": 94.87,
         "frr": 0.0,
-        "accuracy": 69.17
+        "accuracy": 68.91
       },
       {
-        "threshold": 18.65,
-        "far": 90.0,
+        "threshold": 14.12,
+        "far": 94.87,
         "frr": 0.0,
-        "accuracy": 70.0
+        "accuracy": 68.91
       },
       {
-        "threshold": 19.69,
-        "far": 85.0,
+        "threshold": 14.95,
+        "far": 92.31,
         "frr": 0.0,
-        "accuracy": 71.67
+        "accuracy": 69.75
       },
       {
-        "threshold": 20.72,
-        "far": 85.0,
+        "threshold": 15.78,
+        "far": 89.74,
         "frr": 0.0,
-        "accuracy": 71.67
+        "accuracy": 70.59
       },
       {
-        "threshold": 21.76,
-        "far": 85.0,
+        "threshold": 16.62,
+        "far": 87.18,
         "frr": 0.0,
-        "accuracy": 71.67
+        "accuracy": 71.43
       },
       {
-        "threshold": 22.8,
-        "far": 85.0,
+        "threshold": 17.45,
+        "far": 87.18,
         "frr": 0.0,
-        "accuracy": 71.67
+        "accuracy": 71.43
       },
       {
-        "threshold": 23.83,
-        "far": 80.0,
+        "threshold": 18.28,
+        "far": 84.62,
         "frr": 0.0,
-        "accuracy": 73.33
+        "accuracy": 72.27
       },
       {
-        "threshold": 24.87,
-        "far": 77.5,
+        "threshold": 19.11,
+        "far": 76.92,
         "frr": 0.0,
-        "accuracy": 74.17
+        "accuracy": 74.79
       },
       {
-        "threshold": 25.91,
-        "far": 72.5,
+        "threshold": 19.94,
+        "far": 74.36,
         "frr": 0.0,
-        "accuracy": 75.83
+        "accuracy": 75.63
       },
       {
-        "threshold": 26.94,
-        "far": 70.0,
-        "frr": 0.0,
-        "accuracy": 76.67
-      },
-      {
-        "threshold": 27.98,
-        "far": 65.0,
-        "frr": 0.0,
-        "accuracy": 78.33
-      },
-      {
-        "threshold": 29.02,
-        "far": 47.5,
-        "frr": 0.0,
-        "accuracy": 84.17
-      },
-      {
-        "threshold": 30.06,
-        "far": 45.0,
-        "frr": 0.0,
-        "accuracy": 85.0
-      },
-      {
-        "threshold": 31.09,
-        "far": 42.5,
-        "frr": 0.0,
-        "accuracy": 85.83
-      },
-      {
-        "threshold": 32.13,
-        "far": 40.0,
-        "frr": 0.0,
-        "accuracy": 86.67
-      },
-      {
-        "threshold": 33.17,
-        "far": 35.0,
-        "frr": 0.0,
-        "accuracy": 88.33
-      },
-      {
-        "threshold": 34.2,
-        "far": 35.0,
-        "frr": 0.0,
-        "accuracy": 88.33
-      },
-      {
-        "threshold": 35.24,
-        "far": 30.0,
-        "frr": 0.0,
-        "accuracy": 90.0
-      },
-      {
-        "threshold": 36.28,
-        "far": 30.0,
-        "frr": 0.0,
-        "accuracy": 90.0
-      },
-      {
-        "threshold": 37.31,
-        "far": 30.0,
-        "frr": 0.0,
-        "accuracy": 90.0
-      },
-      {
-        "threshold": 38.35,
-        "far": 27.5,
-        "frr": 0.0,
-        "accuracy": 90.83
-      },
-      {
-        "threshold": 39.39,
-        "far": 27.5,
-        "frr": 0.0,
-        "accuracy": 90.83
-      },
-      {
-        "threshold": 40.43,
-        "far": 25.0,
-        "frr": 0.0,
-        "accuracy": 91.67
-      },
-      {
-        "threshold": 41.46,
-        "far": 25.0,
-        "frr": 0.0,
-        "accuracy": 91.67
-      },
-      {
-        "threshold": 42.5,
-        "far": 25.0,
+        "threshold": 20.77,
+        "far": 71.79,
         "frr": 1.25,
-        "accuracy": 90.83
+        "accuracy": 75.63
       },
       {
-        "threshold": 43.54,
-        "far": 25.0,
+        "threshold": 21.6,
+        "far": 66.67,
+        "frr": 3.75,
+        "accuracy": 75.63
+      },
+      {
+        "threshold": 22.43,
+        "far": 58.97,
         "frr": 5.0,
-        "accuracy": 88.33
+        "accuracy": 77.31
       },
       {
-        "threshold": 44.57,
-        "far": 22.5,
-        "frr": 7.5,
-        "accuracy": 87.5
+        "threshold": 23.26,
+        "far": 56.41,
+        "frr": 5.0,
+        "accuracy": 78.15
       },
       {
-        "threshold": 45.61,
-        "far": 22.5,
+        "threshold": 24.09,
+        "far": 53.85,
+        "frr": 8.75,
+        "accuracy": 76.47
+      },
+      {
+        "threshold": 24.92,
+        "far": 53.85,
+        "frr": 10.0,
+        "accuracy": 75.63
+      },
+      {
+        "threshold": 25.75,
+        "far": 51.28,
         "frr": 11.25,
-        "accuracy": 85.0
+        "accuracy": 75.63
       },
       {
-        "threshold": 46.65,
-        "far": 22.5,
+        "threshold": 26.59,
+        "far": 43.59,
         "frr": 17.5,
-        "accuracy": 80.83
+        "accuracy": 73.95
       },
       {
-        "threshold": 47.69,
-        "far": 20.0,
-        "frr": 21.25,
-        "accuracy": 79.17
+        "threshold": 27.42,
+        "far": 43.59,
+        "frr": 20.0,
+        "accuracy": 72.27
       },
       {
-        "threshold": 48.72,
-        "far": 20.0,
-        "frr": 26.25,
-        "accuracy": 75.83
+        "threshold": 28.25,
+        "far": 41.03,
+        "frr": 22.5,
+        "accuracy": 71.43
       },
       {
-        "threshold": 49.76,
-        "far": 20.0,
-        "frr": 31.25,
-        "accuracy": 72.5
+        "threshold": 29.08,
+        "far": 41.03,
+        "frr": 23.75,
+        "accuracy": 70.59
       },
       {
-        "threshold": 50.8,
-        "far": 17.5,
-        "frr": 42.5,
-        "accuracy": 65.83
+        "threshold": 29.91,
+        "far": 33.33,
+        "frr": 28.75,
+        "accuracy": 69.75
       },
       {
-        "threshold": 51.83,
-        "far": 15.0,
-        "frr": 50.0,
-        "accuracy": 61.67
+        "threshold": 30.74,
+        "far": 28.21,
+        "frr": 35.0,
+        "accuracy": 67.23
       },
       {
-        "threshold": 52.87,
-        "far": 12.5,
+        "threshold": 31.57,
+        "far": 20.51,
+        "frr": 37.5,
+        "accuracy": 68.07
+      },
+      {
+        "threshold": 32.4,
+        "far": 17.95,
+        "frr": 43.75,
+        "accuracy": 64.71
+      },
+      {
+        "threshold": 33.23,
+        "far": 17.95,
+        "frr": 51.25,
+        "accuracy": 59.66
+      },
+      {
+        "threshold": 34.06,
+        "far": 15.38,
         "frr": 56.25,
-        "accuracy": 58.33
+        "accuracy": 57.14
       },
       {
-        "threshold": 53.91,
-        "far": 7.5,
-        "frr": 58.75,
-        "accuracy": 58.33
+        "threshold": 34.89,
+        "far": 15.38,
+        "frr": 62.5,
+        "accuracy": 52.94
       },
       {
-        "threshold": 54.94,
-        "far": 7.5,
-        "frr": 60.0,
-        "accuracy": 57.5
+        "threshold": 35.72,
+        "far": 15.38,
+        "frr": 65.0,
+        "accuracy": 51.26
       },
       {
-        "threshold": 55.98,
-        "far": 5.0,
-        "frr": 67.5,
-        "accuracy": 53.33
+        "threshold": 36.56,
+        "far": 12.82,
+        "frr": 68.75,
+        "accuracy": 49.58
       },
       {
-        "threshold": 57.02,
-        "far": 0.0,
+        "threshold": 37.39,
+        "far": 12.82,
         "frr": 70.0,
-        "accuracy": 53.33
+        "accuracy": 48.74
       },
       {
-        "threshold": 58.06,
-        "far": 0.0,
+        "threshold": 38.22,
+        "far": 12.82,
         "frr": 75.0,
-        "accuracy": 50.0
+        "accuracy": 45.38
       },
       {
-        "threshold": 59.09,
-        "far": 0.0,
-        "frr": 77.5,
-        "accuracy": 48.33
+        "threshold": 39.05,
+        "far": 12.82,
+        "frr": 80.0,
+        "accuracy": 42.02
       },
       {
-        "threshold": 60.13,
-        "far": 0.0,
-        "frr": 82.5,
-        "accuracy": 45.0
+        "threshold": 39.88,
+        "far": 10.26,
+        "frr": 83.75,
+        "accuracy": 40.34
       },
       {
-        "threshold": 61.17,
-        "far": 0.0,
-        "frr": 85.0,
-        "accuracy": 43.33
-      },
-      {
-        "threshold": 62.2,
-        "far": 0.0,
-        "frr": 88.75,
-        "accuracy": 40.83
-      },
-      {
-        "threshold": 63.24,
-        "far": 0.0,
+        "threshold": 40.71,
+        "far": 10.26,
         "frr": 91.25,
-        "accuracy": 39.17
+        "accuracy": 35.29
       },
       {
-        "threshold": 64.28,
-        "far": 0.0,
+        "threshold": 41.54,
+        "far": 10.26,
+        "frr": 92.5,
+        "accuracy": 34.45
+      },
+      {
+        "threshold": 42.37,
+        "far": 10.26,
         "frr": 96.25,
-        "accuracy": 35.83
+        "accuracy": 31.93
       },
       {
-        "threshold": 65.31,
-        "far": 0.0,
-        "frr": 97.5,
-        "accuracy": 35.0
+        "threshold": 43.2,
+        "far": 10.26,
+        "frr": 96.25,
+        "accuracy": 31.93
+      },
+      {
+        "threshold": 44.03,
+        "far": 7.69,
+        "frr": 96.25,
+        "accuracy": 32.77
+      },
+      {
+        "threshold": 44.86,
+        "far": 7.69,
+        "frr": 100.0,
+        "accuracy": 30.25
+      },
+      {
+        "threshold": 45.69,
+        "far": 2.56,
+        "frr": 100.0,
+        "accuracy": 31.93
+      },
+      {
+        "threshold": 46.53,
+        "far": 2.56,
+        "frr": 100.0,
+        "accuracy": 31.93
+      },
+      {
+        "threshold": 47.36,
+        "far": 2.56,
+        "frr": 100.0,
+        "accuracy": 31.93
+      },
+      {
+        "threshold": 48.19,
+        "far": 2.56,
+        "frr": 100.0,
+        "accuracy": 31.93
+      },
+      {
+        "threshold": 49.02,
+        "far": 2.56,
+        "frr": 100.0,
+        "accuracy": 31.93
+      },
+      {
+        "threshold": 49.85,
+        "far": 2.56,
+        "frr": 100.0,
+        "accuracy": 31.93
+      },
+      {
+        "threshold": 50.68,
+        "far": 2.56,
+        "frr": 100.0,
+        "accuracy": 31.93
+      },
+      {
+        "threshold": 51.51,
+        "far": 2.56,
+        "frr": 100.0,
+        "accuracy": 31.93
       }
     ]
   },
   "signals": {
     "neural_model": {
       "dimension": "neural_model",
-      "eer_pct": 62.5,
-      "auc": 0.3063,
-      "optimal_threshold": 51.93,
+      "eer_pct": 48.11,
+      "auc": 0.491,
+      "optimal_threshold": 74.25,
       "operating_points": {
         "FAR_1bps": {
-          "threshold": 97.7,
+          "threshold": 99.6,
           "target_far_pct": 0.1,
-          "actual_far_pct": 2.5,
-          "actual_frr_pct": 88.75
+          "actual_far_pct": 2.56,
+          "actual_frr_pct": 100.0
         },
         "FAR_1pct": {
-          "threshold": 97.7,
+          "threshold": 99.6,
           "target_far_pct": 1.0,
-          "actual_far_pct": 2.5,
-          "actual_frr_pct": 88.75
+          "actual_far_pct": 2.56,
+          "actual_frr_pct": 100.0
         },
         "FAR_5pct": {
-          "threshold": 97.6,
+          "threshold": 99.5,
           "target_far_pct": 5.0,
-          "actual_far_pct": 5.0,
-          "actual_frr_pct": 88.75
+          "actual_far_pct": 7.69,
+          "actual_frr_pct": 100.0
         }
       },
-      "mean_positive_score": 36.49,
-      "mean_negative_score": 63.05
+      "mean_positive_score": 58.13,
+      "mean_negative_score": 52.44
     },
     "vocoder_artifacts": {
       "dimension": "vocoder_artifacts",
-      "eer_pct": 35.62,
-      "auc": 0.7488,
+      "eer_pct": 29.76,
+      "auc": 0.8083,
       "optimal_threshold": 27.1,
       "operating_points": {
         "FAR_1bps": {
-          "threshold": 32.8,
+          "threshold": 28.6,
           "target_far_pct": 0.1,
-          "actual_far_pct": 2.5,
-          "actual_frr_pct": 78.75
+          "actual_far_pct": 2.56,
+          "actual_frr_pct": 71.25
         },
         "FAR_1pct": {
-          "threshold": 32.8,
+          "threshold": 28.6,
           "target_far_pct": 1.0,
-          "actual_far_pct": 2.5,
-          "actual_frr_pct": 78.75
+          "actual_far_pct": 2.56,
+          "actual_frr_pct": 71.25
         },
         "FAR_5pct": {
-          "threshold": 32.0,
+          "threshold": 28.0,
           "target_far_pct": 5.0,
-          "actual_far_pct": 5.0,
-          "actual_frr_pct": 76.25
+          "actual_far_pct": 5.13,
+          "actual_frr_pct": 57.5
         }
       },
-      "mean_positive_score": 29.06,
-      "mean_negative_score": 23.14
+      "mean_positive_score": 28.6,
+      "mean_negative_score": 26.55
     },
     "spectral_consistency": {
       "dimension": "spectral_consistency",
-      "eer_pct": 23.12,
-      "auc": 0.8916,
-      "optimal_threshold": 78.2,
+      "eer_pct": 34.17,
+      "auc": 0.7087,
+      "optimal_threshold": 37.06,
       "operating_points": {
         "FAR_1bps": {
-          "threshold": 86.8,
+          "threshold": 90.2,
           "target_far_pct": 0.1,
-          "actual_far_pct": 5.0,
-          "actual_frr_pct": 65.0
+          "actual_far_pct": 2.56,
+          "actual_frr_pct": 98.75
         },
         "FAR_1pct": {
-          "threshold": 86.8,
+          "threshold": 90.2,
           "target_far_pct": 1.0,
-          "actual_far_pct": 5.0,
-          "actual_frr_pct": 65.0
+          "actual_far_pct": 2.56,
+          "actual_frr_pct": 98.75
         },
         "FAR_5pct": {
-          "threshold": 86.8,
+          "threshold": 71.4,
           "target_far_pct": 5.0,
-          "actual_far_pct": 5.0,
-          "actual_frr_pct": 65.0
+          "actual_far_pct": 5.13,
+          "actual_frr_pct": 96.25
         }
       },
-      "mean_positive_score": 83.05,
-      "mean_negative_score": 28.56
+      "mean_positive_score": 44.3,
+      "mean_negative_score": 30.63
     },
     "prosody_naturalness": {
       "dimension": "prosody_naturalness",
-      "eer_pct": 36.88,
-      "auc": 0.6641,
-      "optimal_threshold": 43.24,
+      "eer_pct": 33.54,
+      "auc": 0.7045,
+      "optimal_threshold": 10.71,
       "operating_points": {
         "FAR_1bps": {
-          "threshold": 68.2,
+          "threshold": 18.2,
           "target_far_pct": 0.1,
-          "actual_far_pct": 5.0,
-          "actual_frr_pct": 98.75
+          "actual_far_pct": 2.56,
+          "actual_frr_pct": 90.0
         },
         "FAR_1pct": {
-          "threshold": 68.2,
+          "threshold": 18.2,
           "target_far_pct": 1.0,
-          "actual_far_pct": 5.0,
-          "actual_frr_pct": 98.75
+          "actual_far_pct": 2.56,
+          "actual_frr_pct": 90.0
         },
         "FAR_5pct": {
-          "threshold": 68.2,
+          "threshold": 16.1,
           "target_far_pct": 5.0,
-          "actual_far_pct": 5.0,
-          "actual_frr_pct": 98.75
+          "actual_far_pct": 5.13,
+          "actual_frr_pct": 81.25
         }
       },
-      "mean_positive_score": 47.0,
-      "mean_negative_score": 39.73
+      "mean_positive_score": 12.95,
+      "mean_negative_score": 10.96
     }
   },
-  "category_accuracy_pct": 48.33,
-  "splice_localization_recall_pct": 100.0
+  "category_accuracy_pct": 47.9,
+  "bona_fide_accuracy_pct": 84.62,
+  "bona_fide_fpr_pct": 15.38,
+  "pure_synthetic_accuracy_pct": 50.0,
+  "splice_localization_recall_pct": 30.0
 }
