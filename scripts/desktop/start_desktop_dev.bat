@@ -10,12 +10,12 @@ echo   Forenlytics Desktop Live Development Environment (Hot-Reload Dev Mode)
 echo ==============================================================================
 echo.
 
-start "Forenlytics Frontend Dev" cmd /k "cd frontend && npm run dev"
+start "Forenlytics Frontend Dev" cmd /k "cd frontend && npx next dev -p 3077"
 
 if exist "backend\venv\Scripts\activate.bat" (
-    start "Forenlytics Backend Dev" cmd /k "cd backend && call venv\Scripts\activate.bat && uvicorn main:app --reload --port 8000"
+    start "Forenlytics Backend Dev" cmd /k "cd backend && call venv\Scripts\activate.bat && uvicorn main:app --reload --port 8077"
 ) else (
-    start "Forenlytics Backend Dev" cmd /k "cd backend && uvicorn main:app --reload --port 8000"
+    start "Forenlytics Backend Dev" cmd /k "cd backend && uvicorn main:app --reload --port 8077"
 )
 
 echo [*] Waiting 4 seconds for services to initialize...

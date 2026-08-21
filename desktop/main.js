@@ -15,8 +15,8 @@ let backendProcess = null;
 let frontendProcess = null;
 let isQuitting = false;
 
-const DEFAULT_BACKEND_PORT = 8000;
-const DEFAULT_FRONTEND_PORT = 3000;
+const DEFAULT_BACKEND_PORT = 8077;
+const DEFAULT_FRONTEND_PORT = 3077;
 let backendPort = DEFAULT_BACKEND_PORT;
 let frontendPort = DEFAULT_FRONTEND_PORT;
 
