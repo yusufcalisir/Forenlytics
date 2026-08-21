@@ -69,9 +69,28 @@ function getBackendExecutable() {
 
 // ── Backend Process Manager ───────────────────────────────────────────────────
 
-function startBackend() {
+function isPortOpen(port) {
+  return new Promise((resolve) => {
+    const req = http.get(`http://127.0.0.1:${port}/health`, { timeout: 1000 }, (res) => {
+      resolve(res.statusCode === 200);
+    });
+    req.on("error", () => resolve(false));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
+
+async function startBackend() {
+  const rootDir = getAppRootDir();
+  const alreadyRunning = await isPortOpen(backendPort);
+  if (alreadyRunning) {
+    console.log(`[Desktop Main] Backend is already running on port ${backendPort}.`);
+    return;
+  }
+
   return new Promise((resolve, reject) => {
-    const rootDir = getAppRootDir();
     const backendConfig = getBackendExecutable();
 
     const env = {
@@ -160,43 +179,115 @@ function pollBackendHealth(port, maxAttempts, resolve, reject) {
   }, 1000);
 }
 
-// ── Standalone Frontend Manager (Production) ──────────────────────────────────
+// ── Standalone Frontend Manager ───────────────────────────────────────────────
 
-function startFrontendStandalone() {
+function isFrontendOpen(port) {
   return new Promise((resolve) => {
-    if (isDev) {
-      resolve();
-      return;
-    }
+    const req = http.get(`http://127.0.0.1:${port}/`, { timeout: 1000 }, (res) => {
+      resolve(res.statusCode < 500);
+    });
+    req.on("error", () => resolve(false));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
 
-    const rootDir = getAppRootDir();
-    const serverPath = path.join(rootDir, "frontend", "server.js");
+function pollFrontendHealth(port, maxAttempts = 60) {
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      console.log(`[Desktop Main] Checking Frontend Health (${attempts}/${maxAttempts})...`);
 
-    if (fs.existsSync(serverPath)) {
-      console.log(`[Desktop Main] Starting Next.js Standalone server: ${serverPath}`);
-      const env = {
-        ...process.env,
-        PORT: String(frontendPort),
-        HOSTNAME: "127.0.0.1",
-        NODE_ENV: "production",
-        BACKEND_URL: `http://127.0.0.1:${backendPort}`,
-      };
-
-      frontendProcess = spawn(process.execPath, [serverPath], {
-        env,
-        cwd: path.dirname(serverPath),
-        stdio: ["ignore", "pipe", "pipe"],
+      const req = http.get(`http://127.0.0.1:${port}/`, { timeout: 1500 }, (res) => {
+        if (res.statusCode < 500) {
+          clearInterval(interval);
+          console.log("[Desktop Main] Frontend UI is READY!");
+          resolve();
+        }
       });
 
-      frontendProcess.stdout.on("data", (data) => console.log(`[Next.js] ${data.toString().trim()}`));
-      frontendProcess.stderr.on("data", (data) => console.error(`[Next.js err] ${data.toString().trim()}`));
+      req.on("error", () => {
+        if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          reject(new Error("Frontend UI timed out during initialization."));
+        }
+      });
 
-      setTimeout(resolve, 1500);
-    } else {
-      console.log("[Desktop Main] No standalone Next.js server found, loading directly or relying on external dev server.");
-      resolve();
-    }
+      req.on("timeout", () => {
+        req.destroy();
+      });
+    }, 1000);
   });
+}
+
+async function startFrontendStandalone() {
+  const rootDir = getAppRootDir();
+  const isUp = await isFrontendOpen(frontendPort);
+  if (isUp) {
+    console.log(`[Desktop Main] Frontend is already running on port ${frontendPort}.`);
+    return;
+  }
+
+  // Candidate paths for Next.js standalone server
+  const candidates = [
+    path.join(rootDir, "frontend", ".next", "standalone", "server.js"),
+    path.join(rootDir, "frontend", ".next", "standalone", "frontend", "server.js"),
+    path.join(rootDir, "frontend", "server.js"),
+    path.join(process.resourcesPath || "", "frontend", "server.js"),
+  ];
+
+  let serverPath = null;
+  for (const c of candidates) {
+    if (fs.existsSync(c)) {
+      serverPath = c;
+      break;
+    }
+  }
+
+  const env = {
+    ...process.env,
+    PORT: String(frontendPort),
+    HOSTNAME: "127.0.0.1",
+    NODE_ENV: "production",
+    BACKEND_URL: `http://127.0.0.1:${backendPort}`,
+  };
+
+  if (serverPath) {
+    console.log(`[Desktop Main] Launching Next.js Standalone server: ${serverPath}`);
+    frontendProcess = spawn(process.execPath, [serverPath], {
+      env,
+      cwd: path.dirname(serverPath),
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    frontendProcess.stdout.on("data", (data) => console.log(`[Next.js] ${data.toString().trim()}`));
+    frontendProcess.stderr.on("data", (data) => console.error(`[Next.js err] ${data.toString().trim()}`));
+
+    await pollFrontendHealth(frontendPort, 30);
+  } else {
+    // If not packaged standalone, run via next in frontend folder
+    const frontendDir = path.join(rootDir, "frontend");
+    if (fs.existsSync(frontendDir)) {
+      console.log(`[Desktop Main] Launching Next.js in ${frontendDir}...`);
+      const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
+      frontendProcess = spawn(npxCmd, ["next", "dev", "-p", String(frontendPort)], {
+        env,
+        cwd: frontendDir,
+        stdio: ["ignore", "pipe", "pipe"],
+        shell: true,
+      });
+
+      frontendProcess.stdout.on("data", (data) => console.log(`[Next.js Dev] ${data.toString().trim()}`));
+      frontendProcess.stderr.on("data", (data) => console.error(`[Next.js Dev err] ${data.toString().trim()}`));
+
+      await pollFrontendHealth(frontendPort, 45);
+    } else {
+      console.log("[Desktop Main] Frontend directory not found. Will attempt to load URL directly.");
+    }
+  }
 }
 
 // ── Window Management ─────────────────────────────────────────────────────────
