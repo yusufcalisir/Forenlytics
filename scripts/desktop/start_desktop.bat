@@ -12,3 +12,8 @@ echo.
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0start_desktop.ps1"
 
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Desktop application exited with error code: %errorlevel%
+    pause
+)
