@@ -54,24 +54,46 @@ class WavLMEngine:
         if self._initialized:
             return
 
+        import os
         import torch
         from transformers import Wav2Vec2FeatureExtractor, WavLMForXVector
 
         self.device = torch.device("cpu")
-        logger.info(f"Loading {self.model_name} for speaker verification on {self.device}...")
+        local_only = os.environ.get("TRANSFORMERS_OFFLINE") == "1" or os.environ.get("HF_HUB_OFFLINE") == "1"
+        logger.info(f"Loading {self.model_name} for speaker verification on {self.device} (offline_mode={local_only})...")
         try:
             self.processor = Wav2Vec2FeatureExtractor.from_pretrained(
                 self.model_name,
                 do_normalize=True,          # WavLM-SV expects normalized input
+                local_files_only=local_only,
             )
             self.model = WavLMForXVector.from_pretrained(
                 self.model_name,
                 low_cpu_mem_usage=True,
+                local_files_only=local_only,
             ).to(self.device)
             self.model.eval()
             self._initialized = True
             logger.info(f"WavLM ({self.model_name}) loaded successfully.")
         except Exception as e:
+            if local_only:
+                # If local_only failed, try standard load as fallback before giving up
+                try:
+                    logger.warning(f"Local-only load failed for WavLM ({e}), attempting online fallback...")
+                    self.processor = Wav2Vec2FeatureExtractor.from_pretrained(
+                        self.model_name,
+                        do_normalize=True,
+                    )
+                    self.model = WavLMForXVector.from_pretrained(
+                        self.model_name,
+                        low_cpu_mem_usage=True,
+                    ).to(self.device)
+                    self.model.eval()
+                    self._initialized = True
+                    logger.info(f"WavLM ({self.model_name}) loaded via fallback.")
+                    return
+                except Exception as fallback_err:
+                    logger.error(f"Fallback load also failed for WavLM: {fallback_err}")
             logger.error(f"Failed to load WavLM: {e}")
             raise RuntimeError(f"WavLM forensic engine could not be initialized: {e}") from e
 

@@ -1,0 +1,16 @@
+venv
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+.git
+.gitignore
+.env*.local
+evaluation_results
+benchmark_data/*.wav
+benchmark_data/*.mp3
+tests

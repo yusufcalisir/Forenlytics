@@ -1,0 +1,77 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.forenlytics.desktop",
+  "productName": "Forenlytics",
+  "copyright": "Copyright © 2026 Forenlytics Forensic Systems",
+  "directories": {
+    "output": "../dist/desktop",
+    "buildResources": "build"
+  },
+  "files": [
+    "main.js",
+    "preload.js",
+    "splash.html",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "../models",
+      "to": "models",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../backend/speechbrain_cache",
+      "to": "models/speechbrain",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "resources/backend",
+      "to": "backend",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../frontend/.next/standalone",
+      "to": "app/frontend",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../frontend/.next/static",
+      "to": "app/frontend/.next/static",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../frontend/public",
+      "to": "app/frontend/public",
+      "filter": ["**/*"]
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": "always",
+    "createStartMenuShortcut": true,
+    "shortcutName": "Forenlytics Adli Ses İnceleme",
+    "uninstallDisplayName": "Forenlytics Desktop",
+    "runAfterFinish": true
+  },
+  "portable": {
+    "artifactName": "Forenlytics-Portable-${version}.exe"
+  },
+  "linux": {
+    "target": ["AppImage", "deb"],
+    "category": "Science",
+    "synopsis": "Forenlytics Forensic Audio Examination Platform"
+  }
+}

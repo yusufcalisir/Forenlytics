@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Activity, Map, Mic, FileText, LayoutDashboard, LayoutList, ChevronRight, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ForenlyticsLogo } from "@/components/ui/ForenlyticsLogo";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, shortLabel: "DASH" },
@@ -19,16 +20,14 @@ export function Sidebar() {
     <aside className="hidden md:flex w-[72px] hover:w-64 group/sidebar bg-brand-panel border-r border-brand-border h-screen flex-col transition-all duration-300 ease-out z-30 overflow-hidden">
       
       {/* Brand */}
-      <div className="px-5 pt-6 pb-5 border-b border-brand-border/60">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-cyan/20 to-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center shrink-0">
-            <span className="text-brand-cyan font-bold text-sm tracking-tighter">F</span>
-          </div>
+      <div className="px-4 pt-5 pb-5 border-b border-brand-border/60">
+        <Link href="/" className="flex items-center gap-3 overflow-hidden group/brand">
+          <ForenlyticsLogo size={38} className="transition-transform duration-300 group-hover/brand:scale-105" />
           <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap">
             <h1 className="text-sm font-bold tracking-[0.2em] text-brand-cyan leading-none">FORENLYTICS</h1>
-            <p className="text-[10px] text-neutral-600 mt-1 uppercase tracking-widest">Command Center</p>
+            <p className="text-[10px] text-neutral-500 mt-1 uppercase tracking-widest font-mono">Forensics Lab</p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Navigation */}

@@ -1,0 +1,33 @@
+# ==============================================================================
+# Forenlytics Docker Compose Customization & GPU Acceleration Example
+# ==============================================================================
+# Rename this file to 'docker-compose.override.yml' to apply these settings.
+# ==============================================================================
+
+services:
+  backend:
+    # ── Option A: NVIDIA GPU Acceleration (Requires NVIDIA Container Toolkit) ──
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+    # ── Option B: CPU & Memory Resource Limits ───────────────────────────────
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 8G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+  frontend:
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G

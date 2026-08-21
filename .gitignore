@@ -22,12 +22,15 @@ frontend/out/
 **/venv
 **/env
 
-# forensic data & uploads
+# forensic data, models & uploads
 **/backend/uploads/*
 **/backend/temp/*
 **/backend/benchmark_data/*
 **/backend/speechbrain_cache/*
 **/backend/evaluation/data/*
+models/
+data/
+desktop/resources/
 *.tar.gz
 *.tar
 *.zip
@@ -36,6 +39,7 @@ frontend/out/
 *.mp3
 *.m4a
 *.log
+*.lnk
 
 # agent metadata
 AGENTS.md

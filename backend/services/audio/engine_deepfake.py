@@ -77,25 +77,39 @@ class MultiSignalDeepfakeEngine:
             return
         self._model_load_attempted = True
 
+        import os
         import torch
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        logger.info(f"Initializing Deepfake SOTA Neural Model on device: {self.device}")
+        local_only = os.environ.get("TRANSFORMERS_OFFLINE") == "1" or os.environ.get("HF_HUB_OFFLINE") == "1"
+        logger.info(f"Initializing Deepfake SOTA Neural Model on device: {self.device} (offline_mode={local_only})")
 
         try:
             from transformers import AutoFeatureExtractor, AutoModelForAudioClassification
             logger.info(f"Loading primary deepfake classifier: {SOTA_MODEL_ID}")
-            self._feature_extractor = AutoFeatureExtractor.from_pretrained(SOTA_MODEL_ID)
-            self._model = AutoModelForAudioClassification.from_pretrained(SOTA_MODEL_ID)
+            self._feature_extractor = AutoFeatureExtractor.from_pretrained(
+                SOTA_MODEL_ID,
+                local_files_only=local_only,
+            )
+            self._model = AutoModelForAudioClassification.from_pretrained(
+                SOTA_MODEL_ID,
+                local_files_only=local_only,
+            )
             self._model.to(self.device)
             self._model.eval()
             self._model_loaded = True
             logger.info("Primary SOTA Wav2Vec2 Deepfake Detector loaded successfully.")
         except Exception as e:
-            logger.warning(f"Could not load {SOTA_MODEL_ID}: {e}. Trying fallback...")
+            logger.warning(f"Could not load {SOTA_MODEL_ID} (local_only={local_only}): {e}. Trying fallback...")
             try:
                 from transformers import Wav2Vec2Processor, Wav2Vec2Model
-                self._feature_extractor = Wav2Vec2Processor.from_pretrained(FALLBACK_MODEL_ID)
-                self._model = Wav2Vec2Model.from_pretrained(FALLBACK_MODEL_ID)
+                self._feature_extractor = Wav2Vec2Processor.from_pretrained(
+                    FALLBACK_MODEL_ID,
+                    local_files_only=local_only,
+                )
+                self._model = Wav2Vec2Model.from_pretrained(
+                    FALLBACK_MODEL_ID,
+                    local_files_only=local_only,
+                )
                 self._model.to(self.device)
                 self._model.eval()
                 self._model_loaded = False  # embedding mode

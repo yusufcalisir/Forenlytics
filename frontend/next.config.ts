@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 import path from "path";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const BACKEND_URL =
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://127.0.0.1:8000";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   turbopack: {
     root: path.resolve(process.cwd(), ".."),
   },
@@ -18,3 +22,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+

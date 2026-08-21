@@ -298,7 +298,7 @@ Forenlytics compiles official, court-ready **Forensic Audio Intelligence Dockets
 ### 📂 Repository Structure
 
 ```text
-d:/Forenlytics/
+Forenlytics/
 ├── backend/                               # FastAPI High-Throughput Engine
 │   ├── main.py                            # API routing, CORS, job queue & endpoints
 │   ├── services/
@@ -315,6 +315,9 @@ d:/Forenlytics/
 │   │       ├── engine_biometric.py        # 13-Band MFCC & spectral centroid extractor
 │   │       ├── engine_deepfake.py         # SOTA Wav2Vec2 + 3-Indicator sliding window
 │   │       └── fusion_engine.py           # Bayesian multi-dimensional fusion & contradiction
+│   ├── scripts/
+│   │   ├── download_models.py             # Pre-downloads & validates offline AI weights
+│   │   └── build_standalone_backend.py    # Standalone PyInstaller backend compiler
 │   └── requirements.txt                   # Backend Python dependencies
 │
 ├── frontend/                              # Next.js 16 (Turbopack) Cockpit
@@ -332,47 +335,80 @@ d:/Forenlytics/
 │   │   │   │   ├── PitchContourChart.tsx  # pYIN F0 Intonation Contour Overlays
 │   │   │   │   ├── MfccBarChart.tsx       # 13-Band MFCC Delta Comparison
 │   │   │   │   └── TelemetryTable.tsx     # Low-level acoustic parameter matrix
-│   │   │   └── layout/
-│   │   │       ├── JobPoller.tsx          # Fast 350ms background sync poller
-│   │   │       └── AppLayout.tsx          # Global navigation & status indicators
+│   │   │   ├── layout/
+│   │   │   │   ├── Sidebar.tsx            # Navigation sidebar with Forenlytics circular logo
+│   │   │   │   ├── Topbar.tsx             # Global search & system telemetry HUD
+│   │   │   │   └── AppLayout.tsx          # Global frame wrapper
+│   │   │   └── ui/
+│   │   │       └── ForenlyticsLogo.tsx    # Circular neon forensic logo component
 │   │   └── lib/
 │   │       ├── store.ts                   # Zustand persistent session store & jobProgress
 │   │       └── apiClient.ts               # Proxy-aware Fetch API client
 │   ├── package.json                       # Next.js dependencies
-│   └── next.config.ts                     # Turbopack config & API proxy rewrites
+│   └── next.config.ts                     # Standalone output & API proxy rewrites
+│
+├── desktop/                               # Electron Standalone Desktop Application
+│   ├── main.js                            # Embedded backend lifecycle & tree-kill manager
+│   ├── preload.js                         # Secure IPC bridge for native dialogs
+│   ├── splash.html                        # Animated forensic loading screen
+│   ├── electron-builder.json              # Windows NSIS/Portable & Linux packaging config
+│   └── package.json                       # Electron dependencies
+│
+├── docs/                                  # Comprehensive Deployment & Architecture Guides
+│   ├── AIRGAP_DEPLOYMENT_GUIDE.md         # Air-Gapped Docker Compose installation manual
+│   └── DESKTOP_BUILD_GUIDE.md             # Native desktop standalone compilation guide
+│
+├── scripts/                               # Automation & Launcher Scripts
+│   ├── docker/                            # Docker Compose & Air-Gap tools (install, start, stop, bundle)
+│   ├── desktop/                           # Desktop build, instant launcher & shortcut scripts
+│   └── utils/                             # Logo asset generator
+│
+├── docker-compose.yml                     # Production Docker Compose orchestration
+├── docker-compose.override.yml.example    # Optional NVIDIA CUDA GPU acceleration config
+├── .env.example                           # Environment configuration template
 └── README.md                              # Master forensic documentation
 ```
 
 ---
 
-## 🚀 Quickstart & Deployment
+## 🚀 Quickstart & Deployment Options
 
-### Prerequisites
-- **Python 3.10+** (with PyTorch, Torchaudio & Librosa)
-- **Node.js 18+** & **npm**
+Forenlytics supports three flexible deployment targets:
 
-### 1. Start the Backend API
+### Option A: 🖥️ Desktop Standalone Application (Windows / Linux)
+To compile a native `.exe` installer or portable executable:
+```powershell
+# Run the 1-click desktop builder
+powershell -ExecutionPolicy Bypass -File scripts\desktop\build_desktop.ps1
+```
+*See [DESKTOP_BUILD_GUIDE.md](docs/DESKTOP_BUILD_GUIDE.md) for full details.*
+
+### Option B: 🐳 Docker Compose Air-Gapped Suite (On-Premise / Offline Labs)
+To deploy via Docker Compose in isolated environments:
 ```bash
+# Windows
+scripts\docker\install.bat
+
+# Linux
+chmod +x scripts/docker/*.sh && ./scripts/docker/install.sh
+```
+*See [AIRGAP_DEPLOYMENT_GUIDE.md](docs/AIRGAP_DEPLOYMENT_GUIDE.md) for full details.*
+
+### Option C: 💻 Local Developer Mode
+```bash
+# 1. Start Backend API
 cd backend
 python -m venv venv
-
-# Windows PowerShell
-.\venv\Scripts\activate
-# Linux / macOS
-source venv/bin/activate
-
+source venv/bin/activate # or .\venv\Scripts\activate on Windows
 pip install -r requirements.txt
 uvicorn main:app --host 127.0.0.1 --port 8000 --reload
-```
 
-### 2. Start the Frontend Studio
-```bash
+# 2. Start Frontend Cockpit
 cd frontend
-npm install
-npm run dev
+npm install && npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to enter the **Audio Forensics Intelligence Studio**.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 

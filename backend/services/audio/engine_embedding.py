@@ -69,6 +69,7 @@ class SpeakerEmbeddingEngine:
             ) from e
 
     def _load_speechbrain(self):
+        import os
         import torch
         import importlib
 
@@ -94,11 +95,50 @@ class SpeakerEmbeddingEngine:
         except Exception:
             strategy = None
 
-        kwargs = {
-            "source": MODEL_SPEECHBRAIN,
-            "savedir": f"speechbrain_cache/{MODEL_SPEECHBRAIN.replace('/', '_')}",
-            "run_opts": {"device": "cpu"},
-        }
+        # Determine best local cache directory candidates
+        model_subname = MODEL_SPEECHBRAIN.replace("/", "_")
+        raw_name = MODEL_SPEECHBRAIN.split("/")[-1]
+        env_cache = os.environ.get("SPEECHBRAIN_CACHE_DIR")
+
+        candidate_dirs = []
+        if env_cache:
+            candidate_dirs.extend([
+                env_cache,
+                os.path.join(env_cache, model_subname),
+                os.path.join(env_cache, raw_name),
+            ])
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        candidate_dirs.extend([
+            os.path.join(base_dir, "speechbrain_cache", model_subname),
+            os.path.join(base_dir, "speechbrain_cache", raw_name),
+            os.path.join(base_dir, "models", "speechbrain", model_subname),
+            os.path.join(base_dir, "models", "speechbrain"),
+            f"speechbrain_cache/{model_subname}",
+            f"speechbrain_cache/{raw_name}",
+        ])
+
+        target_dir = None
+        for c in candidate_dirs:
+            if os.path.isdir(c) and os.path.exists(os.path.join(c, "hyperparams.yaml")):
+                target_dir = os.path.abspath(c)
+                break
+
+        if target_dir:
+            logger.info(f"Found offline SpeechBrain local cache at: {target_dir}")
+            kwargs = {
+                "source": target_dir,
+                "savedir": target_dir,
+                "run_opts": {"device": "cpu"},
+            }
+        else:
+            default_save = env_cache or f"speechbrain_cache/{model_subname}"
+            kwargs = {
+                "source": MODEL_SPEECHBRAIN,
+                "savedir": default_save,
+                "run_opts": {"device": "cpu"},
+            }
+
         if strategy is not None:
             kwargs["local_strategy"] = strategy
 
@@ -107,6 +147,7 @@ class SpeakerEmbeddingEngine:
         self._sb_initialized = True
         self.device = torch.device("cpu")
         logger.info("SpeechBrain ECAPA-TDNN loaded successfully.")
+
 
     def _load_wav2vec2_fallback(self):
         import torch

@@ -259,10 +259,27 @@ export const apiClient = {
       }
 
       const blob = await res.blob();
+
+      // Check if running inside Electron Desktop App
+      if (typeof window !== "undefined" && (window as any).electronAPI?.saveReportDialog) {
+        const arrayBuffer = await blob.arrayBuffer();
+        const saveRes = await (window as any).electronAPI.saveReportDialog(
+          Array.from(new Uint8Array(arrayBuffer)),
+          "Forenlytics_Adli_Ses_Raporu.pdf"
+        );
+        if (saveRes?.success) {
+          console.log("[Forenlytics Desktop] Report saved to:", saveRes.path);
+          return saveRes;
+        } else if (saveRes?.canceled) {
+          return { canceled: true };
+        }
+      }
+
+      // Standard browser download fallback
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "Forenlytics_Audio_Docket.pdf";
+      a.download = "Forenlytics_Adli_Ses_Raporu.pdf";
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

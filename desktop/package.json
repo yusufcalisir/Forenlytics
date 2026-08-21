@@ -1,0 +1,26 @@
+{
+  "name": "forenlytics-desktop",
+  "version": "2.0.0",
+  "description": "Forenlytics Forensic Audio Examination Platform - Desktop Standalone Edition",
+  "main": "main.js",
+  "author": "Forenlytics Forensic Systems",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win nsis portable --x64",
+    "dist:linux": "electron-builder --linux AppImage deb --x64"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3",
+    "get-port": "^7.1.0",
+    "tree-kill": "^1.2.2",
+    "wait-on": "^8.0.2"
+  },
+  "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}
