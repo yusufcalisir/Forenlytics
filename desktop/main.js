@@ -272,9 +272,16 @@ async function startFrontendStandalone() {
     const frontendDir = path.join(rootDir, "frontend");
     if (fs.existsSync(frontendDir)) {
       console.log(`[Desktop Main] Launching Next.js in ${frontendDir}...`);
+      const devEnv = {
+        ...process.env,
+        PORT: String(frontendPort),
+        HOSTNAME: "127.0.0.1",
+        NODE_ENV: "development",
+        BACKEND_URL: `http://127.0.0.1:${backendPort}`,
+      };
       const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
       frontendProcess = spawn(npxCmd, ["next", "dev", "-p", String(frontendPort)], {
-        env,
+        env: devEnv,
         cwd: frontendDir,
         stdio: ["ignore", "pipe", "pipe"],
         shell: true,
@@ -329,7 +336,7 @@ function createMainWindow() {
     },
   });
 
-  const targetUrl = `http://127.0.0.1:${frontendPort}`;
+  const targetUrl = `http://localhost:${frontendPort}`;
   console.log(`[Desktop Main] Loading frontend UI from: ${targetUrl}`);
   mainWindow.loadURL(targetUrl);
 

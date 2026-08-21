@@ -8,6 +8,14 @@ const BACKEND_URL =
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  allowedDevOrigins: [
+    "127.0.0.1",
+    "localhost",
+    "127.0.0.1:3077",
+    "localhost:3077",
+    "127.0.0.1:3000",
+    "localhost:3000",
+  ],
   turbopack: {
     root: path.resolve(process.cwd(), ".."),
   },
